@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home_screen.dart';
 import 'screens/journey_screen.dart';
-import 'screens/checklist_screen.dart';
 import 'screens/agencies_screen.dart';
 import 'screens/espace_screen.dart';
 
@@ -89,8 +88,6 @@ class _AppNavigatorState extends State<AppNavigator> {
       AgenciesScreen(lang: widget.currentLocale),
       EspaceScreen(lang: widget.currentLocale),
     ];
-
-    final isRtl = widget.currentLocale == 'ar';
 
     // Simple bottom navigation translated tabs
     final labels = {

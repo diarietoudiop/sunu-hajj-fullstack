@@ -160,7 +160,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.between,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(widget.lang == 'ar' ? 'باقة الوكالة' : 'Forfait agence', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                             Text('${_packagePrice.round()} F', style: const TextStyle(color: Color(0xFF0B5D34), fontSize: 12, fontWeight: FontWeight.bold)),
@@ -186,7 +186,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.between,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(widget.lang == 'ar' ? 'مصروف الجيب' : 'Argent de poche', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                             Text('${_pocketMoney.round()} F', style: const TextStyle(color: Color(0xFF0B5D34), fontSize: 12, fontWeight: FontWeight.bold)),
@@ -212,7 +212,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.between,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(widget.lang == 'ar' ? 'الهدي (الموتون)' : 'Sacrifice (Hady)', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                             Text('${_sacrificePrice.round()} F', style: const TextStyle(color: Color(0xFF0B5D34), fontSize: 12, fontWeight: FontWeight.bold)),
@@ -238,7 +238,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.between,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(widget.lang == 'ar' ? 'المشتريات والهدايا' : 'Shopping / Cadeaux', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                             Text('${_shoppingPrice.round()} F', style: const TextStyle(color: Color(0xFF0B5D34), fontSize: 12, fontWeight: FontWeight.bold)),

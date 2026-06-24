@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { DbManager } from './db.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -8,77 +9,17 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// In-memory Database Mock
-let announcements = [
-  {
-    id: 1,
-    date: "23 Juin 2026",
-    category: "admin",
-    title_fr: "Ouverture des visites médicales",
-    desc_fr: "La DGP informe les futurs pèlerins que les visites médicales d'aptitude ont débuté dans les hôpitaux régionaux agréés. Veuillez prendre rendez-vous rapidement.",
-    title_wo: "Tambali wér-gi-yaram seet gi",
-    desc_wo: "Njiitu Hajj bi (DGP) ngi xamal pèlerin yi ne faj gi door na ci fajukaay yu mag yi ci reew mi. Waajleen ko ci saasa.",
-    title_ar: "بدء الفحوصات الطبية للحجاج",
-    desc_ar: "تعلن البعثة الرسمية للحجاج عن بدء الفحوصات الطبية للتأكد من القدرة البدنية في المستشفيات الإقليمية. يرجى حجز موعد سريعاً."
-  },
-  {
-    id: 2,
-    date: "15 Juin 2026",
-    category: "security",
-    title_fr: "Mise en garde contre les faux démarcheurs",
-    desc_fr: "Attention aux intermédiaires non agréés qui proposent des visas ou forfaits Hajj parallèles. Seules les agences officielles ont l'autorisation.",
-    title_wo: "Moytooleen naxkat yi",
-    desc_wo: "Moytooleen ñiy jaay visa yu fake walla forfaits yu amul yoon. Agence yu dëggër yi rekk lañu nangu.",
-    title_ar: "تحذير من سماسرة التأشيرات غير المرخصين",
-    desc_ar: "تحذر بعثة الحج من التعامل مع الوسطاء غير المعتمدين الذين يعرضون تأشيرات أو باقات حج موازية. الوكالات المرخصة هي المصرح لها فقط."
-  }
-];
+// Initialize Database on startup
+try {
+  await DbManager.initialize();
+  console.log("========================================");
+  console.log("💾 [DATABASE INIT] Dual SQLite databases initialized.");
+  console.log("========================================");
+} catch (err) {
+  console.error("❌ [DATABASE ERROR] Failed to initialize databases:", err.message);
+}
 
-let agencies = [
-  {
-    id: 1,
-    name: "Voyages Teranga Hajj & Omra",
-    price: 3600000,
-    type: "economique",
-    rating: 4.8,
-    address: "Avenue Cheikh Anta Diop, Dakar",
-    phone: "+221 33 824 12 34",
-    email: "contact@terangahajj.sn",
-    desc_fr: "Package économique comprenant le vol charter, l'hébergement en hôtel 3 étoiles à La Mecque à 1.5km du Haram (avec navettes gratuites 24h/24), et restauration sénégalaise.",
-    desc_wo: "Forfait bu yomb ci ndaje, and ak plane bi, dëkk ci hôtel 3 étoiles (1.5km ci Haram) and ak auto transport, ak ñam u Sénégal.",
-    desc_ar: "باقة اقتصادية متميزة تشمل الطيران العارض، السكن في فندق 3 نجوم على بعد 1.5 كم من الحرم مع حافلات نقل مجانية على مدار الساعة، ووجبات سنغالية يومية.",
-    features: ["Vol direct Dakar-Djeddah", "Hébergement 3★ avec navette", "Demi-pension (Plats sénégalais)", "Guide religieux dédié", "Assistance médicale incluse"]
-  },
-  {
-    id: 2,
-    name: "Dakar Air Services Hajj",
-    price: 4900000,
-    type: "standard",
-    rating: 4.5,
-    address: "Immeuble Fahd, Place de l'Indépendance, Dakar",
-    phone: "+221 33 889 45 45",
-    email: "hajj@dakarair.sn",
-    desc_fr: "Forfait standard de grande qualité. Hôtel 4 étoiles à Médine et La Mecque à 500m du Haram. Pension complète et encadrement spirituel par des oulémas réputés.",
-    desc_wo: "Forfait standard bu am qualité. Hôtel 4 étoiles ci Médine ak Maka ci 500m ci Haram. Dunde bu mat ak ñaani oulémas yu rëy.",
-    desc_ar: "باقة قياسية عالية الجودة. فندق 4 نجوم في المدينة ومكة على بعد 500 متر من الحرم. إقامة كاملة مع إرشاد ديني متميز من أشهر العلماء السنغاليين.",
-    features: ["Vol régulier Royal Air Maroc", "Hôtels 4★ proches des Harams", "Pension complète buffet", "Médecin sénégalais dans l'hôtel", "Séminaires préparatoires inclus"]
-  },
-  {
-    id: 3,
-    name: "Sahel Omra & Hajj Confort",
-    price: 8500000,
-    type: "vip",
-    rating: 4.9,
-    address: "Almadies, Route du Méridien, Dakar",
-    phone: "+221 33 869 90 00",
-    email: "vip@sahelhajj.com",
-    desc_fr: "L'excellence pour votre pèlerinage. Hôtels 5 étoiles situés directement sur l'esplanade du Haram (Makkah Clock Tower). Tentes VIP climatisées à Mina et Arafat avec lits.",
-    desc_wo: "Forfait VIP bu gën a mag. Hôtel 5 étoiles ci Haram bi rekk (Clock Tower). Tente VIP and ak clim ak lal ci Mina ak Arafat.",
-    desc_ar: "باقة النخبة الفاخرة. فندق 5 نجوم مطل مباشرة على ساحة الحرم (أبراج البيت). مخيمات مطورة لكبار الشخصيات مكيفة ومجهزة بأسرة في منى وعرفات.",
-    features: ["Vol Business Class Emirates", "Hôtels 5★ sur le Haram", "Pension complète gastronomique", "Tentes VIP privées à Mina", "Assistance personnalisée 24h/24"]
-  }
-];
-
+// Static default checklist
 const defaultChecklist = [
   { id: 1, cat: "admin", text_fr: "Vérifier la validité de mon passeport (min 6 mois)", text_wo: "Seet lane passeport bi am na 6 mois laata mu reer", text_ar: "التحقق من صلاحية جواز السفر (6 أشهر كحد أدنى)", checked: false },
   { id: 2, cat: "admin", text_fr: "Faire les photos d'identité aux normes saoudiennes", text_wo: "Defal photo identité yu Maka nangu", text_ar: "إعداد الصور الشخصية بالمواصفات السعودية المطلوبة", checked: false },
@@ -89,102 +30,277 @@ const defaultChecklist = [
   { id: 7, cat: "spiritual", text_fr: "Apprendre les invocations de base et l'intention du Hajj", text_wo: "Jàng ñaan u Hajj yi ak intention u Hajj bi", text_ar: "حفظ الأدعية الأساسية ونية أداء مناسك الحج", checked: false }
 ];
 
-let inquiries = [];
-
 // API ENDPOINTS
 
 // 1. Announcements
-app.get('/api/announcements', (req, res) => {
-  res.json(announcements);
+app.get('/api/announcements', async (req, res) => {
+  try {
+    const rows = await DbManager.all("SELECT * FROM announcements ORDER BY id DESC");
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.post('/api/announcements', (req, res) => {
+app.post('/api/announcements', async (req, res) => {
   const { category, title_fr, desc_fr, title_wo, desc_wo, title_ar, desc_ar } = req.body;
   if (!title_fr || !desc_fr) {
     return res.status(400).json({ error: "Champs obligatoires manquants" });
   }
 
-  const newAnn = {
-    id: announcements.length > 0 ? Math.max(...announcements.map(a => a.id)) + 1 : 1,
-    date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
-    category: category || 'admin',
-    title_fr,
-    desc_fr,
-    title_wo: title_wo || title_fr,
-    desc_wo: desc_wo || desc_fr,
-    title_ar: title_ar || title_fr,
-    desc_ar: desc_ar || desc_fr
-  };
+  const date = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
-  announcements.unshift(newAnn);
-  res.status(201).json(newAnn);
+  try {
+    const result = await DbManager.run(
+      `INSERT INTO announcements (date, category, title_fr, desc_fr, title_wo, desc_wo, title_ar, desc_ar)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        date,
+        category || 'admin',
+        title_fr,
+        desc_fr,
+        title_wo || title_fr,
+        desc_wo || desc_fr,
+        title_ar || title_fr,
+        desc_ar || desc_fr
+      ]
+    );
+    res.status(201).json({
+      id: result.id,
+      date,
+      category: category || 'admin',
+      title_fr,
+      desc_fr
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // 2. Agencies
-app.get('/api/agencies', (req, res) => {
-  res.json(agencies);
+app.get('/api/agencies', async (req, res) => {
+  try {
+    const rows = await DbManager.all("SELECT * FROM agencies");
+    const parsed = rows.map(r => ({
+      ...r,
+      features: JSON.parse(r.features || '[]')
+    }));
+    res.json(parsed);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.post('/api/agencies', (req, res) => {
+app.post('/api/agencies', async (req, res) => {
   const { name, price, type, rating, address, phone, email, desc_fr, desc_wo, desc_ar, features } = req.body;
   if (!name || !price || !type) {
     return res.status(400).json({ error: "Champs obligatoires manquants (nom, prix, type)" });
   }
 
-  const newAgency = {
-    id: agencies.length > 0 ? Math.max(...agencies.map(a => a.id)) + 1 : 1,
-    name,
-    price: parseInt(price),
-    type,
-    rating: parseFloat(rating) || 4.5,
-    address: address || "Dakar, Sénégal",
-    phone: phone || "+221 ",
-    email: email || "",
-    desc_fr: desc_fr || name,
-    desc_wo: desc_wo || desc_fr || name,
-    desc_ar: desc_ar || desc_fr || name,
-    features: features || ["Assistance médicale", "Encadrement religieux"]
-  };
+  const featuresJson = JSON.stringify(features || ["Assistance médicale", "Encadrement religieux"]);
 
-  agencies.push(newAgency);
-  res.status(201).json(newAgency);
+  try {
+    const result = await DbManager.run(
+      `INSERT INTO agencies (name, price, type, rating, address, phone, email, desc_fr, desc_wo, desc_ar, features)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        name,
+        parseInt(price),
+        type,
+        parseFloat(rating) || 4.5,
+        address || "Dakar, Sénégal",
+        phone || "+221 ",
+        email || "",
+        desc_fr || name,
+        desc_wo || desc_fr || name,
+        desc_ar || desc_fr || name,
+        featuresJson
+      ]
+    );
+    res.status(201).json({
+      id: result.id,
+      name,
+      price: parseInt(price),
+      type,
+      features: features || []
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.delete('/api/agencies/:id', (req, res) => {
+app.delete('/api/agencies/:id', async (req, res) => {
   const id = parseInt(req.params.id);
-  agencies = agencies.filter(a => a.id !== id);
-  res.json({ message: "Agence retirée avec succès", id });
+  try {
+    await DbManager.run("DELETE FROM agencies WHERE id = ?", [id]);
+    res.json({ message: "Agence retirée avec succès", id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// 3. Agency Inquiries / Contact forms
-app.post('/api/agencies/:id/inquiry', (req, res) => {
+// 3. Pilgrim Registrations
+app.get('/api/pilgrims', async (req, res) => {
+  try {
+    const rows = await DbManager.all("SELECT * FROM pilgrims");
+    const parsed = rows.map(r => ({
+      id: r.id,
+      fullName: r.fullName,
+      phone: r.phone,
+      email: r.email,
+      passportNumber: r.passportNumber,
+      birthDate: r.birthDate,
+      bloodType: r.bloodType,
+      medicalStatus: r.medicalStatus,
+      registrationStatus: r.registrationStatus,
+      selectedAgencyId: r.selectedAgencyId,
+      emergencyContact: {
+        name: r.emergencyContactName,
+        phone: r.emergencyContactPhone
+      },
+      registrationDate: r.registrationDate
+    }));
+    res.json(parsed);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/pilgrims/passport/:passportNumber', async (req, res) => {
+  const passport = req.params.passportNumber;
+  try {
+    const row = await DbManager.get("SELECT * FROM pilgrims WHERE passportNumber = ?", [passport]);
+    if (!row) {
+      return res.status(404).json({ error: "Pèlerin introuvable" });
+    }
+    res.json({
+      id: row.id,
+      fullName: row.fullName,
+      phone: row.phone,
+      email: row.email,
+      passportNumber: row.passportNumber,
+      birthDate: row.birthDate,
+      bloodType: row.bloodType,
+      medicalStatus: row.medicalStatus,
+      registrationStatus: row.registrationStatus,
+      selectedAgencyId: row.selectedAgencyId,
+      emergencyContact: {
+        name: row.emergencyContactName,
+        phone: row.emergencyContactPhone
+      },
+      registrationDate: row.registrationDate
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/pilgrims', async (req, res) => {
+  const { fullName, phone, email, passportNumber, birthDate, bloodType, selectedAgencyId, emergencyContact } = req.body;
+  if (!fullName || !phone || !passportNumber) {
+    return res.status(400).json({ error: "Champs obligatoires manquants (nom complet, téléphone, passeport)" });
+  }
+  const registrationDate = new Date().toISOString().split('T')[0];
+
+  try {
+    const result = await DbManager.run(
+      `INSERT INTO pilgrims (fullName, phone, email, passportNumber, birthDate, bloodType, medicalStatus, registrationStatus, selectedAgencyId, emergencyContactName, emergencyContactPhone, registrationDate)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        fullName,
+        phone,
+        email || "",
+        passportNumber,
+        birthDate || "",
+        bloodType || "Inconnu",
+        'pending',
+        'pending',
+        selectedAgencyId ? parseInt(selectedAgencyId) : null,
+        emergencyContact?.name || "",
+        emergencyContact?.phone || "",
+        registrationDate
+      ]
+    );
+    res.status(201).json({
+      id: result.id,
+      fullName,
+      passportNumber,
+      registrationStatus: 'pending'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/pilgrims/:id/status', async (req, res) => {
   const id = parseInt(req.params.id);
-  const agency = agencies.find(a => a.id === id);
-  if (!agency) {
-    return res.status(404).json({ error: "Agence introuvable" });
+  const { status } = req.body;
+  if (!['pending', 'approved', 'rejected'].includes(status)) {
+    return res.status(400).json({ error: "Statut invalide" });
   }
 
-  const { name, phone } = req.body;
-  const newInquiry = {
-    id: inquiries.length + 1,
-    agencyId: id,
-    agencyName: agency.name,
-    clientName: name,
-    clientPhone: phone,
-    timestamp: new Date()
-  };
-
-  inquiries.push(newInquiry);
-  console.log(`[INQUIRY RECEVIED] Pour ${agency.name} par ${name} (${phone})`);
-  res.status(201).json({ message: "Demande reçue", inquiry: newInquiry });
+  try {
+    await DbManager.run("UPDATE pilgrims SET registrationStatus = ? WHERE id = ?", [status, id]);
+    const updated = await DbManager.get("SELECT * FROM pilgrims WHERE id = ?", [id]);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// 4. Default Checklist
+app.put('/api/pilgrims/:id/medical', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { medicalStatus } = req.body;
+  if (!['pending', 'apte', 'inapte'].includes(medicalStatus)) {
+    return res.status(400).json({ error: "Statut médical invalide" });
+  }
+
+  try {
+    await DbManager.run("UPDATE pilgrims SET medicalStatus = ? WHERE id = ?", [medicalStatus, id]);
+    const updated = await DbManager.get("SELECT * FROM pilgrims WHERE id = ?", [id]);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. Inquiries
+app.post('/api/agencies/:id/inquiry', async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    const agency = await DbManager.get("SELECT * FROM agencies WHERE id = ?", [id]);
+    if (!agency) {
+      return res.status(404).json({ error: "Agence introuvable" });
+    }
+    const { name, phone } = req.body;
+    const timestamp = new Date().toISOString();
+    const result = await DbManager.run(
+      `INSERT INTO inquiries (agencyId, agencyName, clientName, clientPhone, timestamp)
+       VALUES (?, ?, ?, ?, ?)`,
+      [id, agency.name, name, phone, timestamp]
+    );
+    res.status(201).json({
+      message: "Demande reçue",
+      inquiry: {
+        id: result.id,
+        agencyId: id,
+        agencyName: agency.name,
+        clientName: name,
+        clientPhone: phone,
+        timestamp
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 5. Default Checklist
 app.get('/api/checklist', (req, res) => {
   res.json(defaultChecklist);
 });
 
-// 5. Budget Calculation and personalized advice
+// 6. Budget Calculation
 app.post('/api/budget/calculate', (req, res) => {
   const { packagePrice, pocketMoney, sacrificePrice, shoppingPrice, lang } = req.body;
   const total = parseInt(packagePrice || 0) + parseInt(pocketMoney || 0) + parseInt(sacrificePrice || 0) + parseInt(shoppingPrice || 0);
@@ -221,16 +337,29 @@ app.post('/api/budget/calculate', (req, res) => {
   res.json({ total, advice });
 });
 
-// 6. Traffic Stats (Admin dashboard query)
-app.get('/api/stats', (req, res) => {
-  res.json({
-    totalVisits: 1245,
-    activePilgrims: 412,
-    registeredInquiries: inquiries.length,
-    announcementsCount: announcements.length,
-    agenciesCount: agencies.length,
-    inquiriesHistory: inquiries.slice(-5) // Get last 5 inquiries
-  });
+// 7. Traffic Stats (Admin dashboard query)
+app.get('/api/stats', async (req, res) => {
+  try {
+    const visitsCount = 1245;
+    const pilgrimsCount = await DbManager.get("SELECT COUNT(*) as count FROM pilgrims");
+    const inquiriesCount = await DbManager.get("SELECT COUNT(*) as count FROM inquiries");
+    const announcementsCount = await DbManager.get("SELECT COUNT(*) as count FROM announcements");
+    const agenciesCount = await DbManager.get("SELECT COUNT(*) as count FROM agencies");
+    const recentInquiries = await DbManager.all("SELECT * FROM inquiries ORDER BY id DESC LIMIT 5");
+
+    res.json({
+      totalVisits: visitsCount,
+      activePilgrims: pilgrimsCount?.count || 0,
+      registeredInquiries: inquiriesCount?.count || 0,
+      announcementsCount: announcementsCount?.count || 0,
+      agenciesCount: agenciesCount?.count || 0,
+      inquiriesHistory: recentInquiries,
+      totalPilgrims: pilgrimsCount?.count || 0,
+      pendingPilgrimsCount: (await DbManager.get("SELECT COUNT(*) as count FROM pilgrims WHERE registrationStatus = 'pending'"))?.count || 0
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.listen(PORT, () => {

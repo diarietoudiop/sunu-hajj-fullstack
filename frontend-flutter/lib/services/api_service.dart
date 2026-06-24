@@ -81,4 +81,36 @@ class ApiService {
     }
     return null;
   }
+
+  // Register a new pilgrim
+  static Future<Map<String, dynamic>?> registerPilgrim(Map<String, dynamic> pilgrimData) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/pilgrims'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(pilgrimData),
+      );
+      if (response.statusCode == 201) {
+        return jsonDecode(response.body);
+      }
+    } catch (e) {
+      print('Error registering pilgrim: $e');
+    }
+    return null;
+  }
+
+  // Fetch pilgrim details by passport number
+  static Future<Map<String, dynamic>?> fetchPilgrimByPassport(String passportNumber) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/pilgrims/passport/$passportNumber'),
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+    } catch (e) {
+      print('Error fetching pilgrim by passport: $e');
+    }
+    return null;
+  }
 }

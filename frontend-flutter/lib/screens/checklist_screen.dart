@@ -58,41 +58,79 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
         backgroundColor: const Color(0xFF0B5D34),
         foregroundColor: Colors.white,
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _checklistItems.length,
-        itemBuilder: (context, index) {
-          final item = _checklistItems[index];
-          final id = item['id'] as String;
-          final isChecked = _checkedIds.contains(id);
-
-          final text = widget.lang == 'ar'
-              ? item['text_ar']
-              : (widget.lang == 'wo' ? item['text_wo'] : item['text_fr']);
-
-          return Card(
+      body: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
             color: Colors.white,
-            margin: const EdgeInsets.only(bottom: 10),
-            child: CheckboxListTile(
-              value: isChecked,
-              onChanged: (val) => _toggleItem(id),
-              title: Text(
-                text!,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  decoration: isChecked ? TextDecoration.lineThrough : null,
-                  color: isChecked ? Colors.grey : Colors.black87,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.lang == 'ar' ? 'التقدم الإجمالي' : (widget.lang == 'wo' ? 'Avancement yëpp' : 'Progression générale'),
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF052C18)),
+                    ),
+                    Text(
+                      '${_checkedIds.length} / ${_checklistItems.length}',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0B5D34)),
+                    ),
+                  ],
                 ),
-              ),
-              subtitle: Text(
-                item['cat'].toString().toUpperCase(),
-                style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
-              ),
-              activeColor: const Color(0xFF0B5D34),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: _checklistItems.isEmpty ? 0 : _checkedIds.length / _checklistItems.length,
+                    backgroundColor: Colors.grey.shade100,
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0B5D34)),
+                    minHeight: 8,
+                  ),
+                ),
+              ],
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _checklistItems.length,
+              itemBuilder: (context, index) {
+                final item = _checklistItems[index];
+                final id = item['id'] as String;
+                final isChecked = _checkedIds.contains(id);
+
+                final text = widget.lang == 'ar'
+                    ? item['text_ar']
+                    : (widget.lang == 'wo' ? item['text_wo'] : item['text_fr']);
+
+                return Card(
+                  color: Colors.white,
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: CheckboxListTile(
+                    value: isChecked,
+                    onChanged: (val) => _toggleItem(id),
+                    title: Text(
+                      text!,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        decoration: isChecked ? TextDecoration.lineThrough : null,
+                        color: isChecked ? Colors.grey : Colors.black87,
+                      ),
+                    ),
+                    subtitle: Text(
+                      item['cat'].toString().toUpperCase(),
+                      style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
+                    ),
+                    activeColor: const Color(0xFF0B5D34),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -19,6 +19,19 @@ class _AgenciesScreenState extends State<AgenciesScreen> {
 
   final TextEditingController _searchController = TextEditingController();
 
+  String _formatPrice(dynamic price) {
+    if (price == null) return '';
+    final str = price.toString();
+    final buffer = StringBuffer();
+    for (int i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 == 0) {
+        buffer.write(' ');
+      }
+      buffer.write(str[i]);
+    }
+    return buffer.toString();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -84,8 +97,6 @@ class _AgenciesScreenState extends State<AgenciesScreen> {
         : (widget.lang == 'wo' ? agency['desc_wo'] : agency['desc_fr']);
 
     final features = List<String>.from(agency['features'] ?? []);
-    final price = agency['price'].toString();
-
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
 
@@ -111,12 +122,60 @@ class _AgenciesScreenState extends State<AgenciesScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0B5D34)),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF052C18)),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        '${agency['address']}',
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '${agency['address']} • ${agency['phone']}',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                Row(
+                  children: [
+                    const Icon(Icons.phone_outlined, size: 14, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${agency['phone']}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${_formatPrice(agency['price'])} F CFA',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0B5D34)),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: agency['type'] == 'vip'
+                            ? const Color(0xFFFFF7E6)
+                            : (agency['type'] == 'standard' ? const Color(0xFFE8F0FE) : const Color(0xFFE7F2E2)),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        agency['type'].toString().toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: agency['type'] == 'vip'
+                              ? const Color(0xFFB27D1B)
+                              : (agency['type'] == 'standard' ? Colors.blue.shade800 : const Color(0xFF0B5D34)),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -273,39 +332,122 @@ class _AgenciesScreenState extends State<AgenciesScreen> {
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    itemCount: _filteredAgencies.length,
-                    itemBuilder: (context, index) {
-                      final agency = _filteredAgencies[index];
-                      final firstLetter = agency['name'].toString().substring(0, 1);
-                      final price = agency['price'].toString();
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      itemCount: _filteredAgencies.length,
+                      itemBuilder: (context, index) {
+                        final agency = _filteredAgencies[index];
+                        final firstLetter = agency['name'].toString().substring(0, 1);
 
-                      return Card(
-                        color: Colors.white,
-                        elevation: 1,
-                        margin: const EdgeInsets.only(bottom: 10),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: const Color(0xFFE7F2E2),
-                            foregroundColor: const Color(0xFF0B5D34),
-                            child: Text(firstLetter, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        return Card(
+                          color: Colors.white,
+                          elevation: 1,
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: InkWell(
+                            onTap: () => _showAgencyDetailModal(agency),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 24,
+                                    backgroundColor: const Color(0xFFE7F2E2),
+                                    foregroundColor: const Color(0xFF0B5D34),
+                                    child: Text(firstLetter, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                agency['name'],
+                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF052C18)),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFFAF4EB),
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(Icons.star, color: Color(0xFFC5A880), size: 12),
+                                                  const SizedBox(width: 2),
+                                                  Text(
+                                                    agency['rating']?.toString() ?? '4.5',
+                                                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF8C6D40)),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                agency['address'] ?? '',
+                                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              '${_formatPrice(agency['price'])} F CFA',
+                                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0B5D34)),
+                                            ),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: agency['type'] == 'vip'
+                                                    ? const Color(0xFFFFF7E6)
+                                                    : (agency['type'] == 'standard' ? const Color(0xFFE8F0FE) : const Color(0xFFE7F2E2)),
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                agency['type'].toString().toUpperCase(),
+                                                style: TextStyle(
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: agency['type'] == 'vip'
+                                                      ? const Color(0xFFB27D1B)
+                                                      : (agency['type'] == 'standard' ? Colors.blue.shade800 : const Color(0xFF0B5D34)),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          title: Text(
-                            agency['name'],
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                          ),
-                          subtitle: Text(
-                            '${agency['address']}\n${price} F CFA',
-                            style: const TextStyle(fontSize: 11, height: 1.3),
-                          ),
-                          isThreeLine: true,
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () => _showAgencyDetailModal(agency),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
           )
         ],
       ),
