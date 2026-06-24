@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import 'checklist_screen.dart';
 import 'budget_screen.dart';
+import 'auth_screen.dart';
 import '../services/api_service.dart';
 
 class EspaceScreen extends StatefulWidget {
@@ -178,18 +179,25 @@ class _EspaceScreenState extends State<EspaceScreen> {
       ),
     );
 
-    if (confirm == true) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('sunuhajj_user_passport');
-      _nameController.clear();
-      _phoneController.clear();
-      _emailController.clear();
-      _passportController.clear();
-      _birthdateController.clear();
-      _emergencyNameController.clear();
-      _emergencyPhoneController.clear();
-      await _checkRegistrationAndLoadData();
-    }
+      if (confirm == true) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('sunuhajj_user_passport');
+        _nameController.clear();
+        _phoneController.clear();
+        _emailController.clear();
+        _passportController.clear();
+        _birthdateController.clear();
+        _emergencyNameController.clear();
+        _emergencyPhoneController.clear();
+        
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => AuthScreen(lang: widget.lang)),
+            (route) => false,
+          );
+        }
+      }
   }
 
   void _uploadDocument(String docType) async {

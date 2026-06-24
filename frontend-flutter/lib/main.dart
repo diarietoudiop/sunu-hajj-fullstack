@@ -4,6 +4,8 @@ import 'screens/home_screen.dart';
 import 'screens/journey_screen.dart';
 import 'screens/agencies_screen.dart';
 import 'screens/espace_screen.dart';
+import 'screens/onboarding_screen.dart';
+import 'screens/auth_screen.dart';
 
 void main() {
   runApp(const SunuHajjApp());
@@ -23,6 +25,7 @@ class SunuHajjApp extends StatefulWidget {
 
 class _SunuHajjAppState extends State<SunuHajjApp> {
   String _locale = 'fr';
+  Widget _homeScreen = const Scaffold(body: Center(child: CircularProgressIndicator(color: Color(0xFF0B5D34))));
 
   @override
   void initState() {
@@ -32,16 +35,44 @@ class _SunuHajjAppState extends State<SunuHajjApp> {
 
   void _loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
+    final String lang = prefs.getString('sunuhajj_lang') ?? 'fr';
+    final bool onboarded = prefs.getBool('sunuhajj_onboarded') ?? false;
+    final String? passport = prefs.getString('sunuhajj_user_passport');
+
+    Widget target;
+    if (passport != null && passport.isNotEmpty) {
+      target = AppNavigator(currentLocale: lang, initialIndex: 0);
+    } else if (!onboarded) {
+      target = OnboardingScreen(lang: lang);
+    } else {
+      target = AuthScreen(lang: lang);
+    }
+
     setState(() {
-      _locale = prefs.getString('sunuhajj_lang') ?? 'fr';
+      _locale = lang;
+      _homeScreen = target;
     });
   }
 
   void changeLanguage(String lang) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('sunuhajj_lang', lang);
+    
+    final bool onboarded = prefs.getBool('sunuhajj_onboarded') ?? false;
+    final String? passport = prefs.getString('sunuhajj_user_passport');
+
+    Widget target;
+    if (passport != null && passport.isNotEmpty) {
+      target = AppNavigator(currentLocale: lang, initialIndex: 0);
+    } else if (!onboarded) {
+      target = OnboardingScreen(lang: lang);
+    } else {
+      target = AuthScreen(lang: lang);
+    }
+
     setState(() {
       _locale = lang;
+      _homeScreen = target;
     });
   }
 
@@ -63,7 +94,7 @@ class _SunuHajjAppState extends State<SunuHajjApp> {
       // Set Text Direction based on locale (RTL for Arabic)
       home: Directionality(
         textDirection: _locale == 'ar' ? TextDirection.rtl : TextDirection.ltr,
-        child: AppNavigator(currentLocale: _locale),
+        child: _homeScreen,
       ),
     );
   }
@@ -71,7 +102,8 @@ class _SunuHajjAppState extends State<SunuHajjApp> {
 
 class AppNavigator extends StatefulWidget {
   final String currentLocale;
-  const AppNavigator({super.key, required this.currentLocale});
+  final int initialIndex;
+  const AppNavigator({super.key, required this.currentLocale, this.initialIndex = 0});
 
   @override
   State<AppNavigator> createState() => _AppNavigatorState();
@@ -79,6 +111,12 @@ class AppNavigator extends StatefulWidget {
 
 class _AppNavigatorState extends State<AppNavigator> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {
