@@ -458,16 +458,16 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUp
           <div className="table-responsive">
             <table className="admin-table">
             <thead>
-              <tr style={{ backgroundColor: '#042F1A', color: '#ffffff' }}>
-                <th style={{ width: '44px', padding: '14px 10px' }}></th>
-                <th style={{ padding: '14px', fontSize: '0.88rem', fontWeight: 800 }}>PÈLERIN (NOM & PRÉNOM)</th>
-                <th style={{ padding: '14px', fontSize: '0.88rem', fontWeight: 800 }}>PASSEPORT SÉNÉGAL</th>
-                <th style={{ padding: '14px', fontSize: '0.88rem', fontWeight: 800 }}>AGENCE SÉLECTIONNÉE</th>
-                <th style={{ padding: '14px', fontSize: '0.88rem', fontWeight: 800 }}>APTITUDE MÉDICALE</th>
-                <th style={{ padding: '14px', fontSize: '0.88rem', fontWeight: 800 }}>SAUDI NUSUK</th>
-                <th style={{ padding: '14px', fontSize: '0.88rem', fontWeight: 800 }}>VISA HAJJ</th>
-                <th style={{ padding: '14px', fontSize: '0.88rem', fontWeight: 800 }}>DOSSIER SUNU HAJJ</th>
-                <th style={{ textAlign: 'right', padding: '14px 20px', width: '230px', fontSize: '0.88rem', fontWeight: 800 }}>DÉCISIONS & ACTIONS</th>
+              <tr style={{ backgroundColor: '#f8fafc', color: '#475569', borderBottom: '2px solid #e2e8f0' }}>
+                <th style={{ width: '40px', padding: '12px 10px', textAlign: 'center' }}></th>
+                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pèlerin</th>
+                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Passeport</th>
+                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Agence Choisie</th>
+                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Aptitude</th>
+                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Nusuk Sync</th>
+                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Visa Hajj</th>
+                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Dossier</th>
+                <th style={{ textAlign: 'right', padding: '12px 16px', width: '210px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -476,7 +476,7 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUp
                   <td colSpan="9" style={{ textAlign: 'center', padding: '40px' }}>
                     <div className="empty-state">
                       <FileText size={36} className="empty-icon" />
-                      <p style={{ fontSize: '1rem', fontWeight: 700 }}>Aucun dossier de pèlerin ne correspond à vos critères.</p>
+                      <p style={{ fontSize: '0.95rem', fontWeight: 700, color: '#64748b' }}>Aucun dossier de pèlerin ne correspond à vos critères.</p>
                     </div>
                   </td>
                 </tr>
@@ -495,105 +495,103 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUp
 
                   return (
                     <React.Fragment key={p.id}>
-                      <tr className={`table-row-hover ${isExpanded ? 'row-expanded-parent' : ''}`} onClick={() => toggleExpand(p.id)} style={{ cursor: 'pointer', borderBottom: '1px solid #e2e8f0', backgroundColor: isExpanded ? 'rgba(10,92,54,0.04)' : '#ffffff' }}>
-                        <td style={{ padding: '14px 10px', textAlign: 'center' }}>
-                          {isExpanded ? <ChevronUp size={20} style={{ color: '#0A5C36' }} /> : <ChevronDown size={20} style={{ color: '#64748b' }} />}
+                      <tr className={`table-row-hover ${isExpanded ? 'row-expanded-parent' : ''}`} onClick={() => toggleExpand(p.id)} style={{ cursor: 'pointer', borderBottom: '1px solid #f1f5f9', backgroundColor: isExpanded ? 'rgba(10,92,54,0.03)' : '#ffffff', transition: 'background 0.15s ease' }}>
+                        <td style={{ padding: '12px 10px', textAlign: 'center', color: '#94a3b8' }}>
+                          {isExpanded ? <ChevronUp size={18} style={{ color: '#0A5C36' }} /> : <ChevronDown size={18} />}
                         </td>
-                        <td style={{ padding: '14px' }}>
+                        <td style={{ padding: '12px 14px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span style={{ fontSize: '1.4rem' }}>
+                            <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'rgba(10,92,54,0.08)', color: '#0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0 }}>
                               {(p.gender === 'F' || p.fullName.toLowerCase().includes('marie') || p.fullName.toLowerCase().includes('khadidiatou') || p.fullName.toLowerCase().includes('nabou') || p.fullName.toLowerCase().includes('noor')) ? '🧕' : '👳‍♂️'}
-                            </span>
+                            </div>
                             <div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <strong style={{ fontSize: isSeniorText ? '1.1rem' : '0.98rem', fontWeight: 900, color: '#042F1A' }}>{p.fullName}</strong>
+                                <strong style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>{p.fullName}</strong>
                                 <button 
                                   onClick={speakPilgrimInfo}
-                                  title="🔊 Écouter l'assistance vocale Wolof/Français"
-                                  style={{ border: 'none', background: 'rgba(212,175,55,0.15)', borderRadius: '50%', width: '26px', height: '26px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem' }}
+                                  title="🔊 Assistance vocale"
+                                  style={{ border: 'none', background: 'rgba(212,175,55,0.15)', borderRadius: '50%', width: '22px', height: '22px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem' }}
                                 >
                                   🔊
                                 </button>
                               </div>
-                              <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block', marginTop: '2px' }}>
-                                📍 {p.region || 'Dakar'} | ✉️ {p.email || 'Sans e-mail'}
+                              <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginTop: '1px' }}>
+                                {p.email || 'Sans e-mail'}
                               </span>
                             </div>
                           </div>
                         </td>
-                        <td style={{ padding: '14px' }}>
-                          <span style={{ fontFamily: 'monospace', fontSize: isSeniorText ? '1rem' : '0.9rem', fontWeight: 800, backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', color: '#042F1A' }}>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontFamily: 'monospace', fontSize: '0.86rem', fontWeight: 700, backgroundColor: '#f8fafc', padding: '3px 8px', borderRadius: '6px', border: '1px solid #e2e8f0', color: '#1e293b' }}>
                             🇸🇳 {p.passportNumber}
                           </span>
                         </td>
-                        <td style={{ padding: '14px' }}>
-                          <span style={{ fontWeight: 700, fontSize: '0.84rem', color: '#0A5C36', backgroundColor: 'rgba(10,92,54,0.08)', padding: '6px 10px', borderRadius: '8px', border: '1px solid rgba(10,92,54,0.15)', display: 'inline-block' }}>
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.78rem', color: '#0A5C36', backgroundColor: '#ecfdf5', padding: '4px 10px', borderRadius: '20px', border: '1px solid #a7f3d0', display: 'inline-block' }}>
                             {getAgencyName(p.selectedAgencyId)}
                           </span>
                         </td>
-                        <td style={{ padding: '14px' }}>
-                          <span style={{ fontWeight: 800, fontSize: '0.8rem', padding: '6px 10px', borderRadius: '8px', backgroundColor: p.medicalStatus === 'apte' ? '#e6f4ea' : p.medicalStatus === 'inapte' ? '#fef2f2' : '#fff7ed', color: p.medicalStatus === 'apte' ? '#047857' : p.medicalStatus === 'inapte' ? '#b91c1c' : '#c2410c', border: p.medicalStatus === 'apte' ? '1px solid #38a169' : p.medicalStatus === 'inapte' ? '1px solid #fca5a5' : '1px solid #fdba74', display: 'inline-block' }}>
-                            {p.medicalStatus === 'apte' ? '🟢 APTE' : p.medicalStatus === 'inapte' ? '🔴 INAPTE' : '⏳ ATTENTE'}
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.78rem', padding: '4px 10px', borderRadius: '20px', backgroundColor: p.medicalStatus === 'apte' ? '#ecfdf5' : p.medicalStatus === 'inapte' ? '#fef2f2' : '#fffbeb', color: p.medicalStatus === 'apte' ? '#047857' : p.medicalStatus === 'inapte' ? '#dc2626' : '#d97706', border: p.medicalStatus === 'apte' ? '1px solid #a7f3d0' : p.medicalStatus === 'inapte' ? '1px solid #fecaca' : '1px solid #fde68a', display: 'inline-block' }}>
+                            {p.medicalStatus === 'apte' ? '🟢 Apte' : p.medicalStatus === 'inapte' ? '🔴 Inapte' : '⏳ Attente'}
                           </span>
                         </td>
-                        <td style={{ padding: '14px' }}>
-                          <span style={{ fontWeight: 800, fontSize: '0.8rem', padding: '6px 10px', borderRadius: '8px', backgroundColor: p.nusukSyncStatus === 'synced' ? '#e6f4ea' : '#f1f5f9', color: p.nusukSyncStatus === 'synced' ? '#047857' : '#475569', border: p.nusukSyncStatus === 'synced' ? '1px solid #38a169' : '1px solid #cbd5e1', display: 'inline-block' }}>
-                            {p.nusukSyncStatus === 'synced' ? '🇸🇦 SYNCHR.' : '⏳ ATTENTE'}
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.78rem', padding: '4px 10px', borderRadius: '20px', backgroundColor: p.nusukSyncStatus === 'synced' ? '#ecfdf5' : '#f8fafc', color: p.nusukSyncStatus === 'synced' ? '#047857' : '#64748b', border: p.nusukSyncStatus === 'synced' ? '1px solid #a7f3d0' : '1px solid #e2e8f0', display: 'inline-block' }}>
+                            {p.nusukSyncStatus === 'synced' ? '🇸🇦 Synchro' : '⏳ Attente'}
                           </span>
                         </td>
-                        <td style={{ padding: '14px' }}>
-                          <span style={{ fontWeight: 800, fontSize: '0.8rem', padding: '6px 10px', borderRadius: '8px', backgroundColor: p.visaStatus === 'issued' ? '#e6f4ea' : '#f1f5f9', color: p.visaStatus === 'issued' ? '#047857' : '#475569', border: p.visaStatus === 'issued' ? '1px solid #38a169' : '1px solid #cbd5e1', display: 'inline-block' }}>
-                            {p.visaStatus === 'issued' ? '🟢 ÉMIS' : '⏳ EN COURS'}
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.78rem', padding: '4px 10px', borderRadius: '20px', backgroundColor: p.visaStatus === 'issued' ? '#ecfdf5' : '#f8fafc', color: p.visaStatus === 'issued' ? '#047857' : '#64748b', border: p.visaStatus === 'issued' ? '1px solid #a7f3d0' : '1px solid #e2e8f0', display: 'inline-block' }}>
+                            {p.visaStatus === 'issued' ? '🟢 Émis' : '⏳ En cours'}
                           </span>
                         </td>
-                        <td style={{ padding: '14px' }}>
-                          <span style={{ fontWeight: 800, fontSize: '0.8rem', padding: '6px 10px', borderRadius: '8px', backgroundColor: p.registrationStatus === 'approved' ? '#e6f4ea' : p.registrationStatus === 'rejected' ? '#fef2f2' : '#fff7ed', color: p.registrationStatus === 'approved' ? '#047857' : p.registrationStatus === 'rejected' ? '#b91c1c' : '#c2410c', border: p.registrationStatus === 'approved' ? '1px solid #38a169' : p.registrationStatus === 'rejected' ? '1px solid #fca5a5' : '1px solid #fdba74', display: 'inline-block' }}>
-                            {p.registrationStatus === 'approved' ? '🟢 VALIDÉ' : p.registrationStatus === 'rejected' ? '🔴 REFUSÉ' : '⏳ ATTENTE'}
+                        <td style={{ padding: '12px 14px' }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.78rem', padding: '4px 10px', borderRadius: '20px', backgroundColor: p.registrationStatus === 'approved' ? '#ecfdf5' : p.registrationStatus === 'rejected' ? '#fef2f2' : '#fffbeb', color: p.registrationStatus === 'approved' ? '#047857' : p.registrationStatus === 'rejected' ? '#dc2626' : '#d97706', border: p.registrationStatus === 'approved' ? '1px solid #a7f3d0' : p.registrationStatus === 'rejected' ? '1px solid #fecaca' : '1px solid #fde68a', display: 'inline-block' }}>
+                            {p.registrationStatus === 'approved' ? '🟢 Validé' : p.registrationStatus === 'rejected' ? '🔴 Refusé' : '⏳ Attente'}
                           </span>
                         </td>
-                        <td style={{ textAlign: 'right', padding: '14px 20px' }} onClick={e => e.stopPropagation()}>
-                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                        <td style={{ textAlign: 'right', padding: '12px 16px' }} onClick={e => e.stopPropagation()}>
+                          <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                             {p.registrationStatus !== 'approved' && (
                               <button
                                 style={{
-                                  padding: '8px 14px',
+                                  padding: '6px 12px',
                                   borderRadius: '8px',
                                   backgroundColor: '#0A5C36',
                                   color: '#ffffff',
                                   border: 'none',
-                                  fontWeight: 800,
-                                  fontSize: '0.82rem',
+                                  fontWeight: 700,
+                                  fontSize: '0.8rem',
                                   cursor: 'pointer',
                                   display: 'flex',
                                   alignItems: 'center',
-                                  gap: '6px',
-                                  boxShadow: '0 2px 6px rgba(10,92,54,0.2)'
+                                  gap: '4px',
+                                  boxShadow: '0 2px 6px rgba(10,92,54,0.15)'
                                 }}
                                 onClick={() => onUpdateStatus(p.id, 'approved')}
-                                title="Valider le dossier"
                               >
-                                <Check size={16} /> Valider
+                                <Check size={14} /> Valider
                               </button>
                             )}
                             {p.registrationStatus !== 'rejected' && (
                               <button
                                 style={{
-                                  padding: '8px 12px',
+                                  padding: '6px 10px',
                                   borderRadius: '8px',
-                                  backgroundColor: '#ffffff',
+                                  backgroundColor: '#f1f5f9',
                                   color: '#dc2626',
-                                  border: '1.5px solid #fca5a5',
-                                  fontWeight: 800,
-                                  fontSize: '0.82rem',
+                                  border: '1px solid #fee2e2',
+                                  fontWeight: 700,
+                                  fontSize: '0.8rem',
                                   cursor: 'pointer',
                                   display: 'flex',
                                   alignItems: 'center',
                                   gap: '4px'
                                 }}
                                 onClick={() => onUpdateStatus(p.id, 'rejected')}
-                                title="Refuser le dossier"
                               >
-                                <X size={16} /> Refuser
+                                <X size={14} /> Refuser
                               </button>
                             )}
                           </div>

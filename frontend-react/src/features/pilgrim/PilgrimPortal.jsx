@@ -874,6 +874,47 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
               <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginTop: '4px', color: 'white' }}>
                 {t.welcome}, {pilgrim.fullName}
               </h2>
+              
+              <div style={{ display: 'flex', gap: '10px', marginTop: '12px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setShowPilgrimBadgeModal(true)}
+                  style={{
+                    backgroundColor: '#D4AF37',
+                    color: '#042F1A',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 14px',
+                    fontWeight: 900,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                  }}
+                >
+                  <span>🪪</span> Mon Badge Pèlerin & Pass Nusuk 🇸🇦
+                </button>
+
+                <button
+                  onClick={() => setShowMedicalCertModal(true)}
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.18)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255,255,255,0.35)',
+                    borderRadius: '8px',
+                    padding: '8px 14px',
+                    fontWeight: 800,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <span>📄</span> Certificat Médical (PDF)
+                </button>
+              </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: lang === 'ar' ? 'flex-start' : 'flex-end', zIndex: 1 }}>
