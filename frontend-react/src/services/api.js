@@ -420,18 +420,48 @@ export const ApiService = {
       throw new Error("API error");
     } catch (err) {
       console.warn("Backend offline, updating medical status locally (mock).");
+      const bloodVal = medicalDetails.bloodType || medicalDetails.bloodGroup;
       const mockList = JSON.parse(localStorage.getItem('mock_pilgrims') || '[]');
-      const index = mockList.findIndex(p => p.id === id || String(p.id) === String(id));
+      const index = mockList.findIndex(p => p.id === id || String(p.id) === String(id) || p.passportNumber === id);
       let updated;
       if (index !== -1) {
-        updated = { ...mockList[index], medicalStatus, ...medicalDetails };
+        updated = { 
+          ...mockList[index], 
+          medicalStatus, 
+          ...medicalDetails,
+          bloodType: bloodVal || mockList[index].bloodType,
+          bloodGroup: bloodVal || mockList[index].bloodGroup
+        };
         mockList[index] = updated;
       } else {
-        const staticP = MOCK_PILGRIMS.find(p => p.id === id || String(p.id) === String(id)) || {};
-        updated = { ...staticP, id, medicalStatus, ...medicalDetails };
+        const staticP = MOCK_PILGRIMS.find(p => p.id === id || String(p.id) === String(id) || p.passportNumber === id) || {};
+        updated = { 
+          ...staticP, 
+          id, 
+          medicalStatus, 
+          ...medicalDetails,
+          bloodType: bloodVal || staticP.bloodType,
+          bloodGroup: bloodVal || staticP.bloodGroup
+        };
         mockList.push(updated);
       }
       localStorage.setItem('mock_pilgrims', JSON.stringify(mockList));
+
+      // Also update dgp_pilgrim in sessionStorage if matching!
+      try {
+        const storedPilgrim = JSON.parse(sessionStorage.getItem('dgp_pilgrim') || 'null');
+        if (storedPilgrim && (storedPilgrim.id === id || String(storedPilgrim.id) === String(id) || storedPilgrim.passportNumber === id)) {
+          const newStored = { 
+            ...storedPilgrim, 
+            medicalStatus, 
+            ...medicalDetails, 
+            bloodType: bloodVal || storedPilgrim.bloodType, 
+            bloodGroup: bloodVal || storedPilgrim.bloodGroup 
+          };
+          sessionStorage.setItem('dgp_pilgrim', JSON.stringify(newStored));
+        }
+      } catch (e) {}
+
       return updated;
     }
   },

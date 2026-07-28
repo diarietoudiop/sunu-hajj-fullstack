@@ -279,7 +279,7 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState(safePilgrim.fullName || safePilgrim.name || 'Pèlerin Sunu Hajj');
   const [selectedAgencyId, setSelectedAgencyId] = useState(safePilgrim.selectedAgencyId || 1);
-  const [bloodType, setBloodType] = useState(safePilgrim.bloodType || 'O+');
+  const [bloodType, setBloodType] = useState(safePilgrim.bloodType || safePilgrim.bloodGroup || 'À déterminer (Visite médicale)');
   const [phone, setPhone] = useState(safePilgrim.phone || '');
   const [email, setEmail] = useState(safePilgrim.email || '');
   const [emergencyContactName, setEmergencyContactName] = useState(safePilgrim.emergencyContact?.name || safePilgrim.emergencyContactName || '');
@@ -307,7 +307,7 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
     if (pilgrim) {
       setFullName(pilgrim.fullName || pilgrim.name || 'Pèlerin Sunu Hajj');
       setSelectedAgencyId(pilgrim.selectedAgencyId || 1);
-      setBloodType(pilgrim.bloodType || 'O+');
+      setBloodType(pilgrim.bloodType || pilgrim.bloodGroup || 'À déterminer (Visite médicale)');
       setPhone(pilgrim.phone || '');
       setEmail(pilgrim.email || '');
       setEmergencyContactName(pilgrim.emergencyContact?.name || pilgrim.emergencyContactName || '');

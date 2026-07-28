@@ -295,7 +295,29 @@ function App() {
   const handleUpdatePilgrimMedical = async (id, medicalStatus, medicalDetails = {}) => {
     try {
       const response = await ApiService.updatePilgrimMedical(id, medicalStatus, medicalDetails);
-      setPilgrims((prev) => prev.map(p => (p.id === id || String(p.id) === String(id)) ? { ...p, medicalStatus, ...medicalDetails } : p));
+      const bloodVal = medicalDetails.bloodType || medicalDetails.bloodGroup;
+      
+      setPilgrims((prev) => prev.map(p => (p.id === id || String(p.id) === String(id) || p.passportNumber === id) ? { 
+        ...p, 
+        medicalStatus, 
+        ...medicalDetails,
+        bloodType: bloodVal || p.bloodType,
+        bloodGroup: bloodVal || p.bloodGroup
+      } : p));
+
+      // Synchronize logged-in pilgrim state in real-time
+      if (currentPilgrim && (currentPilgrim.id === id || String(currentPilgrim.id) === String(id) || currentPilgrim.passportNumber === id)) {
+        const updatedCurrent = { 
+          ...currentPilgrim, 
+          medicalStatus, 
+          ...medicalDetails,
+          bloodType: bloodVal || currentPilgrim.bloodType,
+          bloodGroup: bloodVal || currentPilgrim.bloodGroup
+        };
+        setCurrentPilgrim(updatedCurrent);
+        sessionStorage.setItem('dgp_pilgrim', JSON.stringify(updatedCurrent));
+      }
+
       triggerAlert(`Aptitude médicale (${medicalStatus === 'apte' ? 'APTE 🟢' : 'INAPTE 🔴'}) enregistrée avec succès !`, "success");
     } catch (err) {
       triggerAlert("Erreur lors de la mise à jour de l'état médical.", "error");

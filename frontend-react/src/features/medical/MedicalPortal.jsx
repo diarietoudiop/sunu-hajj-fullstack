@@ -18,6 +18,8 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  const [validationError, setValidationError] = useState('');
+
   // Password change state
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [newPassword, setNewPassword] = useState('');
@@ -50,21 +52,37 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
   const handleOpenConsultation = (pilgrim) => {
     setSelectedPilgrim(pilgrim);
     setMedicalStatus(pilgrim.medicalStatus === 'inapte' ? 'inapte' : 'apte');
-    setBloodType(pilgrim.bloodType || 'O+');
+    const existingBlood = pilgrim.bloodType || pilgrim.bloodGroup || 'O+';
+    setBloodType(existingBlood.includes('déterminer') ? 'O+' : existingBlood);
     setYellowFever(pilgrim.vaccines?.yellowFever !== false);
     setMeningitis(pilgrim.vaccines?.meningitis !== false);
     setFluVaccine(pilgrim.vaccines?.fluVaccine !== false);
     setMedicalNotes(pilgrim.medicalNotes || 'Aptitude physique et psychologique validée pour le pèlerinage.');
     setSaveSuccess(false);
+    setValidationError('');
   };
 
   const handleSaveConsultation = async (e) => {
     e.preventDefault();
     if (!selectedPilgrim) return;
+    setValidationError('');
+
+    // MANDATORY VALIDATIONS BEFORE DELIVERING MEDICAL FITNESS
+    if (medicalStatus === 'apte') {
+      if (!bloodType || bloodType.includes('déterminer')) {
+        setValidationError("⚠️ OBLIGATOIRE : Vous devez sélectionner le groupe sanguin réel du pèlerin (ex: O+, A+, B+...) avant de valider l'aptitude médicale.");
+        return;
+      }
+      if (!yellowFever || !meningitis) {
+        setValidationError("⚠️ OBLIGATOIRE : Le vaccin Fièvre Jaune ET le vaccin Méningite Tétravalente ACYW135 doivent être TOUS LES DEUX cochés/confirmés avant de valider l'aptitude médicale.");
+        return;
+      }
+    }
     
     setIsSubmitting(true);
     const medicalDetails = {
       bloodType,
+      bloodGroup: bloodType,
       vaccines: { yellowFever, meningitis, fluVaccine },
       medicalNotes,
       doctorCode: structureInfo.code,
@@ -87,6 +105,7 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);
+      setValidationError("Une erreur s'est produite lors de l'enregistrement.");
     }
   };
 
@@ -373,6 +392,12 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
               </div>
             ) : (
               <form onSubmit={handleSaveConsultation} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                
+                {validationError && (
+                  <div style={{ backgroundColor: '#FEF2F2', border: '1.5px solid #FCA5A5', color: '#991B1B', padding: '12px 16px', borderRadius: '10px', fontSize: '0.88rem', fontWeight: 700, lineHeight: 1.4 }}>
+                    {validationError}
+                  </div>
+                )}
                 
                 {/* Pilgrim Summary Card */}
                 <div style={{ backgroundColor: '#F8FAFC', borderRadius: '12px', padding: '16px 20px', border: '1px solid #E2E8F0' }}>
