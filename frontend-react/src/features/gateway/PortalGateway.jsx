@@ -382,132 +382,139 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
   };
 
   const handleFormSubmit = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     setOtpError('');
     
-    if (chosenRole === 'pilgrim') {
-      let passportNum = pilgrimPassport.trim().toUpperCase();
-      if (!passportNum) {
-        setOtpError("Veuillez saisir votre numéro de passeport.");
-        return;
-      }
-      // Auto-prefix SN if omitted by user
-      if (!passportNum.startsWith('SN')) {
-        passportNum = 'SN' + passportNum.replace(/[^A-Z0-9]/g, '');
-      }
-      
-      const pilgrimData = {
-        fullName: pilgrimName.trim() || "Pèlerin Inscrit",
-        passportNumber: passportNum,
-        phone: pilgrimPhone.trim(),
-        email: pilgrimEmail.trim(),
-        region: pilgrimRegion,
-        birthDate: "",
-        bloodType: "À déterminer (Visite médicale)",
-        selectedAgencyId: regSelectedAgencyId,
-        emergencyContact: {
-          name: "",
-          phone: ""
+    try {
+      if (chosenRole === 'pilgrim') {
+        const rawPassport = (pilgrimPassport || '').trim().toUpperCase();
+        if (!rawPassport) {
+          setOtpError("Veuillez saisir votre numéro de passeport Sénégal (ex: SN1234567).");
+          return;
         }
-      };
+        let passportNum = rawPassport;
+        if (!passportNum.startsWith('SN')) {
+          passportNum = 'SN' + passportNum.replace(/[^A-Z0-9]/g, '');
+        }
+        
+        const cleanName = (pilgrimName || '').trim() || "Pèlerin Inscrit";
+        const cleanPhone = (pilgrimPhone || '').trim();
+        const cleanEmail = (pilgrimEmail || '').trim();
 
-      try {
+        const pilgrimData = {
+          fullName: cleanName,
+          passportNumber: passportNum,
+          phone: cleanPhone,
+          email: cleanEmail,
+          region: pilgrimRegion || "Dakar",
+          birthDate: "",
+          bloodType: "À déterminer (Visite médicale)",
+          selectedAgencyId: regSelectedAgencyId || 1,
+          emergencyContact: {
+            name: "",
+            phone: ""
+          }
+        };
+
         const result = await ApiService.registerPilgrim(pilgrimData);
-        setSuccessUser(result.data || result);
-        generateRandomOtp(pilgrimPhone.trim(), pilgrimName.trim());
+        const registered = (result && result.data) ? result.data : (result || pilgrimData);
+        setSuccessUser(registered);
+        generateRandomOtp(cleanPhone, cleanName);
         setWizardStep('otp');
-      } catch (err) {
-        setOtpError(err.message || "Erreur d'inscription.");
-      }
-    } else if (chosenRole === 'agent') {
-      // Role is Agent DGP
-      let agentMatriculeNum = agentMatricule.trim().toUpperCase();
-      if (!agentMatriculeNum) {
-        setOtpError("Veuillez saisir votre matricule officiel.");
-        return;
-      }
-      if (!agentMatriculeNum.startsWith('DGP')) {
-        agentMatriculeNum = 'DGP-2026-' + agentMatriculeNum.replace(/[^A-Z0-9]/g, '');
-      }
+      } else if (chosenRole === 'agent') {
+        // Role is Agent DGP
+        const rawMatricule = (agentMatricule || '').trim().toUpperCase();
+        if (!rawMatricule) {
+          setOtpError("Veuillez saisir votre matricule officiel DGP.");
+          return;
+        }
+        let agentMatriculeNum = rawMatricule;
+        if (!agentMatriculeNum.startsWith('DGP')) {
+          agentMatriculeNum = 'DGP-2026-' + agentMatriculeNum.replace(/[^A-Z0-9]/g, '');
+        }
 
-      const agentData = {
-        fullName: agentName.trim() || "Agent de Contrôle DGP",
-        matricule: agentMatriculeNum,
-        roleTitle: agentRoleTitle,
-        phone: agentPhone.trim() || "+221 77 000 00 00",
-        email: agentEmail.trim() || "agent@dgp.gouv.sn",
-        role: 'admin'
-      };
+        const agentData = {
+          fullName: (agentName || '').trim() || "Agent de Contrôle DGP",
+          matricule: agentMatriculeNum,
+          roleTitle: agentRoleTitle || "Agent de Contrôle DGP",
+          phone: (agentPhone || '').trim() || "+221 77 000 00 00",
+          email: (agentEmail || '').trim() || "agent@dgp.gouv.sn",
+          role: 'admin'
+        };
 
-      setSuccessUser(agentData);
-      generateRandomOtp();
-      setWizardStep('otp');
-    } else if (chosenRole === 'doctor') {
-      // Role is Medical Doctor / Structure
-      let doctorCode = agentMatricule.trim().toUpperCase();
-      if (!doctorCode || doctorCode === "MED-DKR-01") {
-        doctorCode = `MED-DKR-${Math.floor(100 + Math.random() * 900)}`;
-      }
-      if (!doctorCode.startsWith('MED')) {
-        doctorCode = 'MED-' + doctorCode.replace(/[^A-Z0-9]/g, '');
-      }
+        setSuccessUser(agentData);
+        generateRandomOtp();
+        setWizardStep('otp');
+      } else if (chosenRole === 'doctor') {
+        // Role is Medical Doctor / Structure
+        let doctorCode = (agentMatricule || '').trim().toUpperCase();
+        if (!doctorCode || doctorCode === "MED-DKR-01") {
+          doctorCode = `MED-DKR-${Math.floor(100 + Math.random() * 900)}`;
+        }
+        if (!doctorCode.startsWith('MED')) {
+          doctorCode = 'MED-' + doctorCode.replace(/[^A-Z0-9]/g, '');
+        }
 
-      const doctorData = {
-        id: doctorCode,
-        code: doctorCode,
-        doctorName: agentName.trim() || "Dr. Babacar Ndiaye",
-        name: agencyName.trim() || "Structure Médicale Agréée",
-        phone: agentPhone.trim() || "+221 33 824 00 00",
-        email: agentEmail.trim() || "medecin@sante.gouv.sn",
-        password: agencyPassword || "123456",
-        region: "Dakar",
-        role: 'doctor'
-      };
+        const doctorData = {
+          id: doctorCode,
+          code: doctorCode,
+          doctorName: (agentName || '').trim() || "Dr. Babacar Ndiaye",
+          name: (agencyName || '').trim() || "Structure Médicale Agréée",
+          phone: (agentPhone || '').trim() || "+221 33 824 00 00",
+          email: (agentEmail || '').trim() || "medecin@sante.gouv.sn",
+          password: agencyPassword || "123456",
+          region: "Dakar",
+          role: 'doctor'
+        };
 
-      try {
-        const localMedicals = JSON.parse(localStorage.getItem('mock_medical_structures') || '[]');
-        localMedicals.unshift(doctorData);
-        localStorage.setItem('mock_medical_structures', JSON.stringify(localMedicals));
-      } catch (e) {}
+        try {
+          const localMedicals = JSON.parse(localStorage.getItem('mock_medical_structures') || '[]');
+          localMedicals.unshift(doctorData);
+          localStorage.setItem('mock_medical_structures', JSON.stringify(localMedicals));
+        } catch (e) {}
 
-      setSuccessUser(doctorData);
-      generateRandomOtp();
-      setWizardStep('otp');
-    } else {
-      // Role is Agency
-      const agencyData = {
-        name: agencyName.trim() || "Nouvelle Agence Hajj",
-        price: 3600000,
-        type: 'standard',
-        rating: 4.5,
-        address: "Dakar, Sénégal",
-        phone: agencyPhone.trim(),
-        email: agencyEmail.trim(),
-        username: agencyEmail.trim().split('@')[0], // Use email prefix as login
-        password: agencyPassword,
-        status: 'pending',
-        isApproved: false,
-        features: ["Vol Charter Direct", "Hôtel 4★ Proche Haram", "Demi-Pension", "Assistance Médicale"]
-      };
+        setSuccessUser(doctorData);
+        generateRandomOtp();
+        setWizardStep('otp');
+      } else {
+        // Role is Agency
+        const cleanAgencyName = (agencyName || '').trim() || "Nouvelle Agence Hajj";
+        const cleanEmail = (agencyEmail || '').trim() || "contact@agence.sn";
 
-      try {
+        const agencyData = {
+          name: cleanAgencyName,
+          price: 3600000,
+          type: 'standard',
+          rating: 4.5,
+          address: "Dakar, Sénégal",
+          phone: (agencyPhone || '').trim(),
+          email: cleanEmail,
+          username: cleanEmail.split('@')[0] || "agence",
+          password: agencyPassword || "123456",
+          status: 'pending',
+          isApproved: false,
+          features: ["Vol Charter Direct", "Hôtel 4★ Proche Haram", "Demi-Pension", "Assistance Médicale"]
+        };
+
         const result = await ApiService.addAgency(agencyData);
         setSuccessUser(result.data || result);
         generateRandomOtp();
         setWizardStep('otp');
-      } catch (err) {
-        setOtpError(err.message || "Erreur d'inscription de l'agence.");
       }
+    } catch (err) {
+      console.error("Registration submit error caught:", err);
+      setOtpError(err.message || "Une erreur est survenue pendant l'inscription. Veuillez réessayer.");
     }
   };
 
   const handleVerifyOtp = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    if (otpInput.trim() === generatedOtp || otpInput.trim() === '8492' || !otpInput.trim()) {
+    const cleanOtp = (otpInput || '').trim();
+    if (cleanOtp === generatedOtp || cleanOtp === '8492' || !cleanOtp) {
       setWizardStep('success');
       setShowSmsPopup(false);
     } else {
-      setOtpError("Code OTP incorrect. Veuillez réessayer.");
+      setOtpError("Code OTP incorrect. Veuillez saisir le code à 4 chiffres reçu par SMS.");
     }
   };
   const handleOtpVerify = handleVerifyOtp;
