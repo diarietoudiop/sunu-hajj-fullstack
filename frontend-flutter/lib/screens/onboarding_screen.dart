@@ -118,7 +118,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isRTL = widget.lang == 'ar';
 
     return Scaffold(
-      backgroundColor: const Color(0xFF052C18), // Dark emerald premium background
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -137,8 +137,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
         ],
       ),
-      body: Column(
-        children: [
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF021B0F), Color(0xFF042F1A)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Column(
+          children: [
           Expanded(
             child: PageView.builder(
               controller: _pageController,
@@ -285,6 +293,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

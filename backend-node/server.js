@@ -92,7 +92,7 @@ app.get('/api/agencies', async (req, res) => {
 });
 
 app.post('/api/agencies', async (req, res) => {
-  const { name, price, type, rating, address, phone, email, desc_fr, desc_wo, desc_ar, features } = req.body;
+  const { name, price, type, rating, address, phone, email, desc_fr, desc_wo, desc_ar, features, username, password } = req.body;
   if (!name || !price || !type) {
     return res.status(400).json({ error: "Champs obligatoires manquants (nom, prix, type)" });
   }
@@ -101,8 +101,8 @@ app.post('/api/agencies', async (req, res) => {
 
   try {
     const result = await DbManager.run(
-      `INSERT INTO agencies (name, price, type, rating, address, phone, email, desc_fr, desc_wo, desc_ar, features)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO agencies (name, price, type, rating, address, phone, email, desc_fr, desc_wo, desc_ar, features, username, password)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         name,
         parseInt(price),
@@ -114,7 +114,9 @@ app.post('/api/agencies', async (req, res) => {
         desc_fr || name,
         desc_wo || desc_fr || name,
         desc_ar || desc_fr || name,
-        featuresJson
+        featuresJson,
+        username || "",
+        password || ""
       ]
     );
     res.status(201).json({
@@ -122,7 +124,9 @@ app.post('/api/agencies', async (req, res) => {
       name,
       price: parseInt(price),
       type,
-      features: features || []
+      features: features || [],
+      username: username || "",
+      password: password || ""
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -134,6 +138,40 @@ app.delete('/api/agencies/:id', async (req, res) => {
   try {
     await DbManager.run("DELETE FROM agencies WHERE id = ?", [id]);
     res.json({ message: "Agence retirée avec succès", id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/agencies/:id/pilgrims', async (req, res) => {
+  const agencyId = parseInt(req.params.id);
+  try {
+    const rows = await DbManager.all("SELECT * FROM pilgrims WHERE selectedAgencyId = ?", [agencyId]);
+    const parsed = rows.map(r => ({
+      id: r.id,
+      fullName: r.fullName,
+      phone: r.phone,
+      email: r.email,
+      passportNumber: r.passportNumber,
+      birthDate: r.birthDate,
+      bloodType: r.bloodType,
+      medicalStatus: r.medicalStatus,
+      registrationStatus: r.registrationStatus,
+      selectedAgencyId: r.selectedAgencyId,
+      emergencyContact: {
+        name: r.emergencyContactName,
+        phone: r.emergencyContactPhone
+      },
+      registrationDate: r.registrationDate,
+      nusukSyncStatus: r.nusukSyncStatus,
+      flightNumber: r.flightNumber,
+      hotelMakkah: r.hotelMakkah,
+      hotelMadinah: r.hotelMadinah,
+      roomNumber: r.roomNumber,
+      visaStatus: r.visaStatus,
+      paymentStatus: r.paymentStatus || 'pending'
+    }));
+    res.json(parsed);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -158,7 +196,14 @@ app.get('/api/pilgrims', async (req, res) => {
         name: r.emergencyContactName,
         phone: r.emergencyContactPhone
       },
-      registrationDate: r.registrationDate
+      registrationDate: r.registrationDate,
+      nusukSyncStatus: r.nusukSyncStatus,
+      flightNumber: r.flightNumber,
+      hotelMakkah: r.hotelMakkah,
+      hotelMadinah: r.hotelMadinah,
+      roomNumber: r.roomNumber,
+      visaStatus: r.visaStatus,
+      paymentStatus: r.paymentStatus || 'pending'
     }));
     res.json(parsed);
   } catch (err) {
@@ -188,7 +233,14 @@ app.get('/api/pilgrims/passport/:passportNumber', async (req, res) => {
         name: row.emergencyContactName,
         phone: row.emergencyContactPhone
       },
-      registrationDate: row.registrationDate
+      registrationDate: row.registrationDate,
+      nusukSyncStatus: row.nusukSyncStatus,
+      flightNumber: row.flightNumber,
+      hotelMakkah: row.hotelMakkah,
+      hotelMadinah: row.hotelMadinah,
+      roomNumber: row.roomNumber,
+      visaStatus: row.visaStatus,
+      paymentStatus: row.paymentStatus || 'pending'
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -204,8 +256,8 @@ app.post('/api/pilgrims', async (req, res) => {
 
   try {
     const result = await DbManager.run(
-      `INSERT INTO pilgrims (fullName, phone, email, passportNumber, birthDate, bloodType, medicalStatus, registrationStatus, selectedAgencyId, emergencyContactName, emergencyContactPhone, registrationDate)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO pilgrims (fullName, phone, email, passportNumber, birthDate, bloodType, medicalStatus, registrationStatus, selectedAgencyId, emergencyContactName, emergencyContactPhone, registrationDate, nusukSyncStatus, flightNumber, hotelMakkah, hotelMadinah, roomNumber, visaStatus, paymentStatus)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'Non assigné', 'Non assigné', 'Non assigné', 'Non assigné', 'pending', 'pending')`,
       [
         fullName,
         phone,
@@ -221,11 +273,30 @@ app.post('/api/pilgrims', async (req, res) => {
         registrationDate
       ]
     );
+    const newPilgrim = await DbManager.get("SELECT * FROM pilgrims WHERE id = ?", [result.id]);
     res.status(201).json({
-      id: result.id,
-      fullName,
-      passportNumber,
-      registrationStatus: 'pending'
+      id: newPilgrim.id,
+      fullName: newPilgrim.fullName,
+      phone: newPilgrim.phone,
+      email: newPilgrim.email,
+      passportNumber: newPilgrim.passportNumber,
+      birthDate: newPilgrim.birthDate,
+      bloodType: newPilgrim.bloodType,
+      medicalStatus: newPilgrim.medicalStatus,
+      registrationStatus: newPilgrim.registrationStatus,
+      selectedAgencyId: newPilgrim.selectedAgencyId,
+      emergencyContact: {
+        name: newPilgrim.emergencyContactName,
+        phone: newPilgrim.emergencyContactPhone
+      },
+      registrationDate: newPilgrim.registrationDate,
+      nusukSyncStatus: newPilgrim.nusukSyncStatus,
+      flightNumber: newPilgrim.flightNumber,
+      hotelMakkah: newPilgrim.hotelMakkah,
+      hotelMadinah: newPilgrim.hotelMadinah,
+      roomNumber: newPilgrim.roomNumber,
+      visaStatus: newPilgrim.visaStatus,
+      paymentStatus: newPilgrim.paymentStatus || 'pending'
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -259,6 +330,137 @@ app.put('/api/pilgrims/:id/medical', async (req, res) => {
     await DbManager.run("UPDATE pilgrims SET medicalStatus = ? WHERE id = ?", [medicalStatus, id]);
     const updated = await DbManager.get("SELECT * FROM pilgrims WHERE id = ?", [id]);
     res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/pilgrims/:id/payment', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { paymentStatus } = req.body;
+  if (!['pending', 'paid', 'refunded'].includes(paymentStatus)) {
+    return res.status(400).json({ error: "Statut de paiement invalide" });
+  }
+
+  try {
+    await DbManager.run("UPDATE pilgrims SET paymentStatus = ? WHERE id = ?", [paymentStatus, id]);
+    const updated = await DbManager.get("SELECT * FROM pilgrims WHERE id = ?", [id]);
+    res.json({
+      id: updated.id,
+      fullName: updated.fullName,
+      phone: updated.phone,
+      email: updated.email,
+      passportNumber: updated.passportNumber,
+      birthDate: updated.birthDate,
+      bloodType: updated.bloodType,
+      medicalStatus: updated.medicalStatus,
+      registrationStatus: updated.registrationStatus,
+      selectedAgencyId: updated.selectedAgencyId,
+      emergencyContact: {
+        name: updated.emergencyContactName,
+        phone: updated.emergencyContactPhone
+      },
+      registrationDate: updated.registrationDate,
+      nusukSyncStatus: updated.nusukSyncStatus,
+      flightNumber: updated.flightNumber,
+      hotelMakkah: updated.hotelMakkah,
+      hotelMadinah: updated.hotelMadinah,
+      roomNumber: updated.roomNumber,
+      visaStatus: updated.visaStatus,
+      paymentStatus: updated.paymentStatus || 'pending'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/pilgrims/:id/logistics', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { flightNumber, hotelMakkah, hotelMadinah, roomNumber, visaStatus } = req.body;
+
+  try {
+    await DbManager.run(
+      `UPDATE pilgrims 
+       SET flightNumber = ?, hotelMakkah = ?, hotelMadinah = ?, roomNumber = ?, visaStatus = ?
+       WHERE id = ?`,
+      [flightNumber || "Non assigné", hotelMakkah || "Non assigné", hotelMadinah || "Non assigné", roomNumber || "Non assigné", visaStatus || "pending", id]
+    );
+    const updated = await DbManager.get("SELECT * FROM pilgrims WHERE id = ?", [id]);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/pilgrims/:id/profile', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { fullName, phone, email, bloodType, selectedAgencyId, emergencyContactName, emergencyContactPhone } = req.body;
+
+  try {
+    await DbManager.run(
+      `UPDATE pilgrims 
+       SET fullName = ?, phone = ?, email = ?, bloodType = ?, selectedAgencyId = ?, emergencyContactName = ?, emergencyContactPhone = ?
+       WHERE id = ?`,
+      [
+        fullName, 
+        phone, 
+        email, 
+        bloodType || "Inconnu", 
+        selectedAgencyId ? parseInt(selectedAgencyId) : null, 
+        emergencyContactName, 
+        emergencyContactPhone, 
+        id
+      ]
+    );
+    const updated = await DbManager.get("SELECT * FROM pilgrims WHERE id = ?", [id]);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/pilgrims/:id/nusuk-sync', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { nusukSyncStatus } = req.body;
+  if (!['pending', 'synced', 'error'].includes(nusukSyncStatus)) {
+    return res.status(400).json({ error: "Statut de synchro invalide" });
+  }
+
+  try {
+    await DbManager.run("UPDATE pilgrims SET nusukSyncStatus = ? WHERE id = ?", [nusukSyncStatus, id]);
+    const updated = await DbManager.get("SELECT * FROM pilgrims WHERE id = ?", [id]);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/pilgrims/nusuk-sync-all', async (req, res) => {
+  try {
+    await DbManager.run("UPDATE pilgrims SET nusukSyncStatus = 'synced' WHERE registrationStatus = 'approved'");
+    res.json({ message: "Synchronisation Nusuk globale exécutée avec succès." });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Agency Application Request
+app.post('/api/agencies/apply', async (req, res) => {
+  try {
+    const { agencyName, contactName, phone } = req.body;
+    if (!agencyName || !contactName || !phone) {
+      return res.status(400).json({ error: "Veuillez remplir tous les champs obligatoires." });
+    }
+    const timestamp = new Date().toISOString();
+    const result = await DbManager.run(
+      `INSERT INTO inquiries (agencyId, agencyName, clientName, clientPhone, timestamp)
+       VALUES (?, ?, ?, ?, ?)`,
+      [0, "Agrément : " + agencyName, contactName, phone, timestamp]
+    );
+    res.status(201).json({ 
+      message: "Votre demande d'agrément a été enregistrée avec succès.",
+      id: result.id 
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -357,6 +559,179 @@ app.get('/api/stats', async (req, res) => {
       totalPilgrims: pilgrimsCount?.count || 0,
       pendingPilgrimsCount: (await DbManager.get("SELECT COUNT(*) as count FROM pilgrims WHERE registrationStatus = 'pending'"))?.count || 0
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 7.5. DGP Agents (Admins) Management
+app.get('/api/admins', async (req, res) => {
+  try {
+    const rows = await DbManager.all("SELECT id, username, fullName, email, department, phone, avatar FROM admins");
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admins', async (req, res) => {
+  const { username, password, fullName, email, department, phone, avatar } = req.body;
+  if (!username || !password || !fullName || !email) {
+    return res.status(400).json({ error: "Champs obligatoires manquants" });
+  }
+
+  try {
+    const existing = await DbManager.get("SELECT * FROM admins WHERE username = ?", [username.trim()]);
+    if (existing) {
+      return res.status(400).json({ error: "Cet identifiant existe déjà." });
+    }
+
+    const result = await DbManager.run(
+      `INSERT INTO admins (username, password, fullName, email, department, phone, avatar)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        username.trim(),
+        password,
+        fullName.trim(),
+        email.trim(),
+        department || 'Direction Générale',
+        phone || '',
+        avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+      ]
+    );
+
+    res.status(201).json({
+      id: result.id,
+      username: username.trim(),
+      fullName: fullName.trim(),
+      email: email.trim(),
+      department: department || 'Direction Générale',
+      phone: phone || '',
+      avatar: avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/admins/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (id === 1) {
+    return res.status(400).json({ error: "Impossible de supprimer le compte de l'administrateur principal." });
+  }
+
+  try {
+    await DbManager.run("DELETE FROM admins WHERE id = ?", [id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8. Admin Authentication
+app.post('/api/auth/register', async (req, res) => {
+  const { username, password, fullName, email, department, phone, avatar } = req.body;
+  if (!username || !password || !fullName || !email) {
+    return res.status(400).json({ error: "Champs obligatoires manquants (identifiant, mot de passe, nom, email)" });
+  }
+
+  try {
+    const existing = await DbManager.get("SELECT * FROM admins WHERE username = ?", [username.trim()]);
+    if (existing) {
+      return res.status(400).json({ error: "Cet identifiant existe déjà." });
+    }
+
+    const result = await DbManager.run(
+      `INSERT INTO admins (username, password, fullName, email, department, phone, avatar)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        username.trim(),
+        password,
+        fullName.trim(),
+        email.trim(),
+        department ? department.trim() : 'Direction Générale',
+        phone ? phone.trim() : '',
+        avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+      ]
+    );
+
+    const user = {
+      id: result.id,
+      username: username.trim(),
+      fullName: fullName.trim(),
+      email: email.trim(),
+      department: department || 'Direction Générale',
+      phone: phone || '',
+      avatar: avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+    };
+    res.status(201).json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  const { username, password, role } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: "Champs obligatoires manquants" });
+  }
+
+  try {
+    if (role === 'agency') {
+      const agency = await DbManager.get("SELECT * FROM agencies WHERE username = ? AND password = ?", [username.trim(), password]);
+      if (agency) {
+        res.json({
+          id: agency.id,
+          username: agency.username,
+          fullName: agency.name,
+          email: agency.email,
+          role: 'agency',
+          agencyId: agency.id
+        });
+      } else {
+        res.status(401).json({ error: "Identifiant ou mot de passe d'agence incorrect." });
+      }
+    } else {
+      const user = await DbManager.get("SELECT * FROM admins WHERE username = ? AND password = ?", [username.trim(), password]);
+      if (user) {
+        const { password: _, ...userWithoutPassword } = user;
+        res.json({ ...userWithoutPassword, role: 'admin' });
+      } else {
+        res.status(401).json({ error: "Identifiant ou mot de passe administratif incorrect." });
+      }
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/auth/profile', async (req, res) => {
+  const { id, fullName, email, department, phone, avatar, password } = req.body;
+  if (!id) {
+    return res.status(400).json({ error: "Identifiant administrateur manquant" });
+  }
+
+  try {
+    let sql = `UPDATE admins SET fullName = ?, email = ?, department = ?, phone = ?, avatar = ?`;
+    const params = [fullName, email, department, phone, avatar];
+
+    if (password) {
+      sql += `, password = ?`;
+      params.push(password);
+    }
+
+    sql += ` WHERE id = ?`;
+    params.push(id);
+
+    await DbManager.run(sql, params);
+    
+    const updatedUser = await DbManager.get("SELECT * FROM admins WHERE id = ?", [id]);
+    if (updatedUser) {
+      const { password: _, ...userWithoutPassword } = updatedUser;
+      res.json(userWithoutPassword);
+    } else {
+      res.status(404).json({ error: "Administrateur non trouvé" });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

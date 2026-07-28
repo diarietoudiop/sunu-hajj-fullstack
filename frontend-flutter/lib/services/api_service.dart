@@ -6,15 +6,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 class ApiService {
   // Auto-detect backend port based on platform
   static String get baseUrl {
-    if (kIsWeb) {
-      return 'http://localhost:3000/api';
-    }
-    try {
-      if (Platform.isAndroid) {
-        return 'http://10.0.2.2:3000/api'; // Android Emulator Loopback
-      }
-    } catch (_) {}
-    return 'http://localhost:3000/api';
+    return 'http://127.0.0.1:3000/api';
   }
 
   // Fetch all announcements from Node backend

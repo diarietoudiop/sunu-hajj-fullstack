@@ -1,12 +1,13 @@
-import React from 'react';
-import { LayoutDashboard, Plane, Megaphone, Users } from 'lucide-react';
+import { LayoutDashboard, Plane, Megaphone, Users, User, Shield } from 'lucide-react';
 
 function Sidebar({ activeTab, setActiveTab }) {
   const menuItems = [
     { id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { id: 'pilgrims', label: 'Pèlerins Inscrits', icon: Users },
     { id: 'agencies', label: 'Agences Agréées', icon: Plane },
-    { id: 'announcements', label: 'Communiqués Officiels', icon: Megaphone }
+    { id: 'agents', label: 'Agents Sunu Hajj', icon: Shield },
+    { id: 'announcements', label: 'Communiqués Officiels', icon: Megaphone },
+    { id: 'profile', label: 'Mon Profil', icon: User }
   ];
 
   return (
@@ -15,7 +16,7 @@ function Sidebar({ activeTab, setActiveTab }) {
         <div className="logo-icon">🇸🇳</div>
         <div className="logo-meta">
           <span className="logo-title">Sunu Hajj</span>
-          <span className="logo-subtitle">Portail DGP Admin</span>
+          <span className="logo-subtitle">Portail Sunu Hajj Admin</span>
         </div>
       </div>
 
@@ -40,8 +41,8 @@ function Sidebar({ activeTab, setActiveTab }) {
       </nav>
 
       <div className="sidebar-footer">
-        <div className="dgp-badge">OFFICIEL DGP</div>
-        <p className="footer-copyright">© 2026 DGP Sénégal</p>
+        <div className="sunuhajj-badge">OFFICIEL Sunu Hajj</div>
+        <p className="footer-copyright">© 2026 Sunu Hajj</p>
       </div>
     </aside>
   );

@@ -1,17 +1,19 @@
 import React from 'react';
 import { Sun, Moon, Wifi, WifiOff, LogOut } from 'lucide-react';
 
-function Header({ activeTab, isApiOnline, darkMode, setDarkMode, onLogout }) {
+function Header({ activeTab, isApiOnline, darkMode, setDarkMode, onLogout, adminUser }) {
   const getPageTitle = () => {
     switch (activeTab) {
       case 'dashboard':
-        return 'Tableau de bord DGP';
+        return 'Tableau de bord Sunu Hajj';
       case 'pilgrims':
-        return 'Registre des Pèlerins DGP';
+        return 'Registre des Pèlerins Sunu Hajj';
       case 'agencies':
         return 'Gestion des Agences Agréées';
       case 'announcements':
         return 'Publication des Communiqués';
+      case 'profile':
+        return 'Mon Profil Administrateur';
       default:
         return 'Administration Sunu Hajj';
     }
@@ -59,10 +61,18 @@ function Header({ activeTab, isApiOnline, darkMode, setDarkMode, onLogout }) {
 
         <div className="user-profile">
           <div className="user-meta">
-            <span className="user-name">DGP Sénégal</span>
-            <span className="user-role">Super Administrateur</span>
+            <span className="user-name">{adminUser?.fullName || 'Sunu Hajj'}</span>
+            <span className="user-role">{adminUser?.department || 'Super Administrateur'}</span>
           </div>
-          <div className="user-avatar" title="Sénégal">🇸🇳</div>
+          {adminUser?.avatar ? (
+            <img 
+              src={adminUser.avatar} 
+              alt="Avatar" 
+              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid var(--secondary)' }} 
+            />
+          ) : (
+            <div className="user-avatar" title="Sénégal">🇸🇳</div>
+          )}
         </div>
       </div>
     </header>

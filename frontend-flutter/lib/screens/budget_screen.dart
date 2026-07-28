@@ -116,7 +116,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: const Color(0xFF0B5D34),
+        backgroundColor: const Color(0xFF042F1A),
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -126,7 +126,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
           children: [
             // Total budget display
             Card(
-              color: const Color(0xFF0B5D34),
+              color: const Color(0xFF042F1A),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 child: Column(
@@ -163,7 +163,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(widget.lang == 'ar' ? 'باقة الوكالة' : 'Forfait agence', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                            Text('${_packagePrice.round()} F', style: const TextStyle(color: Color(0xFF0B5D34), fontSize: 12, fontWeight: FontWeight.bold)),
+                            Text('${_packagePrice.round()} F', style: const TextStyle(color: Color(0xFF042F1A), fontSize: 12, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         Slider(
@@ -171,7 +171,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           min: 3000000,
                           max: 10000000,
                           divisions: 70,
-                          activeColor: const Color(0xFFC5A880),
+                          activeColor: const Color(0xFFD4AF37),
                           onChanged: (val) {
                             setState(() => _packagePrice = val);
                           },
@@ -189,7 +189,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(widget.lang == 'ar' ? 'مصروف الجيب' : 'Argent de poche', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                            Text('${_pocketMoney.round()} F', style: const TextStyle(color: Color(0xFF0B5D34), fontSize: 12, fontWeight: FontWeight.bold)),
+                            Text('${_pocketMoney.round()} F', style: const TextStyle(color: Color(0xFF042F1A), fontSize: 12, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         Slider(
@@ -197,7 +197,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           min: 100000,
                           max: 2000000,
                           divisions: 38,
-                          activeColor: const Color(0xFFC5A880),
+                          activeColor: const Color(0xFFD4AF37),
                           onChanged: (val) {
                             setState(() => _pocketMoney = val);
                           },
@@ -215,7 +215,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(widget.lang == 'ar' ? 'الهدي (الموتون)' : 'Sacrifice (Hady)', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                            Text('${_sacrificePrice.round()} F', style: const TextStyle(color: Color(0xFF0B5D34), fontSize: 12, fontWeight: FontWeight.bold)),
+                            Text('${_sacrificePrice.round()} F', style: const TextStyle(color: Color(0xFF042F1A), fontSize: 12, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         Slider(
@@ -223,7 +223,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           min: 100000,
                           max: 300000,
                           divisions: 20,
-                          activeColor: const Color(0xFFC5A880),
+                          activeColor: const Color(0xFFD4AF37),
                           onChanged: (val) {
                             setState(() => _sacrificePrice = val);
                           },
@@ -241,7 +241,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(widget.lang == 'ar' ? 'المشتريات والهدايا' : 'Shopping / Cadeaux', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                            Text('${_shoppingPrice.round()} F', style: const TextStyle(color: Color(0xFF0B5D34), fontSize: 12, fontWeight: FontWeight.bold)),
+                            Text('${_shoppingPrice.round()} F', style: const TextStyle(color: Color(0xFF042F1A), fontSize: 12, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         Slider(
@@ -249,7 +249,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           min: 50000,
                           max: 1000000,
                           divisions: 38,
-                          activeColor: const Color(0xFFC5A880),
+                          activeColor: const Color(0xFFD4AF37),
                           onChanged: (val) {
                             setState(() => _shoppingPrice = val);
                           },
@@ -277,7 +277,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.info_outline, color: Color(0xFFC5A880)),
+                      const Icon(Icons.info_outline, color: Color(0xFFD4AF37)),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -285,7 +285,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           children: [
                             Text(
                               L10n.get('budget_advice_title', widget.lang),
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF8C6D40)),
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFFD4AF37)),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -304,7 +304,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
             ElevatedButton(
               onPressed: _saveBudgetToStorage,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0B5D34),
+                backgroundColor: const Color(0xFF042F1A),
                 minimumSize: const Size.fromHeight(50),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),

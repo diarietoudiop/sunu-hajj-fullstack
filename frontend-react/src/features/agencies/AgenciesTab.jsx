@@ -170,7 +170,7 @@ function AgenciesTab({ agencies, onAddAgency, onDeleteAgency }) {
                                   </div>
                                   {agency.desc_wo && (
                                     <div className="lang-desc-block">
-                                      <span className="lang-badge">WO</span>
+                                      <span className="lang-badge">EN</span>
                                       <p className="lang-desc-text">{agency.desc_wo}</p>
                                     </div>
                                   )}
@@ -298,11 +298,11 @@ function AgenciesTab({ agencies, onAddAgency, onDeleteAgency }) {
 
             <div className="form-row-2">
               <div className="form-group">
-                <label className="form-label">Traduction Wolof (Optionnelle)</label>
+                <label className="form-label">Traduction Anglaise (Optionnelle)</label>
                 <textarea
                   className="form-control"
                   style={{ minHeight: '50px' }}
-                  placeholder="Description en Wolof..."
+                  placeholder="Description en Anglais..."
                   value={newAgency.desc_wo}
                   onChange={e => setNewAgency({ ...newAgency, desc_wo: e.target.value })}
                 />

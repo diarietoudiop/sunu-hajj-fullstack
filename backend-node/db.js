@@ -100,7 +100,9 @@ export const DbManager = {
         desc_fr TEXT,
         desc_wo TEXT,
         desc_ar TEXT,
-        features TEXT
+        features TEXT,
+        username TEXT,
+        password TEXT
       )`,
       `CREATE TABLE IF NOT EXISTS announcements (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -126,7 +128,14 @@ export const DbManager = {
         selectedAgencyId INTEGER,
         emergencyContactName TEXT,
         emergencyContactPhone TEXT,
-        registrationDate TEXT
+        registrationDate TEXT,
+        nusukSyncStatus TEXT DEFAULT 'pending',
+        flightNumber TEXT DEFAULT 'Non assigné',
+        hotelMakkah TEXT DEFAULT 'Non assigné',
+        hotelMadinah TEXT DEFAULT 'Non assigné',
+        roomNumber TEXT DEFAULT 'Non assigné',
+        visaStatus TEXT DEFAULT 'pending',
+        paymentStatus TEXT DEFAULT 'pending'
       )`,
       `CREATE TABLE IF NOT EXISTS inquiries (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -135,6 +144,16 @@ export const DbManager = {
         clientName TEXT,
         clientPhone TEXT,
         timestamp TEXT
+      )`,
+      `CREATE TABLE IF NOT EXISTS admins (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT,
+        fullName TEXT,
+        email TEXT,
+        department TEXT,
+        phone TEXT,
+        avatar TEXT
       )`
     ];
 
@@ -144,8 +163,72 @@ export const DbManager = {
       await dbQuery.run(dbBackup, sql);
     }
 
+    // Migration: Safely add columns if they do not exist
+    const columnsToMigration = [
+      { name: 'nusukSyncStatus', type: 'TEXT DEFAULT \'pending\'' },
+      { name: 'flightNumber', type: 'TEXT DEFAULT \'Non assigné\'' },
+      { name: 'hotelMakkah', type: 'TEXT DEFAULT \'Non assigné\'' },
+      { name: 'hotelMadinah', type: 'TEXT DEFAULT \'Non assigné\'' },
+      { name: 'roomNumber', type: 'TEXT DEFAULT \'Non assigné\'' },
+      { name: 'visaStatus', type: 'TEXT DEFAULT \'pending\'' },
+      { name: 'paymentStatus', type: 'TEXT DEFAULT \'pending\'' },
+      { name: 'username', type: 'TEXT' },
+      { name: 'password', type: 'TEXT' }
+    ];
+
+    for (const col of columnsToMigration) {
+      try {
+        await dbQuery.run(dbPrimary, `ALTER TABLE pilgrims ADD COLUMN ${col.name} ${col.type}`);
+      } catch (_) {}
+      try {
+        await dbQuery.run(dbBackup, `ALTER TABLE pilgrims ADD COLUMN ${col.name} ${col.type}`);
+      } catch (_) {}
+      try {
+        await dbQuery.run(dbPrimary, `ALTER TABLE agencies ADD COLUMN ${col.name} ${col.type}`);
+      } catch (_) {}
+      try {
+        await dbQuery.run(dbBackup, `ALTER TABLE agencies ADD COLUMN ${col.name} ${col.type}`);
+      } catch (_) {}
+    }
+
+    try {
+      await dbQuery.run(dbPrimary, "UPDATE agencies SET username = 'teranga', password = 'agency123!' WHERE id = 1");
+      await dbQuery.run(dbBackup, "UPDATE agencies SET username = 'teranga', password = 'agency123!' WHERE id = 1");
+
+      await dbQuery.run(dbPrimary, "UPDATE agencies SET username = 'dakarair', password = 'agency123!' WHERE id = 2");
+      await dbQuery.run(dbBackup, "UPDATE agencies SET username = 'dakarair', password = 'agency123!' WHERE id = 2");
+
+      await dbQuery.run(dbPrimary, "UPDATE agencies SET username = 'sahelomra', password = 'agency123!' WHERE id = 3");
+      await dbQuery.run(dbBackup, "UPDATE agencies SET username = 'sahelomra', password = 'agency123!' WHERE id = 3");
+    } catch (e) {
+      console.warn("Migration update credentials skipped:", e.message);
+    }
+
     // Seed mock data if empty
     await this.seedIfEmpty();
+
+    // Seed default admin 'dgpadmin' if missing
+    try {
+      const defaultAdminCheck = await this.get("SELECT COUNT(*) as count FROM admins WHERE username = 'dgpadmin'");
+      if (!defaultAdminCheck || defaultAdminCheck.count === 0) {
+        await this.run(
+          `INSERT INTO admins (username, password, fullName, email, department, phone, avatar)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [
+            'dgpadmin', 
+            'hajj2026!', 
+            'Administrateur DGP Sénégal', 
+            'admin@dgp.sn', 
+            'Direction Générale', 
+            '+221 33 824 12 34', 
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+          ]
+        );
+        console.log("[DB SEED] Default admin 'dgpadmin' seeded successfully in database.");
+      }
+    } catch (err) {
+      console.error("Failed to seed default admin 'dgpadmin':", err.message);
+    }
   },
 
   async seedIfEmpty() {
@@ -171,7 +254,9 @@ export const DbManager = {
         desc_fr: "Package économique comprenant le vol charter, l'hébergement en hôtel 3 étoiles à La Mecque à 1.5km du Haram (avec navettes gratuites 24h/24), et restauration sénégalaise.",
         desc_wo: "Forfait bu yomb ci ndaje, and ak plane bi, dëkk ci hôtel 3 étoiles (1.5km ci Haram) and ak auto transport, ak ñam u Sénégal.",
         desc_ar: "باقة اقتصادية متميزة تشمل الطيران العارض، السكن في فندق 3 نجوم على بعد 1.5 كم من الحرم مع حافلات نقل مجانية على مدار الساعة، ووجبات سنغالية يومية.",
-        features: JSON.stringify(["Vol direct Dakar-Djeddah", "Hébergement 3★ avec navette", "Demi-pension (Plats sénégalais)", "Guide religieux dédié", "Assistance médicale incluse"])
+        features: JSON.stringify(["Vol direct Dakar-Djeddah", "Hébergement 3★ avec navette", "Demi-pension (Plats sénégalais)", "Guide religieux dédié", "Assistance médicale incluse"]),
+        username: "teranga",
+        password: "agency123!"
       },
       {
         name: "Dakar Air Services Hajj",
@@ -184,7 +269,9 @@ export const DbManager = {
         desc_fr: "Forfait standard de grande qualité. Hôtel 4 étoiles à Médine et La Mecque à 500m du Haram. Pension complète et encadrement spirituel par des oulémas réputés.",
         desc_wo: "Forfait standard bu am qualité. Hôtel 4 étoiles ci Médine ak Maka ci 500m ci Haram. Dunde bu mat ak ñaani oulémas yu rëy.",
         desc_ar: "باقة قياسية عالية الجودة. فندق 4 نجوم في المدينة ومكة على بعد 500 متر من الحرم. إقامة كاملة مع إرشاد ديني متميز من أشهر العلماء السنغاليين.",
-        features: JSON.stringify(["Vol régulier Royal Air Maroc", "Hôtels 4★ proches des Harams", "Pension complète buffet", "Médecin sénégalais dans l'hôtel", "Séminaires préparatoires inclus"])
+        features: JSON.stringify(["Vol régulier Royal Air Maroc", "Hôtels 4★ proches des Harams", "Pension complète buffet", "Médecin sénégalais dans l'hôtel", "Séminaires préparatoires inclus"]),
+        username: "dakarair",
+        password: "agency123!"
       },
       {
         name: "Sahel Omra & Hajj Confort",
@@ -197,15 +284,17 @@ export const DbManager = {
         desc_fr: "L'excellence pour votre pèlerinage. Hôtels 5 étoiles situés directement sur l'esplanade du Haram (Makkah Clock Tower). Tentes VIP climatisées à Mina et Arafat avec lits.",
         desc_wo: "Forfait VIP bu gën a mag. Hôtel 5 étoiles ci Haram bi rekk (Clock Tower). Tente VIP and ak clim ak lal ci Mina ak Arafat.",
         desc_ar: "باقة النخبة الفاخرة. فندق 5 نجوم مطل مباشرة على ساحة الحرم (أبراج البيت). مخيمات مطورة لكبار الشخصيات مكيفة ومجهزة بأسرة في منى وعرفات.",
-        features: JSON.stringify(["Vol Business Class Emirates", "Hôtels 5★ sur le Haram", "Pension complète gastronomique", "Tentes VIP privées à Mina", "Assistance personnalisée 24h/24"])
+        features: JSON.stringify(["Vol Business Class Emirates", "Hôtels 5★ sur le Haram", "Pension complète gastronomique", "Tentes VIP privées à Mina", "Assistance personnalisée 24h/24"]),
+        username: "sahelomra",
+        password: "agency123!"
       }
     ];
 
     for (const a of mockAgencies) {
       await this.run(
-        `INSERT INTO agencies (name, price, type, rating, address, phone, email, desc_fr, desc_wo, desc_ar, features)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [a.name, a.price, a.type, a.rating, a.address, a.phone, a.email, a.desc_fr, a.desc_wo, a.desc_ar, a.features]
+        `INSERT INTO agencies (name, price, type, rating, address, phone, email, desc_fr, desc_wo, desc_ar, features, username, password)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [a.name, a.price, a.type, a.rating, a.address, a.phone, a.email, a.desc_fr, a.desc_wo, a.desc_ar, a.features, a.username, a.password]
       );
     }
 
@@ -255,7 +344,13 @@ export const DbManager = {
         selectedAgencyId: 1,
         emergencyContactName: "Awa Diop (Épouse)",
         emergencyContactPhone: "+221 76 112 34 56",
-        registrationDate: "2026-06-10"
+        registrationDate: "2026-06-10",
+        nusukSyncStatus: "synced",
+        flightNumber: "TX-201 (Dakar-Medina)",
+        hotelMakkah: "Abraj Al-Janadriyah",
+        hotelMadinah: "Dar Al-Taqwa",
+        roomNumber: "1204",
+        visaStatus: "issued"
       },
       {
         fullName: "Khadidiatou Diallo",
@@ -269,7 +364,13 @@ export const DbManager = {
         selectedAgencyId: 2,
         emergencyContactName: "Ibrahima Diallo (Frère)",
         emergencyContactPhone: "+221 70 889 00 11",
-        registrationDate: "2026-06-18"
+        registrationDate: "2026-06-18",
+        nusukSyncStatus: "pending",
+        flightNumber: "Non assigné",
+        hotelMakkah: "Non assigné",
+        hotelMadinah: "Non assigné",
+        roomNumber: "Non assigné",
+        visaStatus: "pending"
       },
       {
         fullName: "Ousmane Ndiaye",
@@ -283,7 +384,13 @@ export const DbManager = {
         selectedAgencyId: 1,
         emergencyContactName: "Fatoumata Ndiaye (Fille)",
         emergencyContactPhone: "+221 77 444 33 22",
-        registrationDate: "2026-06-20"
+        registrationDate: "2026-06-20",
+        nusukSyncStatus: "synced",
+        flightNumber: "TX-201 (Dakar-Medina)",
+        hotelMakkah: "Abraj Al-Janadriyah",
+        hotelMadinah: "Dar Al-Taqwa",
+        roomNumber: "1205",
+        visaStatus: "issued"
       },
       {
         fullName: "Aïssatou Sow",
@@ -297,16 +404,41 @@ export const DbManager = {
         selectedAgencyId: 3,
         emergencyContactName: "Abdou Sow (Fils)",
         emergencyContactPhone: "+221 77 888 99 99",
-        registrationDate: "2026-06-22"
+        registrationDate: "2026-06-22",
+        nusukSyncStatus: "error",
+        flightNumber: "Non assigné",
+        hotelMakkah: "Non assigné",
+        hotelMadinah: "Non assigné",
+        roomNumber: "Non assigné",
+        visaStatus: "rejected"
       }
     ];
 
     for (const p of mockPilgrims) {
       await this.run(
-        `INSERT INTO pilgrims (fullName, phone, email, passportNumber, birthDate, bloodType, medicalStatus, registrationStatus, selectedAgencyId, emergencyContactName, emergencyContactPhone, registrationDate)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [p.fullName, p.phone, p.email, p.passportNumber, p.birthDate, p.bloodType, p.medicalStatus, p.registrationStatus, p.selectedAgencyId, p.emergencyContactName, p.emergencyContactPhone, p.registrationDate]
+        `INSERT INTO pilgrims (fullName, phone, email, passportNumber, birthDate, bloodType, medicalStatus, registrationStatus, selectedAgencyId, emergencyContactName, emergencyContactPhone, registrationDate, nusukSyncStatus, flightNumber, hotelMakkah, hotelMadinah, roomNumber, visaStatus)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [p.fullName, p.phone, p.email, p.passportNumber, p.birthDate, p.bloodType, p.medicalStatus, p.registrationStatus, p.selectedAgencyId, p.emergencyContactName, p.emergencyContactPhone, p.registrationDate, p.nusukSyncStatus, p.flightNumber, p.hotelMakkah, p.hotelMadinah, p.roomNumber, p.visaStatus]
       );
+    }
+
+    // Seed default admin
+    const defaultAdminCheck = await this.get("SELECT COUNT(*) as count FROM admins WHERE username = 'dgpadmin'");
+    if (!defaultAdminCheck || defaultAdminCheck.count === 0) {
+      await this.run(
+        `INSERT INTO admins (username, password, fullName, email, department, phone, avatar)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          'dgpadmin', 
+          'hajj2026!', 
+          'Administrateur DGP Sénégal', 
+          'admin@dgp.sn', 
+          'Direction Générale', 
+          '+221 33 824 12 34', 
+          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+        ]
+      );
+      console.log("[DB SEED] Default admin 'dgpadmin' seeded.");
     }
 
     console.log("[DB SEED] Database seeding completed successfully!");

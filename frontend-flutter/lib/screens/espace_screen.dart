@@ -136,7 +136,7 @@ class _EspaceScreenState extends State<EspaceScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              widget.lang == 'ar' ? 'تم تقديم طلب التسجيل بنجاح!' : (widget.lang == 'wo' ? 'Dossier bi yóone na ci DGP !' : 'Demande d\'inscription envoyée avec succès à la DGP !'),
+              widget.lang == 'ar' ? 'تم تقديم طلب التسجيل بنجاح!' : (widget.lang == 'wo' ? 'Dossier bi yóone na ci Sunu Hajj !' : 'Demande d\'inscription envoyée avec succès à la Sunu Hajj !'),
             ),
             backgroundColor: Colors.green,
           ),
@@ -153,7 +153,7 @@ class _EspaceScreenState extends State<EspaceScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              widget.lang == 'ar' ? 'حدث خطأ أثناء التسجيل. حاول مرة أخرى.' : 'Erreur de connexion avec le serveur DGP.',
+              widget.lang == 'ar' ? 'حدث خطأ أثناء التسجيل. حاول مرة أخرى.' : 'Erreur de connexion avec le serveur Sunu Hajj.',
             ),
             backgroundColor: Colors.red,
           ),
@@ -329,6 +329,63 @@ class _EspaceScreenState extends State<EspaceScreen> {
     return 'Chargement...';
   }
 
+  InputDecoration _buildInputDecoration({
+    required String labelText,
+    required IconData prefixIcon,
+    String? hintText,
+  }) {
+    return InputDecoration(
+      labelText: labelText,
+      hintText: hintText,
+      labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF042F1A)),
+      hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFD4AF37), width: 2),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      prefixIcon: Icon(prefixIcon, size: 20, color: const Color(0xFF042F1A)),
+    );
+  }
+
+  Widget _buildLogisticsRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color valueColor,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: const Color(0xFFD4AF37)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade500, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: valueColor),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   // Render registration status badges
   Widget _buildStatusBadge(String status, bool isMedical) {
     Color bg;
@@ -339,8 +396,8 @@ class _EspaceScreenState extends State<EspaceScreen> {
     if (isMedical) {
       switch (status) {
         case 'apte':
-          bg = const Color(0xFFE6F4EA);
-          text = Colors.green.shade800;
+          bg = const Color(0xFF042F1A).withOpacity(0.08);
+          text = const Color(0xFF042F1A);
           label = widget.lang == 'ar' ? 'لائق طبياً' : 'Apte au voyage';
           icon = Icons.check_circle_outline;
           break;
@@ -351,16 +408,16 @@ class _EspaceScreenState extends State<EspaceScreen> {
           icon = Icons.cancel_outlined;
           break;
         default:
-          bg = const Color(0xFFFEF7E0);
-          text = Colors.orange.shade800;
+          bg = const Color(0xFFD4AF37).withOpacity(0.08);
+          text = const Color(0xFFD4AF37);
           label = widget.lang == 'ar' ? 'قيد الفحص الطبي' : 'Examen médical en attente';
           icon = Icons.hourglass_empty;
       }
     } else {
       switch (status) {
         case 'approved':
-          bg = const Color(0xFFE6F4EA);
-          text = Colors.green.shade800;
+          bg = const Color(0xFF042F1A).withOpacity(0.08);
+          text = const Color(0xFF042F1A);
           label = widget.lang == 'ar' ? 'تم قبول الملف' : 'Inscription Validée';
           icon = Icons.assignment_turned_in;
           break;
@@ -371,18 +428,18 @@ class _EspaceScreenState extends State<EspaceScreen> {
           icon = Icons.report_gmailerrorred;
           break;
         default:
-          bg = const Color(0xFFE8F0FE);
-          text = Colors.blue.shade800;
+          bg = const Color(0xFFD4AF37).withOpacity(0.08);
+          text = const Color(0xFFD4AF37);
           label = widget.lang == 'ar' ? 'ملفك قيد المراجعة' : 'Dossier en cours d\'examen';
           icon = Icons.info_outline;
       }
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: text.withOpacity(0.2)),
       ),
       child: Row(
@@ -400,7 +457,7 @@ class _EspaceScreenState extends State<EspaceScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF0B5D34))),
+        body: Center(child: CircularProgressIndicator(color: Color(0xFF042F1A))),
       );
     }
 
@@ -410,12 +467,13 @@ class _EspaceScreenState extends State<EspaceScreen> {
     final progressTitle = L10n.get('progress_title', widget.lang);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFAF9F5),
       appBar: AppBar(
         title: Text(
           L10n.get('app_title', widget.lang),
           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF0B5D34),
+        backgroundColor: const Color(0xFF042F1A),
         actions: [
           IconButton(
             icon: const Icon(Icons.history, color: Colors.white),
@@ -451,10 +509,10 @@ class _EspaceScreenState extends State<EspaceScreen> {
                                 children: [
                                   Text(
                                     widget.lang == 'ar' ? 'طلب التسجيل الرسمي' : 'Inscription Officielle Hajj',
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF052C18)),
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF042F1A)),
                                   ),
                                   Text(
-                                    widget.lang == 'ar' ? 'التسجيل لدى البعثة السنغالية (DGP)' : 'Enregistrement auprès de la DGP du Sénégal',
+                                    widget.lang == 'ar' ? 'التسجيل لدى البعثة السنغالية (Sunu Hajj)' : 'Enregistrement auprès de la Sunu Hajj',
                                     style: const TextStyle(fontSize: 11, color: Colors.grey),
                                   ),
                                 ],
@@ -462,15 +520,14 @@ class _EspaceScreenState extends State<EspaceScreen> {
                             )
                           ],
                         ),
-                        const Divider(height: 24),
+                        const Divider(height: 24, color: Color(0xFFFAF9F5)),
                         
                         // Full Name
                         TextFormField(
                           controller: _nameController,
-                          decoration: InputDecoration(
+                          decoration: _buildInputDecoration(
                             labelText: widget.lang == 'ar' ? 'الاسم الكامل' : 'Nom complet *',
-                            border: const OutlineInputBorder(),
-                            prefixIcon: const Icon(Icons.person),
+                            prefixIcon: Icons.person,
                           ),
                           validator: (v) => v == null || v.trim().isEmpty ? 'Nom requis' : null,
                         ),
@@ -479,11 +536,10 @@ class _EspaceScreenState extends State<EspaceScreen> {
                         // Passport
                         TextFormField(
                           controller: _passportController,
-                          decoration: InputDecoration(
+                          decoration: _buildInputDecoration(
                             labelText: widget.lang == 'ar' ? 'رقم جواز السفر' : 'Numéro de passeport *',
+                            prefixIcon: Icons.badge,
                             hintText: 'Ex: SN1234567',
-                            border: const OutlineInputBorder(),
-                            prefixIcon: const Icon(Icons.badge),
                           ),
                           validator: (v) => v == null || v.trim().isEmpty ? 'Passeport requis' : null,
                         ),
@@ -492,11 +548,10 @@ class _EspaceScreenState extends State<EspaceScreen> {
                         // Birthdate
                         TextFormField(
                           controller: _birthdateController,
-                          decoration: InputDecoration(
+                          decoration: _buildInputDecoration(
                             labelText: widget.lang == 'ar' ? 'تاريخ الميلاد' : 'Date de naissance (AAAA-MM-JJ)',
+                            prefixIcon: Icons.calendar_today,
                             hintText: '1985-05-24',
-                            border: const OutlineInputBorder(),
-                            prefixIcon: const Icon(Icons.calendar_today),
                           ),
                         ),
                         const SizedBox(height: 14),
@@ -504,10 +559,9 @@ class _EspaceScreenState extends State<EspaceScreen> {
                         // Contact
                         TextFormField(
                           controller: _phoneController,
-                          decoration: InputDecoration(
+                          decoration: _buildInputDecoration(
                             labelText: widget.lang == 'ar' ? 'رقم الهاتف' : 'Numéro de téléphone *',
-                            border: const OutlineInputBorder(),
-                            prefixIcon: const Icon(Icons.phone),
+                            prefixIcon: Icons.phone,
                           ),
                           validator: (v) => v == null || v.trim().isEmpty ? 'Téléphone requis' : null,
                         ),
@@ -516,10 +570,9 @@ class _EspaceScreenState extends State<EspaceScreen> {
                         // Email
                         TextFormField(
                           controller: _emailController,
-                          decoration: InputDecoration(
+                          decoration: _buildInputDecoration(
                             labelText: widget.lang == 'ar' ? 'البريد الإلكتروني' : 'Adresse e-mail (Optionnel)',
-                            border: const OutlineInputBorder(),
-                            prefixIcon: const Icon(Icons.email),
+                            prefixIcon: Icons.email,
                           ),
                         ),
                         const SizedBox(height: 14),
@@ -533,7 +586,17 @@ class _EspaceScreenState extends State<EspaceScreen> {
                                 value: _bloodType,
                                 decoration: InputDecoration(
                                   labelText: widget.lang == 'ar' ? 'الفصيلة' : 'Sang',
-                                  border: const OutlineInputBorder(),
+                                  labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF042F1A)),
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: Color(0xFFD4AF37), width: 2),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                                 ),
                                 items: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Inconnu']
                                     .map((b) => DropdownMenuItem(value: b, child: Text(b)))
@@ -550,7 +613,17 @@ class _EspaceScreenState extends State<EspaceScreen> {
                                 value: _selectedAgencyId,
                                 decoration: InputDecoration(
                                   labelText: widget.lang == 'ar' ? 'الوكالة' : 'Agence Hajj *',
-                                  border: const OutlineInputBorder(),
+                                  labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF042F1A)),
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: Color(0xFFD4AF37), width: 2),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                                 ),
                                 hint: Text(widget.lang == 'ar' ? 'اختر وكالة' : 'Choisir agence'),
                                 items: _agencies.map((a) {
@@ -576,17 +649,16 @@ class _EspaceScreenState extends State<EspaceScreen> {
                         // Emergency Contact Header
                         Text(
                           widget.lang == 'ar' ? 'جهة اتصال للطوارئ' : 'Personne à contacter en cas d\'urgence',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0B5D34)),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF042F1A)),
                         ),
                         const SizedBox(height: 10),
 
                         // Emergency Contact Name
                         TextFormField(
                           controller: _emergencyNameController,
-                          decoration: InputDecoration(
+                          decoration: _buildInputDecoration(
                             labelText: widget.lang == 'ar' ? 'اسم القريب' : 'Nom du contact d\'urgence',
-                            border: const OutlineInputBorder(),
-                            prefixIcon: const Icon(Icons.person_outline),
+                            prefixIcon: Icons.person_outline,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -594,10 +666,9 @@ class _EspaceScreenState extends State<EspaceScreen> {
                         // Emergency Contact Phone
                         TextFormField(
                           controller: _emergencyPhoneController,
-                          decoration: InputDecoration(
+                          decoration: _buildInputDecoration(
                             labelText: widget.lang == 'ar' ? 'هاتف القريب' : 'Téléphone du contact d\'urgence',
-                            border: const OutlineInputBorder(),
-                            prefixIcon: const Icon(Icons.phone_android),
+                            prefixIcon: Icons.phone_android,
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -606,13 +677,14 @@ class _EspaceScreenState extends State<EspaceScreen> {
                         ElevatedButton(
                           onPressed: _handleRegister,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0B5D34),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            backgroundColor: const Color(0xFF042F1A),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 2,
                           ),
                           child: Text(
                             widget.lang == 'ar' ? 'إرسال طلب التسجيل' : 'Enregistrer mon dossier Hajj',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 0.5),
                           ),
                         ),
                       ],
@@ -634,10 +706,10 @@ class _EspaceScreenState extends State<EspaceScreen> {
                       // Digital Badge Header
                       Row(
                         children: [
-                          const CircleAvatar(
+                          CircleAvatar(
                             radius: 28,
-                            backgroundColor: Color(0xFFE7F2E2),
-                            child: Text('🇸🇳', style: TextStyle(fontSize: 26)),
+                            backgroundColor: const Color(0xFF042F1A).withOpacity(0.08),
+                            child: const Text('🇸🇳', style: TextStyle(fontSize: 26)),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -646,7 +718,7 @@ class _EspaceScreenState extends State<EspaceScreen> {
                               children: [
                                 Text(
                                   _pilgrimDetails?['fullName'] ?? 'Pèlerin Sénégalais',
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF052C18)),
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF042F1A)),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
@@ -663,12 +735,12 @@ class _EspaceScreenState extends State<EspaceScreen> {
                           )
                         ],
                       ),
-                      const Divider(height: 24),
+                      const Divider(height: 24, color: Color(0xFFFAF9F5)),
                       
                       // Agency Selected Info
                       Row(
                         children: [
-                          const Icon(Icons.business, color: Color(0xFFC5A880), size: 18),
+                          const Icon(Icons.business, color: Color(0xFFD4AF37), size: 18),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -682,7 +754,7 @@ class _EspaceScreenState extends State<EspaceScreen> {
 
                       // Status Badge 1 (Admin Validation)
                       Text(
-                        widget.lang == 'ar' ? 'حالة الملف الإداري :' : 'Validation administrative DGP :',
+                        widget.lang == 'ar' ? 'حالة الملف الإداري :' : 'Validation administrative Sunu Hajj :',
                         style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
                       ),
                       const SizedBox(height: 6),
@@ -703,6 +775,113 @@ class _EspaceScreenState extends State<EspaceScreen> {
               ),
               const SizedBox(height: 16),
 
+              // 🇸🇦 Vos Informations de Voyage & Visas (Display only if approved)
+              if (_pilgrimDetails?['registrationStatus'] == 'approved') ...[
+                Card(
+                  color: Colors.white,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: Color(0xFFD4AF37), width: 1.2),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Text('🇸🇦', style: TextStyle(fontSize: 24)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                widget.lang == 'ar' ? 'معلومات السفر والتأشيرة' : 'Vos Informations de Voyage & Visas',
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF042F1A),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Divider(height: 24, color: Color(0xFFFAF9F5)),
+                        
+                        // Nusuk sync status
+                        _buildLogisticsRow(
+                          icon: Icons.sync,
+                          label: widget.lang == 'ar' ? 'حالة التزامن مع نسك' : 'Portail Saoudien Nusuk',
+                          value: _pilgrimDetails?['nusukSyncStatus'] == 'synced'
+                              ? (widget.lang == 'ar' ? 'تم المزامنة' : 'Synchronisé')
+                              : _pilgrimDetails?['nusukSyncStatus'] == 'error'
+                                  ? (widget.lang == 'ar' ? 'خطأ في المزامنة' : 'Erreur')
+                                  : (widget.lang == 'ar' ? 'قيد الانتظar' : 'En attente'),
+                          valueColor: _pilgrimDetails?['nusukSyncStatus'] == 'synced'
+                              ? const Color(0xFF042F1A)
+                              : _pilgrimDetails?['nusukSyncStatus'] == 'error'
+                                  ? Colors.red
+                                  : const Color(0xFFD4AF37),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Visa status
+                        _buildLogisticsRow(
+                          icon: Icons.card_membership,
+                          label: widget.lang == 'ar' ? 'تأشيرة الحج الرسمية' : 'Visa Officiel Hajj',
+                          value: _pilgrimDetails?['visaStatus'] == 'issued'
+                              ? (widget.lang == 'ar' ? 'صادرة' : 'Émis')
+                              : _pilgrimDetails?['visaStatus'] == 'rejected'
+                                  ? (widget.lang == 'ar' ? 'مرفوضة' : 'Rejeté')
+                                  : (widget.lang == 'ar' ? 'قيد المعالجة' : 'En attente'),
+                          valueColor: _pilgrimDetails?['visaStatus'] == 'issued'
+                              ? const Color(0xFF042F1A)
+                              : _pilgrimDetails?['visaStatus'] == 'rejected'
+                                  ? Colors.red
+                                  : const Color(0xFFD4AF37),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Flight number
+                        _buildLogisticsRow(
+                          icon: Icons.flight_takeoff,
+                          label: widget.lang == 'ar' ? 'رحلة طيران تشارتر' : 'Vol Charter assigné',
+                          value: _pilgrimDetails?['flightNumber'] ?? 'Non assigné',
+                          valueColor: Colors.black87,
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Makkah Hotel
+                        _buildLogisticsRow(
+                          icon: Icons.hotel,
+                          label: widget.lang == 'ar' ? 'سكن مكة المكرمة' : 'Logement La Mecque (Makkah)',
+                          value: _pilgrimDetails?['hotelMakkah'] ?? 'Non assigné',
+                          valueColor: Colors.black87,
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Madinah Hotel
+                        _buildLogisticsRow(
+                          icon: Icons.hotel,
+                          label: widget.lang == 'ar' ? 'سكن المدينة المنورة' : 'Logement Médine (Madinah)',
+                          value: _pilgrimDetails?['hotelMadinah'] ?? 'Non assigné',
+                          valueColor: Colors.black87,
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Room number
+                        _buildLogisticsRow(
+                          icon: Icons.meeting_room,
+                          label: widget.lang == 'ar' ? 'رقم الغرفة' : 'Numéro de Chambre',
+                          value: _pilgrimDetails?['roomNumber'] ?? 'Non assigné',
+                          valueColor: Colors.black87,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+
               // Navigation boxes grid (Checklist and Budget)
               Row(
                 children: [
@@ -717,13 +896,15 @@ class _EspaceScreenState extends State<EspaceScreen> {
                       },
                       child: Card(
                         color: Colors.white,
+                        elevation: 1,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             children: [
                               Text(
                                 '$_checklistPercentage%',
-                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0B5D34)),
+                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF042F1A)),
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -749,13 +930,15 @@ class _EspaceScreenState extends State<EspaceScreen> {
                       },
                       child: Card(
                         color: Colors.white,
+                        elevation: 1,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             children: [
                               Text(
                                 _savedBudget != '0' ? '${_savedBudget.substring(0, 3)}M F' : '0 F',
-                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0B5D34)),
+                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF042F1A)),
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -776,11 +959,13 @@ class _EspaceScreenState extends State<EspaceScreen> {
               // Document Vault Section
               Text(
                 vaultTitle,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF052C18)),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF042F1A)),
               ),
               const SizedBox(height: 8),
               Card(
                 color: Colors.white,
+                elevation: 1,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -795,7 +980,7 @@ class _EspaceScreenState extends State<EspaceScreen> {
                       // Vault Item 1: Passport
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.wallet_membership, color: Color(0xFF0B5D34)),
+                        leading: const Icon(Icons.wallet_membership, color: Color(0xFF042F1A)),
                         title: Text(
                           widget.lang == 'ar' ? 'نسخة جواز السفر' : 'Copie de Passeport',
                           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
@@ -808,19 +993,23 @@ class _EspaceScreenState extends State<EspaceScreen> {
                         ),
                         trailing: ElevatedButton(
                           onPressed: () => _uploadDocument('passport'),
-                          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE7F2E2), elevation: 0),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF042F1A).withOpacity(0.08),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
                           child: Text(
                             widget.lang == 'ar' ? 'إضافة' : 'Ajouter',
-                            style: const TextStyle(color: Color(0xFF0B5D34), fontSize: 11),
+                            style: const TextStyle(color: Color(0xFF042F1A), fontSize: 11, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
-                      const Divider(height: 1),
+                      const Divider(height: 1, color: Color(0xFFFAF9F5)),
 
                       // Vault Item 2: Vaccines
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.health_and_safety, color: Color(0xFF0B5D34)),
+                        leading: const Icon(Icons.health_and_safety, color: Color(0xFF042F1A)),
                         title: Text(
                           widget.lang == 'ar' ? 'بطاقة التلقيح الصفراء' : 'Carnet de Vaccination',
                           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
@@ -833,10 +1022,14 @@ class _EspaceScreenState extends State<EspaceScreen> {
                         ),
                         trailing: ElevatedButton(
                           onPressed: () => _uploadDocument('vaccin'),
-                          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE7F2E2), elevation: 0),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF042F1A).withOpacity(0.08),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
                           child: Text(
                             widget.lang == 'ar' ? 'إضافة' : 'Ajouter',
-                            style: const TextStyle(color: Color(0xFF0B5D34), fontSize: 11),
+                            style: const TextStyle(color: Color(0xFF042F1A), fontSize: 11, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -849,11 +1042,13 @@ class _EspaceScreenState extends State<EspaceScreen> {
               // SMS Simulator Section
               Text(
                 smsTitle,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF052C18)),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF042F1A)),
               ),
               const SizedBox(height: 8),
               Card(
                 color: Colors.white,
+                elevation: 1,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -862,7 +1057,17 @@ class _EspaceScreenState extends State<EspaceScreen> {
                         controller: _smsPhoneController,
                         decoration: InputDecoration(
                           labelText: widget.lang == 'ar' ? 'رقم هاتف القريب' : 'Téléphone du proche',
-                          border: const OutlineInputBorder(),
+                          labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF042F1A)),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFD4AF37), width: 2),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                         ),
                       ),
                       const SizedBox(height: 14),
@@ -875,22 +1080,38 @@ class _EspaceScreenState extends State<EspaceScreen> {
                         children: [
                           ElevatedButton(
                             onPressed: () => _sendSimulatedAlert('depart'),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade100, elevation: 0),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey.shade100,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
                             child: Text(widget.lang == 'ar' ? 'المطار' : 'Aéroport', style: const TextStyle(color: Colors.black87, fontSize: 11)),
                           ),
                           ElevatedButton(
                             onPressed: () => _sendSimulatedAlert('arrivee'),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade100, elevation: 0),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey.shade100,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
                             child: Text(widget.lang == 'ar' ? 'جدة' : 'Djeddah', style: const TextStyle(color: Colors.black87, fontSize: 11)),
                           ),
                           ElevatedButton(
                             onPressed: () => _sendSimulatedAlert('arafat'),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade100, elevation: 0),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey.shade100,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
                             child: Text(widget.lang == 'ar' ? 'عرفة' : 'Arafat', style: const TextStyle(color: Colors.black87, fontSize: 11)),
                           ),
                           ElevatedButton(
                             onPressed: () => _sendSimulatedAlert('retour'),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade100, elevation: 0),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey.shade100,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
                             child: Text(widget.lang == 'ar' ? 'العودة' : 'Retour', style: const TextStyle(color: Colors.black87, fontSize: 11)),
                           ),
                         ],

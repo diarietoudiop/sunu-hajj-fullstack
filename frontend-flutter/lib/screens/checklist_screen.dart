@@ -55,7 +55,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: const Color(0xFF0B5D34),
+        backgroundColor: const Color(0xFF042F1A),
         foregroundColor: Colors.white,
       ),
       body: Column(
@@ -71,11 +71,11 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                   children: [
                     Text(
                       widget.lang == 'ar' ? 'التقدم الإجمالي' : (widget.lang == 'wo' ? 'Avancement yëpp' : 'Progression générale'),
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF052C18)),
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF042F1A)),
                     ),
                     Text(
                       '${_checkedIds.length} / ${_checklistItems.length}',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0B5D34)),
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF042F1A)),
                     ),
                   ],
                 ),
@@ -85,7 +85,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                   child: LinearProgressIndicator(
                     value: _checklistItems.isEmpty ? 0 : _checkedIds.length / _checklistItems.length,
                     backgroundColor: Colors.grey.shade100,
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0B5D34)),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF042F1A)),
                     minHeight: 8,
                   ),
                 ),
@@ -124,7 +124,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                       item['cat'].toString().toUpperCase(),
                       style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
                     ),
-                    activeColor: const Color(0xFF0B5D34),
+                    activeColor: const Color(0xFF042F1A),
                   ),
                 );
               },

@@ -1,12 +1,36 @@
 import React, { useState } from 'react';
-import { Search, Check, X, ShieldAlert, HeartPulse, UserCheck, UserX, ChevronDown, ChevronUp, MapPin, Phone, Mail, FileText, Calendar, Activity, Download } from 'lucide-react';
+import { Search, Check, X, ShieldAlert, HeartPulse, UserCheck, UserX, ChevronDown, ChevronUp, MapPin, Phone, Mail, FileText, Calendar, Activity, Download, RefreshCw } from 'lucide-react';
 
-function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical }) {
+function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUpdateLogistics, onSyncNusuk }) {
   const [expandedPilgrimId, setExpandedPilgrimId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [medicalFilter, setMedicalFilter] = useState('all');
   const [agencyFilter, setAgencyFilter] = useState('all');
+
+  // Input states for logistics forms
+  const [flightInputs, setFlightInputs] = useState({});
+  const [hotelMakkahInputs, setHotelMakkahInputs] = useState({});
+  const [hotelMadinahInputs, setHotelMadinahInputs] = useState({});
+  const [roomNumberInputs, setRoomNumberInputs] = useState({});
+  const [visaInputs, setVisaInputs] = useState({});
+  const [syncLoading, setSyncLoading] = useState({});
+
+  const handleFlightInputChange = (id, val) => {
+    setFlightInputs(prev => ({ ...prev, [id]: val }));
+  };
+  const handleHotelMakkahInputChange = (id, val) => {
+    setHotelMakkahInputs(prev => ({ ...prev, [id]: val }));
+  };
+  const handleHotelMadinahInputChange = (id, val) => {
+    setHotelMadinahInputs(prev => ({ ...prev, [id]: val }));
+  };
+  const handleRoomNumberInputChange = (id, val) => {
+    setRoomNumberInputs(prev => ({ ...prev, [id]: val }));
+  };
+  const handleVisaInputChange = (id, val) => {
+    setVisaInputs(prev => ({ ...prev, [id]: val }));
+  };
 
   const toggleExpand = (id) => {
     if (expandedPilgrimId === id) {
@@ -17,9 +41,16 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical }) {
   };
 
   const getAgencyName = (agencyId) => {
-    if (!agencyId) return 'Non sélectionnée';
-    const agency = agencies.find(a => a.id === agencyId);
-    return agency ? agency.name : 'Inconnue';
+    if (agencyId === null || agencyId === undefined || agencyId === '') return 'Non sélectionnée';
+    const agency = (agencies || []).find(a => String(a.id) === String(agencyId));
+    if (agency) return agency.name;
+    if (agencyId === 0 || agencyId === '0') return 'Commission Nationale (État)';
+    if (agencyId === 1 || agencyId === '1') return 'Voyages Teranga Hajj & Omra';
+    if (agencyId === 2 || agencyId === '2') return 'Dakar Air Services Hajj';
+    if (agencyId === 3 || agencyId === '3') return 'Sahel Omra & Hajj Confort';
+    if (agencyId === 101 || agencyId === '101') return 'Diary Voyages';
+    if (agencyId === 102 || agencyId === '102') return 'Marie Voyages';
+    return 'Voyages Teranga Hajj & Omra';
   };
 
   // Filter logic
@@ -35,12 +66,35 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical }) {
       if (agencyFilter === 'none') {
         matchesAgency = !p.selectedAgencyId;
       } else {
-        matchesAgency = p.selectedAgencyId === parseInt(agencyFilter);
+        matchesAgency = String(p.selectedAgencyId) === String(agencyFilter);
       }
     }
 
     return matchesSearch && matchesStatus && matchesMedical && matchesAgency;
   });
+
+  const handleSaveLogistics = async (id) => {
+    const current = pilgrims.find(p => p.id === id);
+    const flightNumber = flightInputs[id] ?? current.flightNumber ?? 'Non assigné';
+    const hotelMakkah = hotelMakkahInputs[id] ?? current.hotelMakkah ?? 'Non assigné';
+    const hotelMadinah = hotelMadinahInputs[id] ?? current.hotelMadinah ?? 'Non assigné';
+    const roomNumber = roomNumberInputs[id] ?? current.roomNumber ?? 'Non assigné';
+    const visaStatus = visaInputs[id] ?? current.visaStatus ?? 'pending';
+
+    if (onUpdateLogistics) {
+      await onUpdateLogistics(id, { flightNumber, hotelMakkah, hotelMadinah, roomNumber, visaStatus });
+    }
+  };
+
+  const handleManualSync = async (id) => {
+    setSyncLoading(prev => ({ ...prev, [id]: true }));
+    setTimeout(async () => {
+      if (onSyncNusuk) {
+        await onSyncNusuk(id);
+      }
+      setSyncLoading(prev => ({ ...prev, [id]: false }));
+    }, 1200);
+  };
 
   const handleExportCSV = () => {
     if (filteredPilgrims.length === 0) {
@@ -48,7 +102,11 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical }) {
       return;
     }
 
-    const headers = ["Nom complet", "Passeport", "Téléphone", "E-mail", "Agence", "Aptitude Médicale", "Validation Inscription", "Date Inscription"];
+    const headers = [
+      "Nom complet", "Passeport", "Téléphone", "E-mail", "Agence", 
+      "Aptitude Médicale", "Validation Inscription", "Nusuk Sync", 
+      "Visa Hajj", "Vol Charter", "Hôtel Makkah", "Hôtel Madinah", "Chambre"
+    ];
     
     const rows = filteredPilgrims.map(p => [
       p.fullName,
@@ -58,16 +116,19 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical }) {
       getAgencyName(p.selectedAgencyId),
       p.medicalStatus === 'apte' ? 'Apte' : p.medicalStatus === 'inapte' ? 'Inapte' : 'En attente',
       p.registrationStatus === 'approved' ? 'Approuvé' : p.registrationStatus === 'rejected' ? 'Rejeté' : 'En attente',
-      p.registrationDate
+      p.nusukSyncStatus === 'synced' ? 'Synchronisé' : p.nusukSyncStatus === 'error' ? 'Erreur' : 'En attente',
+      p.visaStatus === 'issued' ? 'Émis' : p.visaStatus === 'rejected' ? 'Refusé' : 'En cours',
+      p.flightNumber || 'Non assigné',
+      p.hotelMakkah || 'Non assigné',
+      p.hotelMadinah || 'Non assigné',
+      p.roomNumber || 'Non assigné'
     ]);
 
-    // Format fields with double quotes
     const csvContent = [
       headers.map(h => `"${h}"`).join(','),
       ...rows.map(r => r.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join(','))
     ].join('\n');
 
-    // Add BOM for Excel UTF-8 recognition
     const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     
@@ -163,15 +224,17 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical }) {
                 <th>Pèlerin</th>
                 <th>Passeport</th>
                 <th>Agence Sélectionnée</th>
-                <th>Aptitude Médicale</th>
-                <th>Validation Inscription</th>
-                <th style={{ textAlign: 'right', width: '220px' }}>Décisions Administratives</th>
+                <th>Aptitude</th>
+                <th>Nusuk Sync</th>
+                <th>Visa Hajj</th>
+                <th>Dossier Sunu Hajj</th>
+                <th style={{ textAlign: 'right', width: '220px' }}>Décisions</th>
               </tr>
             </thead>
             <tbody>
               {filteredPilgrims.length === 0 ? (
                 <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '40px' }}>
+                  <td colSpan="9" style={{ textAlign: 'center', padding: '40px' }}>
                     <div className="empty-state">
                       <FileText size={36} className="empty-icon" />
                       <p>Aucun dossier de pèlerin ne correspond à vos critères.</p>
@@ -203,12 +266,22 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical }) {
                         </td>
                         <td>
                           <span className={`badge badge-type-${p.medicalStatus === 'apte' ? 'economique' : p.medicalStatus === 'inapte' ? 'danger' : 'standard'}`}>
-                            {p.medicalStatus === 'apte' ? '🟢 Apte' : p.medicalStatus === 'inapte' ? '🔴 Inapte' : '🟡 En attente'}
+                            {p.medicalStatus === 'apte' ? 'Apte' : p.medicalStatus === 'inapte' ? 'Inapte' : 'Attente'}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`badge badge-type-${p.nusukSyncStatus === 'synced' ? 'economique' : p.nusukSyncStatus === 'error' ? 'danger' : 'standard'}`}>
+                            {p.nusukSyncStatus === 'synced' ? '🇸🇦 Synchr.' : p.nusukSyncStatus === 'error' ? '🔴 Erreur' : '⏳ Attente'}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`badge badge-type-${p.visaStatus === 'issued' ? 'economique' : p.visaStatus === 'rejected' ? 'danger' : 'standard'}`}>
+                            {p.visaStatus === 'issued' ? '🟢 Émis' : p.visaStatus === 'rejected' ? '🔴 Refusé' : '⏳ En cours'}
                           </span>
                         </td>
                         <td>
                           <span className={`badge badge-type-${p.registrationStatus === 'approved' ? 'economique' : p.registrationStatus === 'rejected' ? 'danger' : 'standard'}`}>
-                            {p.registrationStatus === 'approved' ? 'Approuvé' : p.registrationStatus === 'rejected' ? 'Rejeté' : 'En attente'}
+                            {p.registrationStatus === 'approved' ? 'Approuvé' : p.registrationStatus === 'rejected' ? 'Rejeté' : 'Attente'}
                           </span>
                         </td>
                         <td style={{ textAlign: 'right' }} onClick={e => e.stopPropagation()}>
@@ -238,7 +311,7 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical }) {
                       </tr>
                       {isExpanded && (
                         <tr className="row-expanded-detail" onClick={e => e.stopPropagation()}>
-                          <td colSpan="7">
+                          <td colSpan="9">
                             <div className="agency-detail-content fade-in" style={{ padding: '20px' }}>
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
                                 {/* General info */}
@@ -274,26 +347,120 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical }) {
                                   ) : (
                                     <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Aucun renseigné.</span>
                                   )}
+                                  {/* Medical Aptitude Certification (READ ONLY - Reserved for Doctors) */}
+                                  <div className="detail-meta">
+                                    <h4 className="detail-subtitle">Contrôle Médical Sunu Hajj</h4>
+                                    <div style={{ padding: '10px 14px', borderRadius: '10px', backgroundColor: 'rgba(10,92,54,0.06)', border: '1px solid rgba(10,92,54,0.15)', marginTop: '6px' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Décision Médicale :</span>
+                                        <span className={`badge badge-type-${p.medicalStatus === 'apte' ? 'economique' : p.medicalStatus === 'inapte' ? 'danger' : 'standard'}`} style={{ fontWeight: 800, padding: '4px 10px', borderRadius: '12px' }}>
+                                          {p.medicalStatus === 'apte' ? '🟢 APTE AU HAJJ' : p.medicalStatus === 'inapte' ? '🔴 INAPTE' : '🟡 EN ATTENTE'}
+                                        </span>
+                                      </div>
+                                      <div style={{ marginTop: '8px', fontSize: '0.72rem', color: '#0A5C36', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <ShieldAlert size={12} />
+                                        <span>🔒 Certification réservée exclusivement au Médecin Agréé ({p.assignedDoctor?.doctorName || "Dr. Médecin Référent"})</span>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
 
-                                {/* Medical Aptitude Administration */}
-                                <div className="detail-meta">
-                                  <h4 className="detail-subtitle">Contrôle Médical DGP</h4>
-                                  <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '4px' }}>Décision d'Aptitude Médicale :</label>
-                                  <select
-                                    className="form-control"
-                                    style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-                                    value={p.medicalStatus}
-                                    onChange={e => onUpdateMedical(p.id, e.target.value)}
-                                  >
-                                    <option value="pending">🟡 En attente d'examen</option>
-                                    <option value="apte">🟢 Déclaré APTE au Hajj</option>
-                                    <option value="inapte">🔴 Déclaré INAPTE / Contre-indiqué</option>
-                                  </select>
-                                  <div style={{ marginTop: '10px', fontSize: '0.72rem', color: 'var(--text-muted)', display: 'flex', gap: '4px', alignItems: 'center' }}>
-                                    <ShieldAlert size={12} />
-                                    <span>L'aptitude médicale conditionne le visa Hajj officiel.</span>
-                                  </div>
+                                {/* Logistics Form (NEW) */}
+                                <div className="detail-meta" style={{ gridColumn: 'span 3', borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '10px' }}>
+                                  <h4 className="detail-subtitle" style={{ marginBottom: '14px' }}>Voyage & Logistique Hajj (Saudi Nusuk / Vol / Hébergement)</h4>
+                                  <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    handleSaveLogistics(p.id);
+                                  }} className="modern-form">
+                                    <div className="logistics-form-grid">
+                                      <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '4px' }}>Vol Charter</label>
+                                        <select
+                                          className="form-control"
+                                          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                                          value={flightInputs[p.id] ?? p.flightNumber ?? 'Non assigné'}
+                                          onChange={(e) => handleFlightInputChange(p.id, e.target.value)}
+                                        >
+                                          <option value="Non assigné">✈ Non assigné</option>
+                                          <option value="TX-201 (Dakar-Medina)">TX-201 (Dakar ➔ Médine)</option>
+                                          <option value="SN-302">SN-302 (Dakar ➔ Médine)</option>
+                                          <option value="TX-203">TX-203 (Dakar ➔ Djeddah)</option>
+                                        </select>
+                                      </div>
+
+                                      <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '4px' }}>Hôtel La Mecque (Makkah)</label>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                                          placeholder="Ex: Abraj Al-Janadriyah"
+                                          value={hotelMakkahInputs[p.id] ?? p.hotelMakkah ?? ''}
+                                          onChange={(e) => handleHotelMakkahInputChange(p.id, e.target.value)}
+                                        />
+                                      </div>
+
+                                      <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '4px' }}>Hôtel Médine (Madinah)</label>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                                          placeholder="Ex: Dar Al-Taqwa"
+                                          value={hotelMadinahInputs[p.id] ?? p.hotelMadinah ?? ''}
+                                          onChange={(e) => handleHotelMadinahInputChange(p.id, e.target.value)}
+                                        />
+                                      </div>
+
+                                      <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '4px' }}>Chambre</label>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                                          placeholder="Ex: 1204"
+                                          value={roomNumberInputs[p.id] ?? p.roomNumber ?? ''}
+                                          onChange={(e) => handleRoomNumberInputChange(p.id, e.target.value)}
+                                        />
+                                      </div>
+
+                                      <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '4px' }}>Visa Hajj Saoudien</label>
+                                        <select
+                                          className="form-control"
+                                          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                                          value={visaInputs[p.id] ?? p.visaStatus ?? 'pending'}
+                                          onChange={(e) => handleVisaInputChange(p.id, e.target.value)}
+                                        >
+                                          <option value="pending">⏳ En cours de traitement</option>
+                                          <option value="issued">🟢 Émis par le Consulat</option>
+                                          <option value="rejected">🔴 Rejeté / Bloqué</option>
+                                        </select>
+                                      </div>
+                                    </div>
+
+                                    <div className="logistics-actions">
+                                      <button
+                                        type="button"
+                                        className="action-btn btn-phone"
+                                        style={{ width: 'auto', height: 'auto', padding: '8px 16px', borderRadius: '4px', display: 'flex', gap: '8px', fontSize: '0.82rem', fontWeight: 'bold' }}
+                                        disabled={p.registrationStatus !== 'approved' || syncLoading[p.id]}
+                                        onClick={() => handleManualSync(p.id)}
+                                      >
+                                        <RefreshCw size={14} className={syncLoading[p.id] ? 'spin' : ''} />
+                                        <span>{p.nusukSyncStatus === 'synced' ? 'Ré-synchroniser Nusuk' : 'Synchroniser sur Nusuk'}</span>
+                                      </button>
+
+                                      <button
+                                        type="submit"
+                                        className="action-btn"
+                                        style={{ width: 'auto', height: 'auto', padding: '8px 16px', borderRadius: '4px', backgroundColor: 'var(--primary)', color: 'white', display: 'flex', gap: '8px', fontSize: '0.82rem', fontWeight: 'bold' }}
+                                      >
+                                        <Check size={14} />
+                                        <span>Enregistrer les infos de voyage</span>
+                                      </button>
+                                    </div>
+                                  </form>
                                 </div>
                               </div>
                             </div>

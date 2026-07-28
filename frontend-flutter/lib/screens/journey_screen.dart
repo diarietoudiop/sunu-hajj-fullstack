@@ -1,231 +1,313 @@
 import 'package:flutter/material.dart';
 
-class JourneyScreen extends StatefulWidget {
+class JourneyScreen extends StatelessWidget {
   final String lang;
   const JourneyScreen({super.key, required this.lang});
 
   @override
-  State<JourneyScreen> createState() => _JourneyScreenState();
-}
-
-class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  final Map<String, Map<String, List<Map<String, String>>>> _timelineData = {
-    'fr': {
-      'before': [
-        { 'step': 'Étape 1', 'title': 'Visite médicale obligatoire', 'desc': 'Passage devant le médecin conseil désigné par la DGP pour obtenir le certificat d\'aptitude.', 'tip': 'Rendez-vous à l\'hôpital régional muni de votre carte d\'identité.' },
-        { 'step': 'Étape 2', 'title': 'Dossier & Validation passeport', 'desc': 'Vérification des pièces justificatives et dépôt du passeport biométrique officiel.', 'tip': 'Vérifiez la validité (min 6 mois).' },
-        { 'step': 'Étape 3', 'title': 'Paiement du forfait de voyage', 'desc': 'Versement des frais du package auprès de la banque agréée ou de votre agence.', 'tip': 'Conservez précieusement vos reçus.' },
-      ],
-      'during': [
-        { 'step': 'Jour 1', 'title': 'Vol Dakar - Djeddah / Médine', 'desc': 'Départ de l\'AIBD. Prise d\'intention d\'Ihram dans l\'avion.', 'tip': 'Gardez l\'Ihram dans votre bagage à main.' },
-        { 'step': 'Rite 1', 'title': 'Mina - Tentes & Prières', 'desc': 'Installation dans les tentes de Mina le 8 Dhou al-hijja.', 'tip': 'Buvez beaucoup d\'eau.' },
-        { 'step': 'Rite 2', 'title': 'Journée de Arafat', 'desc': 'Station debout sur le mont Arafat le 9 Dhou al-hijja. Prières et invocations.', 'tip': 'C\'est le pilier majeur du Hajj.' },
-      ],
-      'after': [
-        { 'step': 'Étape 1', 'title': 'Tawaf d\'Adieu (Al-Wadaa)', 'desc': 'Dernière circumambulation autour de la Kaaba.', 'tip': 'C\'est le dernier acte obligatoire.' },
-        { 'step': 'Étape 2', 'title': 'Retour au Sénégal', 'desc': 'Enregistrement à Djeddah et retour vers Dakar AIBD.', 'tip': 'Étiquetez votre bouteille d\'eau de Zamzam.' },
-      ]
-    },
-    'wo': {
-      'before': [
-        { 'step': 'Étape 1', 'title': 'Wér-gi-yaram seet gi', 'desc': 'Dem ci docteur bi DGP tëral ngir certificat.', 'tip': 'Demal ak sa carte d\'identité.' },
-        { 'step': 'Étape 2', 'title': 'Kayit yi ak Passeport bi', 'desc': 'Seet say kayit yu wér ak denc passeport bi.', 'tip': 'Passeport bi na am 6 mois.' },
-        { 'step': 'Étape 3', 'title': 'Fay forfait u Hajj bi', 'desc': 'Denc sa koppari Hajj ci banque walla agence.', 'tip': 'Dencal say reçu.' },
-      ],
-      'during': [
-        { 'step': 'Jour 1', 'title': 'Vol Dakar - Djeddah', 'desc': 'Décollage ci AIBD. Sol sa Ihram ci plane bi.', 'tip': 'Defal sa Ihram ci bagage u loxó bi.' },
-        { 'step': 'Rite 1', 'title': 'Mina - Tente yi', 'desc': 'Aksi ci tente u Mina ci 8 Dhou al-hijja.', 'tip': 'Nanal ndox bu baax.' },
-        { 'step': 'Rite 2', 'title': 'Bësu Arafat', 'desc': 'Taxaw ci mont Arafat ci 9 Dhou al-hijja di ñaan.', 'tip': 'Gën a wóolu ñaan yi.' },
-      ],
-      'after': [
-        { 'step': 'Étape 1', 'title': 'Tawaf u Taggoo', 'desc': 'Tawaf bu mujj bi ci Kaaba laata nga guèn Maka.', 'tip': 'Lii moy taggoo bi.' },
-        { 'step': 'Étape 2', 'title': 'Dellusi ci Sénégal', 'desc': 'Dem aéroportu Djeddah di dellu Dakar.', 'tip': 'Defal sa tour ci Zamzam bi.' },
-      ]
-    },
-    'ar': {
-      'before': [
-        { 'step': 'الخطوة الأولى', 'title': 'الفحص الطبي الإلزامي', 'desc': 'زيارة الطبيب المعتمد للحصول على شهادة اللياقة البدنية.', 'tip': 'توجه إلى المستشفى برفقة بطاقتك الشخصية.' },
-        { 'step': 'الخطوة الثانية', 'title': 'تدقيق المستندات والجواز', 'desc': 'تقديم جواز السفر البيومتري الرسمي وتدقيق الأوراق.', 'tip': 'تأكد من صلاحية الجواز لـ 6 أشهر.' },
-        { 'step': 'الخطوة الثالثة', 'title': 'دفع رسوم باقة السفر', 'desc': 'سداد تكلفة الباقة لدى البنوك المعتمدة أو الوكالة.', 'tip': 'احتفظ بسندات الدفع الورقية.' },
-      ],
-      'during': [
-        { 'step': 'اليوم الأول', 'title': 'رحلة الطيران دكار - جدة', 'desc': 'المغادرة من مطار دكار وعقد نية الإحرام في الطائرة.', 'tip': 'ضع لباس الإحرام في حقيبتك اليدوية.' },
-        { 'step': 'المشعر الأول', 'title': 'منى - الاستقرار والصلوات', 'desc': 'النزول بمخيمات منى في يوم التروية (8 ذي الحجة).', 'tip': 'شرب المياه لتفادي ضربات الشمس.' },
-        { 'step': 'المشعر الثاني', 'title': 'يوم عرفة - الوقوف الأكبر', 'desc': 'الوقوف بصعيد عرفات في 9 ذي الحجة للدعاء والتضرع.', 'tip': 'هو أعظم أركان الحج.' },
-      ],
-      'after': [
-        { 'step': 'الخطوة الأولى', 'title': 'طواف الوداع', 'desc': 'أداء الطواف الأخير حول الكعبة المشرفة.', 'tip': 'آخر واجبات الحج قبل السفر.' },
-        { 'step': 'الخطوة الثانية', 'title': 'العودة إلى السنغال', 'desc': 'التوجه للمطار والعودة إلى دكار بسلامة الله.', 'tip': 'تأكد من شحن عبوة ماء زمزم الرسمية.' },
-      ]
-    }
-  };
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  Widget _buildTimeline(String phase) {
-    final List<Map<String, String>> steps = _timelineData[widget.lang]?[phase] ?? [];
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: steps.length,
-      itemBuilder: (context, index) {
-        final step = steps[index];
-        final isFirst = index == 0;
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Vertical timeline markers
-            Column(
-              children: [
-                Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: isFirst ? const Color(0xFF0B5D34) : Colors.white,
-                    border: Border.all(
-                      color: isFirst ? const Color(0xFF0B5D34) : Colors.grey.shade400,
-                      width: 3,
-                    ),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                if (index < steps.length - 1)
-                  Container(
-                    width: 2,
-                    height: 120,
-                    color: Colors.grey.shade300,
-                  ),
-              ],
-            ),
-            const SizedBox(width: 16),
-
-            // Card details
-            Expanded(
-              child: Card(
-                color: Colors.white,
-                elevation: 1,
-                margin: const EdgeInsets.only(bottom: 16),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: isFirst ? const Color(0xFFE7F2E2) : Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              step['step']!,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: isFirst ? const Color(0xFF0B5D34) : Colors.grey.shade700,
-                              ),
-                            ),
-                          ),
-                          if (isFirst)
-                            Text(
-                              widget.lang == 'ar' ? 'قيد التنفيذ' : (widget.lang == 'wo' ? 'Ya ngi ci' : 'En cours'),
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0B5D34),
-                              ),
-                            )
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        step['title']!,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF052C18),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        step['desc']!,
-                        style: const TextStyle(fontSize: 12, color: Colors.black87),
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFAF4EB),
-                          borderRadius: BorderRadius.circular(6),
-                          border: const Border(
-                            left: BorderSide(color: Color(0xFFC5A880), width: 3),
-                          ),
-                        ),
-                        child: Text(
-                          '${widget.lang == 'ar' ? 'نصيحة عملية' : (widget.lang == 'wo' ? 'Xelal' : 'Conseil pratique')} : ${step['tip']}',
-                          style: const TextStyle(fontSize: 11, color: Color(0xFF8C6D40)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final title = widget.lang == 'ar'
-        ? 'مسار الحجاج'
-        : (widget.lang == 'wo' ? 'Yoonu pèlerin bi' : 'Parcours du pèlerin');
-        
-    final tabLabels = {
-      'fr': ['Avant le Hajj', 'Pendant (Rites)', 'Après le retour'],
-      'wo': ['Laata dem gi', 'Maka (Rite yi)', 'Dellusi gi'],
-      'ar': ['قبل المغادرة', 'المشاعر المقدسة', 'بعد العودة']
-    }[widget.lang]!;
+    final bool isAr = lang == 'ar';
+    final String title = isAr ? 'برنامج المناسك' : 'Programme des Rites';
+
+    final List<Map<String, dynamic>> rites = [
+      {
+        'id': 1,
+        'title_fr': 'Ihram & Tawaf d\'arrivée',
+        'title_ar': 'الإحرام وطواف القدوم',
+        'date': '05 Juin',
+        'completed': true,
+        'active': false,
+      },
+      {
+        'id': 2,
+        'title_fr': 'Médine - Ziyarat',
+        'title_ar': 'المدينة المنورة - الزيارة',
+        'date': '06-10 Juin',
+        'completed': true,
+        'active': false,
+      },
+      {
+        'id': 3,
+        'title_fr': 'Retour La Mecque',
+        'title_ar': 'العودة إلى مكة المكرمة',
+        'date': '11 Juin',
+        'completed': true,
+        'active': false,
+      },
+      {
+        'id': 4,
+        'title_fr': 'Yawm at-Tarwiya - Mina',
+        'title_ar': 'يوم التروية - مشعر منى',
+        'date': '14 Juin',
+        'completed': false,
+        'active': true,
+      },
+      {
+        'id': 5,
+        'title_fr': 'Wuquf Arafat',
+        'title_ar': 'الوقوف بعرفة',
+        'date': '15 Juin',
+        'completed': false,
+        'active': false,
+      },
+      {
+        'id': 6,
+        'title_fr': 'Muzdalifa - Nuit',
+        'title_ar': 'المبيت بمزدلفة',
+        'date': '15/16 Juin',
+        'completed': false,
+        'active': false,
+      },
+      {
+        'id': 7,
+        'title_fr': 'Ramy Jamarat + Sacrifice',
+        'title_ar': 'رمي الجمرات والهدي',
+        'date': '16 Juin',
+        'completed': false,
+        'active': false,
+      },
+      {
+        'id': 8,
+        'title_fr': 'Tawaf al-Ifada + Sa\'i',
+        'title_ar': 'طواف الإفاضة والسعي',
+        'date': '17 Juin',
+        'completed': false,
+        'active': false,
+      },
+      {
+        'id': 9,
+        'title_fr': 'Tawaf al-Wada\'',
+        'title_ar': 'طواف الوداع',
+        'date': '27 Juin',
+        'completed': false,
+        'active': false,
+      },
+    ];
 
     return Scaffold(
       appBar: AppBar(
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: const Color(0xFF0B5D34),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor: const Color(0xFFC5A880),
-          tabs: [
-            Tab(text: tabLabels[0]),
-            Tab(text: tabLabels[1]),
-            Tab(text: tabLabels[2]),
+        backgroundColor: const Color(0xFF042F1A),
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header Active Step Banner
+            _buildActiveRiteHeader(isAr),
+            
+            // Timeline list
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: rites.length,
+                    itemBuilder: (context, index) {
+                      final rite = rites[index];
+                      final String riteTitle = isAr ? rite['title_ar'] : rite['title_fr'];
+                      return _buildTimelineItem(rite, riteTitle, index == rites.length - 1);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Talbiyah Card
+                  _buildTalbiyahCard(isAr),
+                ],
+              ),
+            )
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
+    );
+  }
+
+  Widget _buildActiveRiteHeader(bool isAr) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      decoration: const BoxDecoration(
+        color: Color(0xFFB48A31), // Golden/bronze background
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _buildTimeline('before'),
-          _buildTimeline('during'),
-          _buildTimeline('after'),
+          const Text(
+            'Hajj 1447 H',
+            style: TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            isAr ? 'برنامج المناسك' : 'Programme des Rites',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            isAr ? 'المرحلة النشطة : منى - أيام التشريق' : 'Étape active : Mina - Jours de Tashrik',
+            style: const TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w500),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineItem(Map<String, dynamic> rite, String title, bool isLast) {
+    final bool completed = rite['completed'];
+    final bool active = rite['active'];
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Dot & Line Column
+          Column(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: active
+                      ? const Color(0xFFB48A31)
+                      : (completed ? const Color(0xFF042F1A) : Colors.white),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: active
+                        ? const Color(0xFFB48A31)
+                        : (completed ? const Color(0xFF042F1A) : Colors.grey.shade300),
+                    width: 2,
+                  ),
+                ),
+                child: Center(
+                  child: active
+                      ? const Icon(Icons.circle, color: Colors.white, size: 8)
+                      : (completed
+                          ? const Icon(Icons.check, color: Colors.white, size: 12)
+                          : Text(
+                              rite['id'].toString(),
+                              style: TextStyle(fontSize: 10, color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+                            )),
+                ),
+              ),
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: completed ? const Color(0xFF042F1A) : Colors.grey.shade300,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 14),
+
+          // Content Column
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: active ? const Color(0xFFFFFDF5) : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: active ? const Color(0xFFF3E8C4) : Colors.grey.shade200,
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.01),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    )
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: active ? FontWeight.bold : FontWeight.w500,
+                          color: active ? const Color(0xFF042F1A) : Colors.black87,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (active)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3E8C4),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'ACTIF',
+                          style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Color(0xFFB48A31)),
+                        ),
+                      )
+                    else
+                      Text(
+                        rite['date'] ?? '',
+                        style: TextStyle(fontSize: 11, color: Colors.grey.shade500, fontWeight: FontWeight.bold),
+                      )
+                  ],
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTalbiyahCard(bool isAr) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.menu_book, color: Color(0xFF042F1A), size: 18),
+              const SizedBox(width: 8),
+              Text(
+                isAr ? 'التلبية' : 'Talbiyah',
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF042F1A)),
+              )
+            ],
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE2F0D9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Column(
+              children: [
+                Text(
+                  'لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF042F1A)),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 6),
+                Text(
+                  'Labbayka Allahumma labbayk...',
+                  style: TextStyle(fontSize: 12, color: Colors.black54, fontStyle: FontStyle.italic),
+                  textAlign: TextAlign.center,
+                )
+              ],
+            ),
+          )
         ],
       ),
     );

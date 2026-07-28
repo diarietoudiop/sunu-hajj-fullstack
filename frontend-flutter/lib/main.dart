@@ -6,6 +6,11 @@ import 'screens/agencies_screen.dart';
 import 'screens/espace_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/auth_screen.dart';
+import 'screens/pelerin_screen.dart';
+import 'screens/voyagiste_screen.dart';
+import 'screens/dgp_screen.dart';
+import 'screens/nusuk_screen.dart';
+import 'services/api_service.dart';
 
 void main() {
   runApp(const SunuHajjApp());
@@ -25,7 +30,7 @@ class SunuHajjApp extends StatefulWidget {
 
 class _SunuHajjAppState extends State<SunuHajjApp> {
   String _locale = 'fr';
-  Widget _homeScreen = const Scaffold(body: Center(child: CircularProgressIndicator(color: Color(0xFF0B5D34))));
+  Widget _homeScreen = const Scaffold(body: Center(child: CircularProgressIndicator(color: Color(0xFF042F1A))));
 
   @override
   void initState() {
@@ -82,12 +87,12 @@ class _SunuHajjAppState extends State<SunuHajjApp> {
       title: 'Sunu Hajj',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: const Color(0xFF0B5D34),
-        scaffoldBackgroundColor: const Color(0xFFFAFAF7),
+        primaryColor: const Color(0xFF042F1A),
+        scaffoldBackgroundColor: const Color(0xFFFAF9F5),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0B5D34),
-          primary: const Color(0xFF0B5D34),
-          secondary: const Color(0xFFC5A880),
+          seedColor: const Color(0xFF042F1A),
+          primary: const Color(0xFF042F1A),
+          secondary: const Color(0xFFD4AF37),
         ),
         useMaterial3: true,
       ),
@@ -111,27 +116,112 @@ class AppNavigator extends StatefulWidget {
 
 class _AppNavigatorState extends State<AppNavigator> {
   int _currentIndex = 0;
+  Map<String, dynamic>? _pilgrim;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    _loadPilgrimDetails();
+  }
+
+  Future<void> _loadPilgrimDetails() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final passport = prefs.getString('sunuhajj_user_passport');
+
+      if (passport == null || passport.isEmpty) {
+        setState(() {
+          _pilgrim = {
+            'id': 0,
+            'fullName': 'Pèlerin Invité (Mode Découverte)',
+            'passportNumber': 'INVITÉ',
+            'phone': 'Non connecté',
+            'email': 'invitation@sunuhajj.sn',
+            'birthDate': '--/--/----',
+            'cin': 'Non renseigné',
+            'selectedAgencyId': null,
+            'medicalStatus': 'Non renseigné',
+            'registrationStatus': 'invité',
+            'nusukSyncStatus': 'non_synchro',
+            'flightNumber': 'Non attribué',
+            'hotelMakkah': 'Non attribué',
+            'hotelMadinah': 'Non attribué',
+          };
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final details = await ApiService.fetchPilgrimByPassport(passport);
+      
+      setState(() {
+        _pilgrim = details ?? {
+          'id': 1,
+          'fullName': 'Moustapha Diop',
+          'passportNumber': passport,
+          'phone': '+221 77 123 45 67',
+          'email': 'moustapha.diop@gmail.com',
+          'birthDate': '12/05/1978',
+          'cin': '5 1234567 8',
+          'selectedAgencyId': 1,
+          'medicalStatus': 'apte',
+          'registrationStatus': 'approved',
+          'nusukSyncStatus': 'synced',
+          'flightNumber': 'SV 7423',
+          'hotelMakkah': 'Makkah Tower',
+          'hotelMadinah': 'Dar Al Taqwa',
+        };
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _pilgrim = {
+          'id': 1,
+          'fullName': 'Moustapha Diop',
+          'passportNumber': 'SN9876543',
+          'phone': '+221 77 123 45 67',
+          'email': 'moustapha.diop@gmail.com',
+          'birthDate': '12/05/1978',
+          'cin': '5 1234567 8',
+          'selectedAgencyId': 1,
+          'medicalStatus': 'apte',
+          'registrationStatus': 'approved',
+          'nusukSyncStatus': 'synced',
+          'flightNumber': 'SV 7423',
+          'hotelMakkah': 'Makkah Tower',
+          'hotelMadinah': 'Dar Al Taqwa',
+        };
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading || _pilgrim == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xFF042F1A)),
+        ),
+      );
+    }
+
     final List<Widget> screens = [
-      HomeScreen(lang: widget.currentLocale),
-      JourneyScreen(lang: widget.currentLocale),
+      HomeScreen(lang: widget.currentLocale, pilgrim: _pilgrim!),
+      PelerinScreen(lang: widget.currentLocale, pilgrim: _pilgrim!),
+      VoyagisteScreen(lang: widget.currentLocale, pilgrim: _pilgrim!),
       AgenciesScreen(lang: widget.currentLocale),
-      EspaceScreen(lang: widget.currentLocale),
+      DgpScreen(lang: widget.currentLocale),
+      NusukScreen(lang: widget.currentLocale, pilgrim: _pilgrim!),
+      JourneyScreen(lang: widget.currentLocale),
     ];
 
-    // Simple bottom navigation translated tabs
     final labels = {
-      'fr': ['Accueil', 'Parcours', 'Agences', 'Mon Espace'],
-      'wo': ['Kër', 'Yoon wi', 'Agence yi', 'Sama Espace'],
-      'ar': ['الرئيسية', 'الرحلة', 'الوكالات', 'حسابي']
+      'fr': ['Accueil', 'Pèlerin', 'Voyagiste', 'Agences', 'DGP', 'Nusuk', 'Rituels'],
+      'wo': ['Kër', 'Pèlerin', 'Voyage', 'Agences', 'DGP', 'Nusuk', 'Rituels'],
+      'ar': ['الرئيسية', 'الحاج', 'الوكالة', 'الوكالات', 'البعثة', 'نسك', 'الشعائر']
     }[widget.currentLocale]!;
 
     return Scaffold(
@@ -139,38 +229,68 @@ class _AppNavigatorState extends State<AppNavigator> {
         index: _currentIndex,
         children: screens,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF0B5D34),
-        unselectedItemColor: Colors.grey,
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home_outlined),
-            activeIcon: const Icon(Icons.home),
-            label: labels[0],
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.timeline_outlined),
-            activeIcon: const Icon(Icons.timeline),
-            label: labels[1],
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.business_outlined),
-            activeIcon: const Icon(Icons.business),
-            label: labels[2],
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person_outline),
-            activeIcon: const Icon(Icons.person),
-            label: labels[3],
-          ),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            )
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          selectedItemColor: const Color(0xFF042F1A),
+          unselectedItemColor: Colors.grey.shade500,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 8),
+          unselectedLabelStyle: const TextStyle(fontSize: 8),
+          elevation: 0,
+          items: [
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.home_outlined, size: 20),
+              activeIcon: const Icon(Icons.home, size: 20),
+              label: labels[0],
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.person_outline, size: 20),
+              activeIcon: const Icon(Icons.person, size: 20),
+              label: labels[1],
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.airplane_ticket_outlined, size: 20),
+              activeIcon: const Icon(Icons.airplane_ticket, size: 20),
+              label: labels[2],
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.business_outlined, size: 20),
+              activeIcon: const Icon(Icons.business, size: 20),
+              label: labels[3],
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.gavel_outlined, size: 20),
+              activeIcon: const Icon(Icons.gavel, size: 20),
+              label: labels[4],
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.sync_outlined, size: 20),
+              activeIcon: const Icon(Icons.sync, size: 20),
+              label: labels[5],
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.menu_book_outlined, size: 20),
+              activeIcon: const Icon(Icons.menu_book, size: 20),
+              label: labels[6],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -185,7 +305,7 @@ class L10n {
       'welcome_sub': 'Votre compagnon spirituel et logistique.',
       'btn_start': 'Commencer mon parcours',
       'scam_warning_title': 'Alerte Arnaques !',
-      'scam_warning_desc': 'Ne versez jamais d\'argent à une agence sans avoir vérifié son agrément DGP.',
+      'scam_warning_desc': 'Ne versez jamais d\'argent à une agence sans avoir vérifié son agrément Sunu Hajj.',
       'progress_title': 'Mon avancement',
       'budget_title': 'Simulateur de budget',
       'total_est': 'Estimation coût total',
@@ -196,6 +316,9 @@ class L10n {
       'btn_send_sms': 'Envoyer alerte',
       'inquiry_success': 'Demande envoyée avec succès !',
       'checklist_title': 'Checklist interactive',
+      'agencies_title': 'Agences Agréées Sunu Hajj',
+      'agency_search_placeholder': 'Rechercher une agence...',
+      'budget_advice_title': 'Recommandations Sunu Hajj',
     },
     'wo': {
       'app_title': 'Sunu Hajj',
@@ -214,6 +337,9 @@ class L10n {
       'btn_send_sms': 'Yóone alerte',
       'inquiry_success': 'Laaj bi yóone na !',
       'checklist_title': 'Limu waajal gi',
+      'agencies_title': 'Agences yi Sunu Hajj dëggërël',
+      'agency_search_placeholder': 'Seet benn agence...',
+      'budget_advice_title': 'Xalaat yi Sunu Hajj joxe',
     },
     'ar': {
       'app_title': 'سنو الحج',
@@ -232,6 +358,9 @@ class L10n {
       'btn_send_sms': 'إرسال التنبيه',
       'inquiry_success': 'تم إرسال طلبك بنجاح!',
       'checklist_title': 'قائمة المهام',
+      'agencies_title': 'الوكالات المعتمدة',
+      'agency_search_placeholder': 'البحث عن وكالة...',
+      'budget_advice_title': 'توصيات بعثة الحج',
     }
   };
 
