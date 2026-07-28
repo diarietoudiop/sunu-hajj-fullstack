@@ -125,38 +125,49 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
   }, [agency.agencyId, agencies]);
 
   const handleRegisterPilgrim = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     setFormError('');
     setFormSuccess('');
 
-    if (!passport || !fullName || !phone || !email || !birthDate || !emergencyContactName || !emergencyContactPhone) {
-      setFormError("Veuillez remplir tous les champs obligatoires du dossier.");
+    const rawPassport = (passport || '').trim().toUpperCase();
+    const rawFullName = (fullName || '').trim();
+
+    if (!rawPassport || !rawFullName) {
+      setFormError("Veuillez remplir au moins le N° de Passeport et le Nom Complet du pèlerin.");
       return;
     }
 
-    const passportNum = passport.trim().toUpperCase();
+    let passportNum = rawPassport;
     if (!passportNum.startsWith('SN')) {
-      setFormError("Le numéro de passeport doit obligatoirement commencer par 'SN'.");
-      return;
+      passportNum = 'SN' + passportNum.replace(/[^A-Z0-9]/g, '');
     }
 
     try {
-      await ApiService.registerPilgrim({
+      const newPilgrimData = {
         passportNumber: passportNum,
-        fullName: fullName.trim(),
-        phone: phone.trim(),
-        email: email.trim(),
-        birthDate,
-        bloodType,
+        fullName: rawFullName,
+        phone: (phone || '').trim() || "+221 77 000 00 00",
+        email: (email || '').trim() || `${rawFullName.toLowerCase().replace(/\s+/g, '.')}@gmail.com`,
+        birthDate: birthDate || "1970-01-01",
+        bloodType: bloodType || "O+",
+        bloodGroup: bloodType || "O+",
         selectedAgencyId: agency.agencyId,
+        registrationStatus: 'approved',
+        medicalStatus: 'pending',
         emergencyContact: {
-          name: emergencyContactName.trim(),
-          phone: emergencyContactPhone.trim()
+          name: (emergencyContactName || '').trim() || "Proche à contacter",
+          phone: (emergencyContactPhone || '').trim() || "+221 77 000 00 00"
         }
-      });
+      };
 
-      setFormSuccess("Le pèlerin a été inscrit avec succès au registre de votre agence !");
+      const res = await ApiService.registerPilgrim(newPilgrimData);
+      const createdPilgrim = res?.data || res || newPilgrimData;
+
+      setFormSuccess(`Le pèlerin ${rawFullName} (Passeport ${passportNum}) a été inscrit avec succès au registre de votre agence !`);
       
+      // Instantly prepend to agency pilgrims list
+      setPilgrims(prev => [createdPilgrim, ...prev]);
+
       // Reset fields
       setPassport('');
       setFullName('');
@@ -170,7 +181,8 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
       // Reload agency data
       loadAgencyData();
     } catch (err) {
-      setFormError(err.message || "Erreur lors de la création du dossier.");
+      console.error("Agency pilgrim registration error:", err);
+      setFormError(err.message || "Erreur lors de l'enregistrement du pèlerin.");
     }
   };
 
@@ -690,14 +702,13 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
                 </div>
 
                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label className="form-label">Téléphone *</label>
+                  <label className="form-label">Téléphone Mobile</label>
                   <div className="input-with-icon">
                     <Phone size={16} className="input-field-icon" />
                     <input 
                       type="text" 
                       className="form-control" 
-                      required 
-                      placeholder="+221 77 123 45 67"
+                      placeholder="+221 77 123 45 67 (Optionnel)"
                       value={phone}
                       onChange={e => setPhone(e.target.value)}
                     />
@@ -705,14 +716,13 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
                 </div>
 
                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label className="form-label">Adresse Email *</label>
+                  <label className="form-label">Adresse Email</label>
                   <div className="input-with-icon">
                     <Mail size={16} className="input-field-icon" />
                     <input 
                       type="email" 
                       className="form-control" 
-                      required 
-                      placeholder="email@adresse.com"
+                      placeholder="email@adresse.com (Optionnel)"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                     />
@@ -720,13 +730,12 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
                 </div>
 
                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label className="form-label">Date de Naissance *</label>
+                  <label className="form-label">Date de Naissance</label>
                   <div className="input-with-icon">
                     <Calendar size={16} className="input-field-icon" />
                     <input 
                       type="date" 
                       className="form-control" 
-                      required 
                       value={birthDate}
                       onChange={e => setBirthDate(e.target.value)}
                     />
@@ -734,7 +743,7 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
                 </div>
 
                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label className="form-label">Groupe Sanguin *</label>
+                  <label className="form-label">Groupe Sanguin</label>
                   <div className="input-with-icon">
                     <Heart size={16} className="input-field-icon" />
                     <select 
@@ -767,24 +776,22 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
                 </div>
 
                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label className="form-label">Nom du Proche d'Urgence *</label>
+                  <label className="form-label">Nom du Proche d'Urgence</label>
                   <input 
                     type="text" 
                     className="form-control" 
-                    required 
-                    placeholder="Ex: Fatoumata Ndiaye (Fille)"
+                    placeholder="Ex: Fatoumata Ndiaye (Optionnel)"
                     value={emergencyContactName}
                     onChange={e => setEmergencyContactName(e.target.value)}
                   />
                 </div>
 
                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label className="form-label">Téléphone du Proche d'Urgence *</label>
+                  <label className="form-label">Téléphone du Proche d'Urgence</label>
                   <input 
                     type="text" 
                     className="form-control" 
-                    required 
-                    placeholder="Ex: +221 77 987 65 43"
+                    placeholder="Ex: +221 77 987 65 43 (Optionnel)"
                     value={emergencyContactPhone}
                     onChange={e => setEmergencyContactPhone(e.target.value)}
                   />

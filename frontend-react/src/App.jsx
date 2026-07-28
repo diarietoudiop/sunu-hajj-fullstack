@@ -135,6 +135,12 @@ function App() {
     if (role === 'pilgrim') {
       sessionStorage.setItem('dgp_pilgrim', JSON.stringify(authData));
       setCurrentPilgrim(authData);
+      if (authData) {
+        setPilgrims(prev => {
+          const exists = prev.some(p => (p.id && authData.id && p.id === authData.id) || (p.passportNumber && authData.passportNumber && p.passportNumber === authData.passportNumber));
+          return exists ? prev : [authData, ...prev];
+        });
+      }
     } else {
       const profile = authData || {
         id: 999,

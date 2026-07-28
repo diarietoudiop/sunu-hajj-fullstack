@@ -210,7 +210,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
   // Onboarding Wizard Modal state
   const [showWizard, setShowWizard] = useState(false);
   const [wizardStep, setWizardStep] = useState('role'); // 'role' | 'form' | 'otp' | 'success'
-  const [chosenRole, setChosenRole] = useState(null); // 'pilgrim' | 'agency'
+  const [chosenRole, setChosenRole] = useState('pilgrim'); // Default to 'pilgrim' so form always displays
 
   // Senegal 14 Regions
   const SENEGAL_REGIONS = [
