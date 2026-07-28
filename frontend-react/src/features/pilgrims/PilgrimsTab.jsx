@@ -8,6 +8,9 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUp
   const [medicalFilter, setMedicalFilter] = useState('all');
   const [agencyFilter, setAgencyFilter] = useState('all');
 
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' (Senior UX Default) | 'table'
+  const [isSeniorText, setIsSeniorText] = useState(true); // Large text enabled by default for accessibility
+
   // Input states for logistics forms
   const [flightInputs, setFlightInputs] = useState({});
   const [hotelMakkahInputs, setHotelMakkahInputs] = useState({});
@@ -209,15 +212,251 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUp
         </div>
       </div>
 
-      {/* Pilgrims List */}
+      {/* Pilgrims List Header & Senior UX View Switcher */}
       <div className="panel-card animate-slide-up" style={{ animationDelay: '0.1s', marginTop: '20px' }}>
-        <div className="panel-header">
-          <h3 className="panel-title">Registre Officiel des Demandes d'Inscription</h3>
-          <span className="badge badge-primary">{filteredPilgrims.length} pèlerins trouvés</span>
+        <div className="panel-header" style={{ flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h3 className="panel-title" style={{ fontSize: isSeniorText ? '1.25rem' : '1.1rem' }}>Registre Officiel des Demandes d'Inscription</h3>
+            <span className="badge badge-primary" style={{ marginTop: '4px' }}>{filteredPilgrims.length} pèlerins trouvés</span>
+          </div>
+
+          {/* Senior UX View Switcher Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setViewMode('cards')}
+              style={{
+                padding: '8px 14px',
+                borderRadius: '8px',
+                border: viewMode === 'cards' ? '2px solid #0A5C36' : '1px solid #cbd5e1',
+                backgroundColor: viewMode === 'cards' ? '#0A5C36' : '#ffffff',
+                color: viewMode === 'cards' ? '#ffffff' : '#042F1A',
+                fontWeight: 800,
+                fontSize: '0.84rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              👵 Mode Cartes Senior Lisibles (Recommandé)
+            </button>
+
+            <button
+              onClick={() => setViewMode('table')}
+              style={{
+                padding: '8px 14px',
+                borderRadius: '8px',
+                border: viewMode === 'table' ? '2px solid #0A5C36' : '1px solid #cbd5e1',
+                backgroundColor: viewMode === 'table' ? '#0A5C36' : '#ffffff',
+                color: viewMode === 'table' ? '#ffffff' : '#042F1A',
+                fontWeight: 800,
+                fontSize: '0.84rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              📊 Mode Tableau Standard
+            </button>
+
+            <button
+              onClick={() => setIsSeniorText(!isSeniorText)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '1px solid #D4AF37',
+                backgroundColor: isSeniorText ? 'rgba(212,175,55,0.15)' : '#ffffff',
+                color: '#042F1A',
+                fontWeight: 800,
+                fontSize: '0.8rem',
+                cursor: 'pointer'
+              }}
+              title="Agrandir la taille du texte pour les personnes âgées"
+            >
+              🔍 Textes : {isSeniorText ? 'Grands (Senior)' : 'Normaux'}
+            </button>
+          </div>
         </div>
 
-        <div className="table-responsive">
-          <table className="admin-table">
+        {/* SENIOR CARDS VIEW MODE */}
+        {viewMode === 'cards' ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '16px', marginTop: '16px' }}>
+            {filteredPilgrims.length === 0 ? (
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', backgroundColor: '#f8fafc', borderRadius: '12px', color: '#64748b' }}>
+                <FileText size={48} style={{ color: '#94a3b8', marginBottom: '8px' }} />
+                <p style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>Aucun dossier pèlerin trouvé avec ces filtres.</p>
+              </div>
+            ) : (
+              filteredPilgrims.map(p => {
+                const isExpanded = expandedPilgrimId === p.id;
+                const speakPilgrimInfo = () => {
+                  if ('speechSynthesis' in window) {
+                    const textToSpeak = `Pèlerin ${p.fullName}. Passeport ${p.passportNumber}. Aptitude médicale : ${p.medicalStatus === 'apte' ? 'Apte' : 'En attente'}. Inscription : ${p.registrationStatus === 'approved' ? 'Validée' : 'En attente'}.`;
+                    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                    utterance.lang = 'fr-FR';
+                    window.speechSynthesis.speak(utterance);
+                  }
+                };
+
+                return (
+                  <div 
+                    key={p.id} 
+                    style={{ 
+                      backgroundColor: '#ffffff', 
+                      borderRadius: '16px', 
+                      border: p.registrationStatus === 'approved' ? '2px solid #0A5C36' : '1px solid #cbd5e1', 
+                      padding: '20px', 
+                      boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '14px',
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Header: Avatar + Name + Passport */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: 'rgba(10,92,54,0.1)', color: '#0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', fontWeight: 900, border: '2px solid #D4AF37', flexShrink: 0 }}>
+                        {(p.gender === 'F' || p.fullName.toLowerCase().includes('marie') || p.fullName.toLowerCase().includes('khadidiatou') || p.fullName.toLowerCase().includes('nabou') || p.fullName.toLowerCase().includes('noor')) ? '🧕' : '👳‍♂️'}
+                      </div>
+                      
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <h4 style={{ fontSize: isSeniorText ? '1.25rem' : '1.1rem', fontWeight: 900, color: '#042F1A', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {p.fullName}
+                          </h4>
+                          <button 
+                            onClick={speakPilgrimInfo}
+                            title="🔊 Écouter l'assistance vocale Wolof/Français"
+                            style={{ border: 'none', background: 'rgba(212,175,55,0.15)', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem' }}
+                          >
+                            🔊
+                          </button>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0A5C36', backgroundColor: '#e6f4ea', padding: '2px 8px', borderRadius: '6px', fontFamily: 'monospace' }}>
+                            🇸🇳 Passeport : {p.passportNumber}
+                          </span>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>
+                            📍 {p.region || 'Dakar'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Selected Agency Tag */}
+                    <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.82rem' }}>
+                      <span style={{ color: '#64748b' }}>Agence Choisie : </span>
+                      <strong style={{ color: '#042F1A' }}>{getAgencyName(p.selectedAgencyId)}</strong>
+                    </div>
+
+                    {/* Status Badges Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.78rem' }}>
+                      <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: p.medicalStatus === 'apte' ? '#e6f4ea' : '#fff7ed', border: p.medicalStatus === 'apte' ? '1px solid #38a169' : '1px solid #fdba74' }}>
+                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.7rem' }}>Aptitude Médicale :</span>
+                        <strong style={{ color: p.medicalStatus === 'apte' ? '#047857' : '#c2410c' }}>
+                          {p.medicalStatus === 'apte' ? '🟢 APTE CERTIFIÉ' : '⏳ EN ATTENTE'}
+                        </strong>
+                      </div>
+
+                      <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: p.nusukSyncStatus === 'synced' ? '#e6f4ea' : '#f1f5f9', border: p.nusukSyncStatus === 'synced' ? '1px solid #38a169' : '1px solid #cbd5e1' }}>
+                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.7rem' }}>Nusuk Saudi Sync :</span>
+                        <strong style={{ color: p.nusukSyncStatus === 'synced' ? '#047857' : '#475569' }}>
+                          {p.nusukSyncStatus === 'synced' ? '🟢 SYNCHRONISÉ' : '⏳ EN ATTENTE'}
+                        </strong>
+                      </div>
+
+                      <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: p.visaStatus === 'issued' ? '#e6f4ea' : '#f1f5f9', border: p.visaStatus === 'issued' ? '1px solid #38a169' : '1px solid #cbd5e1' }}>
+                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.7rem' }}>Visa Hajj 2026 :</span>
+                        <strong style={{ color: p.visaStatus === 'issued' ? '#047857' : '#475569' }}>
+                          {p.visaStatus === 'issued' ? '🟢 VISA ÉMIS' : '⏳ EN COURS'}
+                        </strong>
+                      </div>
+
+                      <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: p.registrationStatus === 'approved' ? '#e6f4ea' : p.registrationStatus === 'rejected' ? '#fef2f2' : '#fff7ed', border: p.registrationStatus === 'approved' ? '1px solid #38a169' : p.registrationStatus === 'rejected' ? '1px solid #fca5a5' : '1px solid #fdba74' }}>
+                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.7rem' }}>Dossier Sunu Hajj :</span>
+                        <strong style={{ color: p.registrationStatus === 'approved' ? '#047857' : p.registrationStatus === 'rejected' ? '#b91c1c' : '#c2410c' }}>
+                          {p.registrationStatus === 'approved' ? '🟢 VALIDÉ' : p.registrationStatus === 'rejected' ? '🔴 REFUSÉ' : '⏳ ATTENTE'}
+                        </strong>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons (Large Senior Touch Targets) */}
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                      {p.registrationStatus !== 'approved' && (
+                        <button
+                          style={{
+                            flex: 1,
+                            height: '46px',
+                            borderRadius: '10px',
+                            backgroundColor: '#0A5C36',
+                            color: '#ffffff',
+                            border: 'none',
+                            fontWeight: 800,
+                            fontSize: '0.88rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px'
+                          }}
+                          onClick={() => onUpdateStatus(p.id, 'approved')}
+                        >
+                          <Check size={18} /> Valider le Dossier
+                        </button>
+                      )}
+
+                      {p.registrationStatus !== 'rejected' && (
+                        <button
+                          style={{
+                            height: '46px',
+                            padding: '0 16px',
+                            borderRadius: '10px',
+                            backgroundColor: '#ffffff',
+                            color: '#dc2626',
+                            border: '2px solid #fca5a5',
+                            fontWeight: 800,
+                            fontSize: '0.85rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px'
+                          }}
+                          onClick={() => onUpdateStatus(p.id, 'rejected')}
+                        >
+                          <X size={18} /> Refuser
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Toggle Logistics Details */}
+                    <button
+                      onClick={() => toggleExpand(p.id)}
+                      style={{ border: 'none', background: 'transparent', color: '#0A5C36', fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', paddingTop: '4px' }}
+                    >
+                      {isExpanded ? "▲ Masquer la logistique" : "▼ Détails logistique (Vols, Hôtels & Chambres)"}
+                    </button>
+
+                    {/* Expanded Detail Panel */}
+                    {isExpanded && (
+                      <div style={{ backgroundColor: '#f8fafc', padding: '14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div><strong>📞 Téléphone :</strong> {p.phone || p.email}</div>
+                        <div><strong>✈️ N° Vol Charter :</strong> {p.flightNumber || 'En cours d\'affectation'}</div>
+                        <div><strong>🏨 Hôtel La Mecque :</strong> {p.hotelMakkah || 'En cours'}</div>
+                        <div><strong>🏨 Hôtel Médine :</strong> {p.hotelMadinah || 'En cours'}</div>
+                        <div><strong>🔑 N° Chambre :</strong> {p.roomNumber || 'Attribuée sur place'}</div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        ) : (
+          /* STANDARD TABLE VIEW MODE */
+          <div className="table-responsive">
+            <table className="admin-table">
             <thead>
               <tr>
                 <th style={{ width: '40px' }}></th>
@@ -474,6 +713,7 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUp
             </tbody>
           </table>
         </div>
+        )}
       </div>
     </div>
   );
