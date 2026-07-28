@@ -1213,6 +1213,10 @@ export const ApiService = {
     } catch {
       return { success: true, count: 4 };
     }
+  },
+
+  sendRealSms(phone, text) {
+    return sendRealSms(phone, text);
   }
 };
 

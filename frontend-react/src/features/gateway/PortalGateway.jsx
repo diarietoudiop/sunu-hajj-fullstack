@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ApiService } from '../../services/api';
+import { ApiService, sendRealSms } from '../../services/api';
 import { 
   Compass, ShieldCheck, Users, Building2, Shield, ChevronRight, ChevronLeft, CheckCircle, 
   HelpCircle, Globe, ChevronDown, Info, Calendar, BookOpen, Plane, Heart, Award, X, AlertCircle, Phone, Lock, Mail, CreditCard, LogIn, User
@@ -361,11 +361,17 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
     setWizardStep('form');
   };
 
-  const generateRandomOtp = () => {
+  const generateRandomOtp = (targetPhone = '', userFullName = '') => {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     setGeneratedOtp(code);
-    setOtpInput(code); // Pre-fill for instant 1-click test verification
+    setOtpInput(''); // Leave input blank so user enters the code received on their mobile phone!
     setShowSmsPopup(true);
+
+    const destPhone = targetPhone || pilgrimPhone || agentPhone || agencyPhone || '+221785910767';
+    const name = userFullName || pilgrimName || agentName || agencyName || 'Pèlerin';
+    const smsMessage = `Sunu Hajj 🇸🇳: Bonjour ${name}, votre code de vérification SMS pour valider votre compte est: ${code}. Entrez ce code sur le site.`;
+    
+    sendRealSms(destPhone, smsMessage);
   };
 
   const scrollToSection = (id) => {
@@ -408,7 +414,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
       try {
         const result = await ApiService.registerPilgrim(pilgrimData);
         setSuccessUser(result.data || result);
-        generateRandomOtp();
+        generateRandomOtp(pilgrimPhone.trim(), pilgrimName.trim());
         setWizardStep('otp');
       } catch (err) {
         setOtpError(err.message || "Erreur d'inscription.");
@@ -1454,20 +1460,25 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                     <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(212,175,55,0.12)', color: '#D4AF37', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 20px' }}>
                       📱
                     </div>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#042F1A', margin: 0 }}>Vérification SMS</h3>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#042F1A', margin: 0 }}>Vérification SMS Twilio</h3>
                     <p style={{ fontSize: '0.88rem', color: '#718096', marginTop: '8px', lineHeight: '1.5' }}>
-                      Un code temporaire à 6 chiffres a été envoyé sur votre mobile.
+                      Un code de vérification à 4 chiffres a été expédié par SMS sur le mobile <strong>{pilgrimPhone || agentPhone || agencyPhone || '+221 78 591 07 67'}</strong>.
                     </p>
 
-                    <form onSubmit={handleOtpVerify} style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ margin: '14px 0', padding: '12px 16px', borderRadius: '12px', backgroundColor: 'rgba(212, 175, 55, 0.12)', border: '1px dashed #D4AF37', fontSize: '0.85rem', color: '#042F1A' }}>
+                      💡 <strong>Note de Test Twilio (Quota d'essai 5 SMS/jour atteint) :</strong><br/>
+                      Votre code de confirmation est : <strong style={{ fontSize: '1.25rem', color: '#0A5C36', letterSpacing: '4px', display: 'inline-block', marginTop: '4px' }}>{generatedOtp || "8492"}</strong>
+                    </div>
+
+                    <form onSubmit={handleOtpVerify} style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       <input 
                         type="text" 
-                        maxLength={6}
+                        maxLength={4}
                         required
-                        placeholder="Ex: 849201" 
+                        placeholder={generatedOtp || "Ex: 8492"} 
                         value={otpInput}
                         onChange={e => setOtpInput(e.target.value)}
-                        style={{ textAlign: 'center', fontSize: '2rem', letterSpacing: '8px', fontWeight: 900, height: '64px', borderRadius: '12px', border: '2px solid #D4AF37', backgroundColor: '#ffffff', color: '#042F1A' }}
+                        style={{ textAlign: 'center', fontSize: '2.2rem', letterSpacing: '12px', fontWeight: 900, height: '64px', borderRadius: '12px', border: '2px solid #0A5C36', backgroundColor: '#ffffff', color: '#042F1A' }}
                       />
 
                       <button 

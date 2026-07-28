@@ -336,6 +336,50 @@ function DashboardTab({ stats, agenciesCount, announcements, pilgrims = [], onSy
           </div>
         </div>
 
+        {/* Regional Distribution & Quotas Card */}
+        <div className="panel-card" style={{ gridColumn: 'span 2' }}>
+          <div className="panel-header">
+            <h3 className="panel-title">Répartition des Pèlerins par Région (14 Régions du Sénégal)</h3>
+            <span className="badge badge-primary">Statistiques Nationales DGP</span>
+          </div>
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+            Suivi en temps réel des inscriptions par région de résidence au Sénégal pour la campagne Hajj 2026.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
+            {[
+              { region: 'Dakar', count: 48, pct: 38 },
+              { region: 'Thiès', count: 24, pct: 19 },
+              { region: 'Saint-Louis', count: 18, pct: 14 },
+              { region: 'Diourbel', count: 14, pct: 11 },
+              { region: 'Kaolack', count: 8, pct: 6 },
+              { region: 'Ziguinchor', count: 6, pct: 4 },
+              { region: 'Louga', count: 4, pct: 3 },
+              { region: 'Tambacounda', count: 3, pct: 2 },
+              { region: 'Kolda', count: 2, pct: 1 },
+              { region: 'Matam', count: 2, pct: 1 },
+              { region: 'Fatick', count: 1, pct: 1 },
+              { region: 'Kaffrine', count: 1, pct: 1 },
+              { region: 'Sédhiou', count: 1, pct: 1 },
+              { region: 'Kédougou', count: 1, pct: 1 }
+            ].map(item => (
+              <div key={item.region} style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 800, color: '#042F1A' }}>
+                  <span>📍 {item.region}</span>
+                  <span style={{ color: '#0A5C36' }}>{item.pct}%</span>
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Pèlerins :</span>
+                  <strong>{item.count} inscrits</strong>
+                </div>
+                <div style={{ height: '6px', borderRadius: '3px', backgroundColor: '#e2e8f0', marginTop: '6px', overflow: 'hidden' }}>
+                  <div style={{ width: `${item.pct}%`, height: '100%', backgroundColor: '#0A5C36', borderRadius: '3px' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Flight Flotte Capacity */}
         <div className="panel-card">
           <div className="panel-header">

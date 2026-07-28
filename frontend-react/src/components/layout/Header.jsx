@@ -40,6 +40,14 @@ function Header({ activeTab, isApiOnline, darkMode, setDarkMode, onLogout, admin
 
       <div className="header-right">
         <button
+          className="btn btn-outline"
+          onClick={() => alert("📱 Sunu Hajj App : Pour installer l'application sur votre écran d'accueil, appuyez sur le menu de votre navigateur et sélectionnez 'Ajouter à l'écran d'accueil'.")}
+          style={{ height: '36px', fontSize: '0.78rem', padding: '0 12px', borderRadius: '8px', border: '1px solid #D4AF37', color: '#D4AF37', backgroundColor: 'rgba(212,175,55,0.08)', fontWeight: 700 }}
+        >
+          📱 Installer l'App Mobile
+        </button>
+
+        <button
           className="theme-toggle-btn"
           onClick={() => setDarkMode(!darkMode)}
           title={darkMode ? "Passer en mode clair" : "Passer en mode sombre"}

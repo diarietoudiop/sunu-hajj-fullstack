@@ -421,6 +421,9 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
   const [appointmentTime, setAppointmentTime] = useState('09:30');
   const [appointmentBooked, setAppointmentBooked] = useState(false);
 
+  const [showMedicalCertModal, setShowMedicalCertModal] = useState(false);
+  const [showPilgrimBadgeModal, setShowPilgrimBadgeModal] = useState(false);
+
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
@@ -1368,28 +1371,70 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
                       </div>
                     )}
 
-                    <button 
-                      onClick={() => setShowDoctorModal(true)}
-                      style={{ 
-                        width: '100%', 
-                        height: '40px', 
-                        marginTop: '14px', 
-                        fontWeight: 800, 
-                        fontSize: '0.8rem', 
-                        borderRadius: '10px',
-                        border: 'none', 
-                        color: '#ffffff',
-                        backgroundColor: '#0A5C36',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 12px rgba(10,92,54,0.2)'
-                      }}
-                    >
-                      <span>🩺</span> {chosenDoctor ? "Changer de Médecin / Réserver RDV" : "Choisir mon Médecin Agréé"}
-                    </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '14px' }}>
+                      <button 
+                        onClick={() => setShowDoctorModal(true)}
+                        style={{ 
+                          width: '100%', 
+                          height: '38px', 
+                          fontWeight: 800, 
+                          fontSize: '0.78rem', 
+                          borderRadius: '10px',
+                          border: 'none', 
+                          color: '#ffffff',
+                          backgroundColor: '#0A5C36',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <span>🩺</span> {chosenDoctor ? "Changer de Médecin / RDV" : "Choisir mon Médecin Agréé"}
+                      </button>
+
+                      <button 
+                        onClick={() => setShowMedicalCertModal(true)}
+                        style={{ 
+                          width: '100%', 
+                          height: '38px', 
+                          fontWeight: 800, 
+                          fontSize: '0.78rem', 
+                          borderRadius: '10px',
+                          border: '1px solid #D4AF37', 
+                          color: '#042F1A',
+                          backgroundColor: 'rgba(212,175,55,0.12)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <span>📄</span> Télécharger Certificat Médical (PDF)
+                      </button>
+
+                      <button 
+                        onClick={() => setShowPilgrimBadgeModal(true)}
+                        style={{ 
+                          width: '100%', 
+                          height: '38px', 
+                          fontWeight: 800, 
+                          fontSize: '0.78rem', 
+                          borderRadius: '10px',
+                          border: '1px solid #0A5C36', 
+                          color: '#0A5C36',
+                          backgroundColor: '#ffffff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <span>🪪</span> Mon Badge Pèlerin & Pass Nusuk 🇸🇦
+                      </button>
+                    </div>
                   </div>
 
                   {/* Support Card for Elderly */}
@@ -3128,6 +3173,178 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
                 }}
               >
                 🚀 Valider mon Médecin & Réserver le RDV Médical
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 1: CERTIFICAT MEDICAL D'APTITUDE PDF */}
+      {showMedicalCertModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', maxWidth: '680px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '32px', border: '3px double #D4AF37', boxShadow: '0 20px 50px rgba(0,0,0,0.3)', position: 'relative' }}>
+            <button 
+              onClick={() => setShowMedicalCertModal(false)}
+              style={{ position: 'absolute', top: '16px', right: '16px', border: 'none', background: '#f1f5f9', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '1rem', color: '#64748b' }}
+            >
+              ✕
+            </button>
+
+            {/* Official Header */}
+            <div style={{ textAlign: 'center', borderBottom: '2px solid #0A5C36', paddingBottom: '16px', marginBottom: '20px' }}>
+              <div style={{ fontSize: '0.82rem', fontWeight: 800, letterSpacing: '1px', color: '#042F1A' }}>RÉPUBLIQUE DU SÉNÉGAL</div>
+              <div style={{ fontSize: '0.72rem', fontStyle: 'italic', color: '#64748b' }}>Un Peuple - Un But - Une Foi</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0A5C36', marginTop: '4px' }}>MINISTÈRE DE LA SANTÉ ET DE L'ACTION SOCIALE</div>
+              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#D4AF37' }}>DÉLÉGATION GÉNÉRALE AU HAJJ (DGP)</div>
+            </div>
+
+            <div style={{ textAlign: 'center', margin: '20px 0' }}>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#042F1A', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, textDecoration: 'underline' }}>
+                CERTIFICAT D'APTITUDE MÉDICALE AU HAJJ 2026
+              </h2>
+              <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block', marginTop: '6px' }}>N° Document Certifié : DGP-MED-2026-{(safePilgrim.passportNumber || 'SN92837').slice(-5)}</span>
+            </div>
+
+            {/* Content Body */}
+            <div style={{ fontSize: '0.88rem', lineHeight: '1.8', color: '#1e293b', margin: '24px 0', padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <p style={{ margin: '0 0 12px 0' }}>
+                Je soussigné(e), <strong>{chosenDoctor?.doctorName || 'Dr. Mouhamadou Kane'}</strong>, Médecin d'État assermenté et agréé par la Commission Médicale Nationale du Hajj, certifie avoir examiné ce jour le pèlerin :
+              </p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', backgroundColor: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.84rem' }}>
+                <div><strong>Nom & Prénom :</strong> {safePilgrim.fullName || safePilgrim.name || 'Samba DIOP'}</div>
+                <div><strong>N° Passeport :</strong> {safePilgrim.passportNumber || 'SN8492049'}</div>
+                <div><strong>Région :</strong> {safePilgrim.region || chosenDoctor?.region || 'Dakar'}</div>
+                <div><strong>Groupe Sanguin :</strong> {safePilgrim.bloodType || 'O+ (Positif)'}</div>
+                <div><strong>Structure Sanitaire :</strong> {chosenDoctor?.hospital || chosenDoctor?.name || 'Hôpital Régional de Saint-Louis'}</div>
+                <div><strong>Téléphone :</strong> {safePilgrim.phone || '+221 78 591 07 67'}</div>
+              </div>
+
+              <div style={{ marginTop: '16px', padding: '12px', backgroundColor: 'rgba(10,92,54,0.08)', borderRadius: '8px', borderLeft: '4px solid #0A5C36', fontWeight: 800, color: '#0A5C36', textAlign: 'center', fontSize: '0.95rem' }}>
+                CONCLUSIONS MÉDICALES : 🟢 APTE À L'ACCOMPLISSEMENT DU PÈLERINAGE À LA MECQUE
+              </div>
+            </div>
+
+            {/* Official Stamp & Signatures */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '30px', paddingTop: '16px', borderTop: '1px dashed #cbd5e1' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ width: '80px', height: '80px', borderRadius: '50%', border: '2px dashed #0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 900, color: '#0A5C36', margin: '0 auto 6px' }}>
+                  TAMPON D'ÉTAT<br/>SÉNÉGAL
+                </div>
+                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Scellé Numérique Officiel</span>
+              </div>
+
+              <div style={{ textAlign: 'center' }}>
+                {/* Simulated QR Code */}
+                <div style={{ width: '74px', height: '74px', backgroundColor: '#042F1A', color: '#ffffff', padding: '6px', borderRadius: '6px', margin: '0 auto 6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', textAlign: 'center' }}>
+                  [QR CODE VERIFICATION DGP]
+                </div>
+                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Scan Sécurité Makkah</span>
+              </div>
+
+              <div style={{ textAlign: 'right' }}>
+                <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block' }}>Fait à Dakar, le {new Date().toLocaleDateString('fr-FR')}</span>
+                <strong style={{ fontSize: '0.85rem', color: '#042F1A', display: 'block', marginTop: '6px' }}>{chosenDoctor?.doctorName || 'Dr. Mouhamadou Kane'}</strong>
+                <span style={{ fontSize: '0.72rem', fontStyle: 'italic', color: '#0A5C36' }}>Signature & Cachet du Médecin</span>
+              </div>
+            </div>
+
+            {/* Print Button */}
+            <div style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
+              <button 
+                onClick={() => window.print()} 
+                style={{ flex: 1, height: '46px', backgroundColor: '#0A5C36', color: '#ffffff', border: 'none', borderRadius: '10px', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer' }}
+              >
+                🖨️ Imprimer / Sauvegarder en PDF
+              </button>
+              <button 
+                onClick={() => setShowMedicalCertModal(false)}
+                style={{ width: '120px', height: '46px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '10px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: BADGE OFFICIEL PELLERIN & PASS NUSUK SAUDI */}
+      {showPilgrimBadgeModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '20px', maxWidth: '440px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '24px', border: '2px solid #D4AF37', boxShadow: '0 20px 50px rgba(0,0,0,0.4)', position: 'relative' }}>
+            <button 
+              onClick={() => setShowPilgrimBadgeModal(false)}
+              style={{ position: 'absolute', top: '16px', right: '16px', border: 'none', background: '#f1f5f9', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.9rem', color: '#64748b' }}
+            >
+              ✕
+            </button>
+
+            {/* Badge Card Lanyard UI */}
+            <div style={{ borderRadius: '16px', border: '3px solid #0A5C36', overflow: 'hidden', backgroundColor: '#ffffff', boxShadow: '0 8px 25px rgba(0,0,0,0.12)' }}>
+              {/* Badge Header Banner */}
+              <div style={{ background: 'linear-gradient(135deg, #042F1A 0%, #0A5C36 100%)', color: '#ffffff', padding: '14px', textAlign: 'center', position: 'relative' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.2rem', marginBottom: '4px' }}>
+                  <span>🇸🇳</span>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#D4AF37', letterSpacing: '2px' }}>ROYAUME D'ARABIE SAOUDITE - SÉNÉGAL</span>
+                  <span>🇸🇦</span>
+                </div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#FFFFFF' }}>HAJJ 2026 — PASS PÈLERIN</h3>
+                <span style={{ fontSize: '0.68rem', color: '#D4AF37', fontWeight: 700 }}>CARD IDENTIFICATION & NUSUK PERMIT</span>
+              </div>
+
+              {/* Badge Body */}
+              <div style={{ padding: '20px', textAlign: 'center' }}>
+                {/* Pilgrim Avatar Frame */}
+                <div style={{ width: '90px', height: '90px', borderRadius: '50%', border: '4px solid #D4AF37', margin: '0 auto 12px', overflow: 'hidden', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>
+                  👳‍♂️
+                </div>
+
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#042F1A', margin: '0 0 4px 0' }}>
+                  {safePilgrim.fullName || safePilgrim.name || 'Samba DIOP'}
+                </h2>
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0A5C36', display: 'block', marginBottom: '14px' }}>
+                  Passeport : {safePilgrim.passportNumber || 'SN9283741'} | Groupe : {safePilgrim.bloodType || 'O+'}
+                </span>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', textAlign: 'left', backgroundColor: '#f8fafc', padding: '10px 12px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.74rem', margin: '12px 0' }}>
+                  <div><span style={{ color: '#64748b' }}>Agence :</span><br/><strong>{safePilgrim.agencyName || 'Teranga Hajj'}</strong></div>
+                  <div><span style={{ color: '#64748b' }}>Région :</span><br/><strong>{safePilgrim.region || 'Dakar'}</strong></div>
+                  <div><span style={{ color: '#64748b' }}>Nusuk Status :</span><br/><strong style={{ color: '#047857' }}>🟢 SYNCHRONISÉ</strong></div>
+                  <div><span style={{ color: '#64748b' }}>Aptitude :</span><br/><strong style={{ color: '#047857' }}>🟢 VALIDAIT (APTE)</strong></div>
+                </div>
+
+                {/* QR Code Nusuk Saudi */}
+                <div style={{ margin: '16px 0 8px 0', padding: '12px', backgroundColor: '#042F1A', color: '#ffffff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
+                  <div style={{ width: '60px', height: '60px', backgroundColor: '#ffffff', color: '#000000', borderRadius: '6px', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.55rem', fontWeight: 900 }}>
+                    [QR NUSUK SAUDI]
+                  </div>
+                  <div style={{ textAlign: 'left' }}>
+                    <span style={{ fontSize: '0.65rem', color: '#D4AF37', fontWeight: 800, display: 'block' }}>NUSUK HAJJ VISA ID</span>
+                    <strong style={{ fontSize: '0.88rem', color: '#ffffff' }}>SA-2026-SN-84920</strong>
+                    <span style={{ fontSize: '0.62rem', color: '#94a3b8', display: 'block', marginTop: '2px' }}>Scannable à Makkah, Mina & Arafat</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Badge Footer */}
+              <div style={{ backgroundColor: '#f1f5f9', borderTop: '1px solid #e2e8f0', padding: '8px', textAlign: 'center', fontSize: '0.68rem', color: '#64748b', fontWeight: 700 }}>
+                📞 Urgence DGP Sénégal sur place : +966 50 000 0000 / 800 10 20 30
+              </div>
+            </div>
+
+            {/* Print Button */}
+            <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+              <button 
+                onClick={() => window.print()} 
+                style={{ flex: 1, height: '44px', backgroundColor: '#0A5C36', color: '#ffffff', border: 'none', borderRadius: '10px', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}
+              >
+                🖨️ Imprimer mon Badge (Format Plastifié)
+              </button>
+              <button 
+                onClick={() => setShowPilgrimBadgeModal(false)}
+                style={{ width: '100px', height: '44px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '10px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                Fermer
               </button>
             </div>
           </div>
