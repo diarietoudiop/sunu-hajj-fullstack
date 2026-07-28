@@ -22,7 +22,7 @@ class ErrorBoundary extends React.Component {
       sessionStorage.clear();
       localStorage.clear();
     } catch (e) {}
-    window.location.href = window.location.origin + window.location.pathname + '?v=' + Date.now();
+    window.location.href = window.location.origin + '/?v=' + Date.now();
   };
 
   render() {
