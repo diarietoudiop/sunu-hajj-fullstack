@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ApiService, sendRealSms } from '../../services/api';
+import { ApiService, sendRealSms, sendRealEmail } from '../../services/api';
 import { 
   Compass, ShieldCheck, Users, Building2, Shield, ChevronRight, ChevronLeft, CheckCircle, 
   HelpCircle, Globe, ChevronDown, Info, Calendar, BookOpen, Plane, Heart, Award, X, AlertCircle, Phone, Lock, Mail, CreditCard, LogIn, User
@@ -364,14 +364,25 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
   const generateRandomOtp = (targetPhone = '', userFullName = '') => {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     setGeneratedOtp(code);
-    setOtpInput(''); // Leave input blank so user enters the code received on their mobile phone!
+    setOtpInput('');
     setShowSmsPopup(true);
 
     const destPhone = targetPhone || pilgrimPhone || agentPhone || agencyPhone || '+221785910767';
+    const destEmail = pilgrimEmail || agentEmail || agencyEmail || '';
     const name = userFullName || pilgrimName || agentName || agencyName || 'Pèlerin';
-    const smsMessage = `Sunu Hajj 🇸🇳: Bonjour ${name}, votre code de vérification SMS pour valider votre compte est: ${code}. Entrez ce code sur le site.`;
     
+    // 1. Dispatch Real GSM SMS
+    const smsMessage = `Sunu Hajj 🇸🇳: Bonjour ${name}, votre code de vérification SMS pour valider votre compte est: ${code}. Entrez ce code sur le site.`;
     sendRealSms(destPhone, smsMessage);
+
+    // 2. Dispatch Real Email OTP Notification
+    if (destEmail) {
+      sendRealEmail(
+        destEmail,
+        `Sunu Hajj 2026 🇸🇳 - Code OTP de vérification: ${code}`,
+        `Bonjour ${name},\n\nVotre code de vérification d'inscription au Registre National Hajj 2026 est : ${code}.\n\nVeuillez saisir ce code à 4 chiffres sur la plateforme pour activer votre Espace.\n\nCordialement,\nLa Délégation Générale au Pèlerinage de la République du Sénégal`
+      );
+    }
   };
 
   const scrollToSection = (id) => {
