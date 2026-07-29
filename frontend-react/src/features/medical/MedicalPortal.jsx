@@ -31,8 +31,36 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
   const structureInfo = MOCK_MEDICAL_STRUCTURES.find(m => m.code === structureCode) || MOCK_MEDICAL_STRUCTURES[0];
   const doctorName = doctorUser?.fullName || doctorUser?.doctorName || structureInfo.doctorName;
 
-  // Filter pilgrims
-  const filteredPilgrims = pilgrims.filter(p => {
+  // Filter pilgrims specifically for THIS doctor/hospital's waiting list
+  const myDoctorPilgrims = pilgrims.filter(p => {
+    if (!p) return false;
+    const targetCode = String(structureCode || '').toUpperCase();
+    const targetName = String(doctorName || '').toLowerCase();
+    const targetHospital = String(structureInfo?.name || '').toLowerCase();
+
+    const pCode = String(p.selectedMedicalCode || p.selectedDoctorId || p.doctorCode || p.medicalDetails?.doctorCode || '').toUpperCase();
+    const pDoctorName = String(p.selectedDoctorName || p.medicalDetails?.doctorName || '').toLowerCase();
+    const pHospital = String(p.selectedHospital || p.medicalDetails?.structureName || '').toLowerCase();
+
+    // 1. Direct code match (ex: MED-DKR-02)
+    if (pCode && targetCode && pCode === targetCode) return true;
+
+    // 2. Doctor name or hospital name match
+    if (pDoctorName && targetName && (pDoctorName.includes(targetName) || targetName.includes(pDoctorName))) return true;
+    if (pHospital && targetHospital && (pHospital.includes(targetHospital) || targetHospital.includes(pHospital))) return true;
+
+    // 3. Fallback for demo static test pilgrims (id 1 or id 50) without explicit doctor code
+    if (!pCode && !pDoctorName && !pHospital) {
+      if (p.id === 1 || p.id === 50) {
+        return targetCode === 'MED-DKR-01' || targetCode === 'MED-DKR-02';
+      }
+      return false;
+    }
+
+    return false;
+  });
+
+  const filteredPilgrims = myDoctorPilgrims.filter(p => {
     const query = searchQuery.toLowerCase().trim();
     const matchesSearch = !query || 
       (p.fullName && p.fullName.toLowerCase().includes(query)) || 
@@ -43,11 +71,11 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
     return matchesSearch && matchesStatus;
   });
 
-  // Calculate statistics
-  const totalCount = pilgrims.length;
-  const apteCount = pilgrims.filter(p => p.medicalStatus === 'apte').length;
-  const pendingCount = pilgrims.filter(p => !p.medicalStatus || p.medicalStatus === 'pending').length;
-  const inapteCount = pilgrims.filter(p => p.medicalStatus === 'inapte').length;
+  // Calculate statistics for THIS doctor's pilgrims
+  const totalCount = myDoctorPilgrims.length;
+  const apteCount = myDoctorPilgrims.filter(p => p.medicalStatus === 'apte').length;
+  const pendingCount = myDoctorPilgrims.filter(p => !p.medicalStatus || p.medicalStatus === 'pending').length;
+  const inapteCount = myDoctorPilgrims.filter(p => p.medicalStatus === 'inapte').length;
 
   const handleOpenConsultation = (pilgrim) => {
     setSelectedPilgrim(pilgrim);

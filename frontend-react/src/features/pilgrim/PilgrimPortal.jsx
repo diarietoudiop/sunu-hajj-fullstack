@@ -3193,8 +3193,30 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
 
               <button
                 type="button"
-                onClick={() => {
+                onClick={async () => {
                   setAppointmentBooked(true);
+                  const doctorData = {
+                    selectedMedicalCode: chosenDoctor.code,
+                    selectedDoctorId: chosenDoctor.code,
+                    selectedDoctorName: chosenDoctor.doctorName,
+                    selectedHospital: chosenDoctor.hospital,
+                    medicalAppointmentDate: appointmentDate,
+                    medicalAppointmentTime: appointmentTime
+                  };
+                  try {
+                    await ApiService.updatePilgrimProfile(safePilgrim.id, doctorData);
+                  } catch (e) {}
+                  
+                  // Save to local storage mock pilgrims list
+                  try {
+                    const mockList = JSON.parse(localStorage.getItem('mock_pilgrims') || '[]');
+                    const idx = mockList.findIndex(p => p.id === safePilgrim.id || p.passportNumber === safePilgrim.passportNumber);
+                    if (idx !== -1) {
+                      mockList[idx] = { ...mockList[idx], ...doctorData };
+                      localStorage.setItem('mock_pilgrims', JSON.stringify(mockList));
+                    }
+                  } catch (e) {}
+
                   sendRealSms(phone || safePilgrim.phone || '+221 77 123 45 67', `Sunu Hajj: Votre RDV médical avec ${chosenDoctor.doctorName} (${chosenDoctor.hospital}) est confirmé pour le ${appointmentDate} à ${appointmentTime}.`);
                   alert(`✅ Visite médicale programmée avec succès !\n\nMédecin : ${chosenDoctor.doctorName}\nStructure : ${chosenDoctor.hospital}\nDate : Le ${appointmentDate} à ${appointmentTime}\n\nUn SMS de confirmation a été transmis.`);
                   setShowDoctorModal(false);

@@ -1523,30 +1523,19 @@ export const sendRealSms = (phone, text) => {
 
 export const sendRealEmail = (toEmail, subject, bodyText) => {
   const cleanEmail = (toEmail || '').trim() || 'pelerin@sunuhajj.sn';
-  const encodedSubject = encodeURIComponent(subject);
-  const encodedBody = encodeURIComponent(bodyText);
 
-  // 1. Trigger Native Email Client (Gmail, Outlook, Apple Mail)
-  const mailtoUrl = `mailto:${cleanEmail}?subject=${encodedSubject}&body=${encodedBody}`;
-
-  try {
-    const windowRef = window.open(mailtoUrl, '_blank');
-    if (windowRef) setTimeout(() => windowRef.close(), 1000);
-  } catch (e) {
-    console.warn("Mailto trigger error", e);
-  }
-
-  // 2. Direct HTTPS Email Dispatcher (Formsubmit API)
+  // Direct HTTPS Email Dispatcher (Formsubmit API)
   fetch(`https://formsubmit.co/ajax/${cleanEmail}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify({
       _subject: subject,
       message: bodyText,
-      service: "SUNU HAJJ 2026 - Plateforme Officielle"
+      service: "SUNU HAJJ 2026 - Plateforme Officielle",
+      _captcha: "false"
     })
   }).catch(() => {});
 
-  return { success: true, email: cleanEmail, mailtoUrl };
+  return { success: true, email: cleanEmail };
 };
 
