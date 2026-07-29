@@ -26,10 +26,28 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMsg, setPasswordMsg] = useState(null);
 
-  // Find structure details or fallback
-  const structureCode = doctorUser?.code || doctorUser?.id || 'MED-DKR-01';
-  const structureInfo = MOCK_MEDICAL_STRUCTURES.find(m => m.code === structureCode) || MOCK_MEDICAL_STRUCTURES[0];
-  const doctorName = doctorUser?.fullName || doctorUser?.doctorName || structureInfo.doctorName;
+  // Find structure details dynamically from doctorUser or local storage
+  const localMedicals = (() => {
+    try { return JSON.parse(localStorage.getItem('mock_medical_structures') || '[]'); } catch (e) { return []; }
+  })();
+  const allMedicals = [...localMedicals, ...MOCK_MEDICAL_STRUCTURES];
+
+  const structureCode = String(doctorUser?.code || doctorUser?.id || 'MED-DKR-01').toUpperCase();
+  const foundMatch = allMedicals.find(m => m && (
+    String(m.code || '').toUpperCase() === structureCode ||
+    String(m.id || '').toUpperCase() === structureCode
+  ));
+
+  const structureInfo = {
+    code: doctorUser?.code || doctorUser?.id || foundMatch?.code || foundMatch?.id || structureCode,
+    name: doctorUser?.hospital || doctorUser?.name || foundMatch?.name || 'Structure Médicale Agréée',
+    doctorName: doctorUser?.doctorName || doctorUser?.fullName || foundMatch?.doctorName || 'Dr. Médecin Chef',
+    region: doctorUser?.region || foundMatch?.region || 'Dakar',
+    phone: doctorUser?.phone || foundMatch?.phone || '+221 33 824 00 00',
+    email: doctorUser?.email || foundMatch?.email || 'medecin@sante.gouv.sn'
+  };
+
+  const doctorName = doctorUser?.doctorName || doctorUser?.fullName || structureInfo.doctorName || 'Dr. Médecin Chef';
 
   // Filter pilgrims specifically for THIS doctor/hospital's waiting list
   const myDoctorPilgrims = pilgrims.filter(p => {
