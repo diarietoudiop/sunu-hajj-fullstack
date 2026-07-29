@@ -56,14 +56,12 @@ function App() {
   const [selectedPortal, setSelectedPortal] = useState(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      const path = window.location.pathname;
       const portal = urlParams.get('portal');
       const role = urlParams.get('role');
       if (portal === 'pelerin' || role === 'pilgrim') return 'pilgrim';
       if (role === 'doctor' || role === 'medical' || portal === 'medecin' || portal === 'medical') return 'doctor';
       if (role === 'agency' || portal === 'agence') return 'agency';
       if (role === 'admin' || portal === 'admin') return 'admin';
-      if (path.includes('/account/login')) return 'agency';
       return null;
     } catch {
       return null;

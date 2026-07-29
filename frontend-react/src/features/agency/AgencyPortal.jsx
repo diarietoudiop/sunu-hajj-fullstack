@@ -67,16 +67,22 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
     }
   };
 
-  // Find detailed agency info from the agencies list
-  const fullAgencyDetails = agencies.find(a => a.id === safeAgency.agencyId) || {
-    name: safeAgency.fullName || safeAgency.name || "Agence Agréée",
-    price: 3600000,
-    type: "economique",
-    address: "Sénégal",
-    phone: "",
-    email: safeAgency.email || "",
-    rating: 4.5,
-    features: "[]"
+  // Find detailed agency info from the agencies list safely
+  const agencyNameStr = safeAgency.fullName || safeAgency.name || "Voyages Teranga Hajj & Omra";
+  const matchedAgency = (agencies || []).find(a => a && (a.id === safeAgency.agencyId || a.id === safeAgency.id || a.name === agencyNameStr));
+  
+  const fullAgencyDetails = {
+    id: matchedAgency?.id || safeAgency.agencyId || safeAgency.id || 1,
+    name: matchedAgency?.name || agencyNameStr,
+    price: matchedAgency?.price || safeAgency.price || 3600000,
+    type: matchedAgency?.type || safeAgency.type || "economique",
+    address: matchedAgency?.address || safeAgency.address || "Dakar, Sénégal",
+    phone: matchedAgency?.phone || safeAgency.phone || "+221 33 824 12 34",
+    email: matchedAgency?.email || safeAgency.email || "contact@terangahajj.sn",
+    rating: matchedAgency?.rating || 4.5,
+    features: matchedAgency?.features || safeAgency.features || [],
+    status: matchedAgency?.status || safeAgency.status || 'approved',
+    isApproved: matchedAgency?.isApproved ?? safeAgency.isApproved ?? true
   };
 
   const getFeaturesList = () => {
@@ -220,7 +226,7 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
           <div className="logo-section">
             <div className="logo-icon" style={{ fontSize: '1.4rem' }}>🕋</div>
             <div className="logo-meta">
-              <span className="logo-title" style={{ fontSize: '1.15rem' }}>{fullAgencyDetails.name.split(' ')[0]} Hajj</span>
+              <span className="logo-title" style={{ fontSize: '1.15rem' }}>{(fullAgencyDetails.name || "Agence").split(' ')[0]} Hajj</span>
               <span className="logo-subtitle">Espace Agence Agréée</span>
             </div>
           </div>

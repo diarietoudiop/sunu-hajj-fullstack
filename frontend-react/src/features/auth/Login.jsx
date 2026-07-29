@@ -51,8 +51,14 @@ function Login({ onLoginSuccess, initialRole = 'agency', onBackToHome }) {
   useEffect(() => {
     try {
       const custom = JSON.parse(localStorage.getItem('mock_agencies') || '[]');
-      setRegisteredAgencies(custom);
-    } catch (e) {}
+      if (Array.isArray(custom)) {
+        setRegisteredAgencies(custom.filter(a => a && typeof a === 'object'));
+      } else {
+        setRegisteredAgencies([]);
+      }
+    } catch (e) {
+      setRegisteredAgencies([]);
+    }
   }, []);
 
   const handleSubmit = async (e) => {
