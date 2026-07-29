@@ -546,10 +546,12 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
         });
       } else if (chosenRole === 'doctor') {
         onDirectLogin('doctor', {
-          id: userData.code || userData.id || 'MED-DKR-01',
-          code: userData.code || 'MED-DKR-01',
-          name: userData.name || 'Hôpital Principal de Dakar',
-          doctorName: userData.doctorName || userData.fullName || 'Dr. Babacar Ndiaye',
+          id: userData.code || userData.id || agentMatricule || 'MED-DKR-01',
+          code: userData.code || userData.id || agentMatricule || 'MED-DKR-01',
+          name: userData.name || agencyName || 'Structure Médicale Agréée',
+          doctorName: userData.doctorName || userData.fullName || agentName || 'Dr. Médecin Chef',
+          email: userData.email || agentEmail || 'medecin@sante.gouv.sn',
+          phone: userData.phone || agentPhone || '+221 33 824 00 00',
           role: 'doctor'
         });
       } else {
@@ -1311,16 +1313,42 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                              <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Nom de la Structure Médicale / Hôpital *</label>
-                              <input 
-                                type="text" 
-                                required 
-                                className="form-control"
-                                placeholder="Ex: Hôpital Principal de Dakar" 
-                                value={agencyName}
-                                onChange={e => setAgencyName(e.target.value)}
-                                style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px' }}
-                              />
+                               <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Nom de la Structure Médicale / Hôpital Agréé *</label>
+                               <select
+                                 required 
+                                 className="form-control"
+                                 value={agencyName}
+                                 onChange={e => {
+                                   const selectedName = e.target.value;
+                                   setAgencyName(selectedName);
+                                   const ACCREDITED_HOSPITALS_LIST = [
+                                     { name: "Hôpital Aristide Le Dantec (Dakar)", code: "MED-DKR-02", doctor: "Dr. Aïssatou Sow", phone: "+221 33 889 38 00", email: "hajj@ledantec.sn" },
+                                     { name: "Hôpital Principal de Dakar", code: "MED-DKR-01", doctor: "Dr. Babacar Ndiaye", phone: "+221 33 839 50 50", email: "visitemedicale@principaldakar.sn" },
+                                     { name: "Hôpital Régional de Thiès", code: "MED-THIES-01", doctor: "Dr. Cheikh Tall", phone: "+221 33 951 10 20", email: "sante.thies@sante.gouv.sn" },
+                                     { name: "Hôpital Régional de Saint-Louis", code: "MED-SL-01", doctor: "Dr. Mouhamadou Kane", phone: "+221 33 961 11 00", email: "hajj@hopitalsaintlouis.sn" },
+                                     { name: "Hôpital Régional de Ziguinchor", code: "MED-ZIG-01", doctor: "Dr. Aminata Touré", phone: "+221 33 991 12 34", email: "visite.zig@sante.gouv.sn" },
+                                     { name: "Hôpital Régional d'El Hadji Ibrahima Niass (Kaolack)", code: "MED-KL-01", doctor: "Dr. Mamadou Ndiaye", phone: "+221 33 941 12 00", email: "hajj@kaolack.sante.sn" },
+                                     { name: "Autre Hôpital / Centre Médical Agréé", code: "MED-DKR-03", doctor: "Dr. Médecin Référent", phone: "+221 33 824 00 00", email: "medecin@sante.gouv.sn" }
+                                   ];
+                                   const found = ACCREDITED_HOSPITALS_LIST.find(h => h.name === selectedName);
+                                   if (found) {
+                                     setAgentMatricule(found.code);
+                                     if (!agentName) setAgentName(found.doctor);
+                                     if (!agentPhone) setAgentPhone(found.phone);
+                                     if (!agentEmail) setAgentEmail(found.email);
+                                   }
+                                 }}
+                                 style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px', fontWeight: 700 }}
+                               >
+                                 <option value="">-- Sélectionnez votre Hôpital Agréé --</option>
+                                 <option value="Hôpital Aristide Le Dantec (Dakar)">Hôpital Aristide Le Dantec (Dakar) — Code: MED-DKR-02</option>
+                                 <option value="Hôpital Principal de Dakar">Hôpital Principal de Dakar — Code: MED-DKR-01</option>
+                                 <option value="Hôpital Régional de Thiès">Hôpital Régional de Thiès — Code: MED-THIES-01</option>
+                                 <option value="Hôpital Régional de Saint-Louis">Hôpital Régional de Saint-Louis — Code: MED-SL-01</option>
+                                 <option value="Hôpital Régional de Ziguinchor">Hôpital Régional de Ziguinchor — Code: MED-ZIG-01</option>
+                                 <option value="Hôpital Régional d'El Hadji Ibrahima Niass (Kaolack)">Hôpital Régional d'El Hadji Ibrahima Niass (Kaolack) — Code: MED-KL-01</option>
+                                 <option value="Autre Hôpital / Centre Médical Agréé">Autre Hôpital / Centre Médical Agréé</option>
+                               </select>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
