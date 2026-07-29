@@ -1475,25 +1475,20 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                 {/* STEP 2: OTP */}
                 {wizardStep === 'otp' && (
                   <div className="fade-in" style={{ textAlign: 'center', padding: '20px 0' }}>
-                    <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(212,175,55,0.12)', color: '#D4AF37', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 20px' }}>
-                      📱
+                    <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(10,92,54,0.1)', color: '#0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 20px' }}>
+                      🔐
                     </div>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#042F1A', margin: 0 }}>Vérification SMS Twilio</h3>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#042F1A', margin: 0 }}>Vérification Sécurisée</h3>
                     <p style={{ fontSize: '0.88rem', color: '#718096', marginTop: '8px', lineHeight: '1.5' }}>
-                      Un code de vérification à 4 chiffres a été expédié par SMS sur le mobile <strong>{pilgrimPhone || agentPhone || agencyPhone || '+221 78 591 07 67'}</strong>.
+                      Un code de vérification à 4 chiffres a été expédié sur votre mobile <strong>{pilgrimPhone || agentPhone || agencyPhone || '+221 78 591 07 67'}</strong> et à votre adresse Email.
                     </p>
 
-                    <div style={{ margin: '14px 0', padding: '12px 16px', borderRadius: '12px', backgroundColor: 'rgba(212, 175, 55, 0.12)', border: '1px dashed #D4AF37', fontSize: '0.85rem', color: '#042F1A' }}>
-                      💡 <strong>Note de Test Twilio (Quota d'essai 5 SMS/jour atteint) :</strong><br/>
-                      Votre code de confirmation est : <strong style={{ fontSize: '1.25rem', color: '#0A5C36', letterSpacing: '4px', display: 'inline-block', marginTop: '4px' }}>{generatedOtp || "8492"}</strong>
-                    </div>
-
-                    <form onSubmit={handleOtpVerify} style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <form onSubmit={handleOtpVerify} style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       <input 
                         type="text" 
                         maxLength={4}
                         required
-                        placeholder={generatedOtp || "Ex: 8492"} 
+                        placeholder="• • • •" 
                         value={otpInput}
                         onChange={e => setOtpInput(e.target.value)}
                         style={{ textAlign: 'center', fontSize: '2.2rem', letterSpacing: '12px', fontWeight: 900, height: '64px', borderRadius: '12px', border: '2px solid #0A5C36', backgroundColor: '#ffffff', color: '#042F1A' }}
@@ -1501,11 +1496,21 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
 
                       <button 
                         type="submit" 
-                        style={{ width: '100%', height: '52px', fontWeight: 800, fontSize: '0.98rem', borderRadius: '10px', backgroundColor: '#0A5C36', color: '#ffffff', border: 'none', cursor: 'pointer' }}
+                        style={{ width: '100%', height: '52px', fontWeight: 800, fontSize: '0.98rem', borderRadius: '10px', backgroundColor: '#0A5C36', color: '#ffffff', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(10,92,54,0.3)' }}
                       >
-                        Valider mon Code SMS & Finaliser →
+                        Valider mon Code & Finaliser →
                       </button>
                     </form>
+
+                    <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center', gap: '12px' }}>
+                      <button
+                        type="button"
+                        onClick={() => generateRandomOtp(pilgrimPhone || agentPhone || agencyPhone, pilgrimName || agentName || agencyName)}
+                        style={{ background: 'none', border: 'none', color: '#0A5C36', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+                      >
+                        🔄 Renvoyer le code par SMS / Email
+                      </button>
+                    </div>
                   </div>
                 )}
 
