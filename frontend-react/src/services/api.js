@@ -1414,7 +1414,7 @@ export const sendRealSms = (phone, text) => {
   if (!cleanPhone.startsWith('+')) {
     if (cleanPhone.startsWith('221')) {
       cleanPhone = '+' + cleanPhone;
-    } else if (cleanPhone.length === 9 && (cleanPhone.startsWith('77') || cleanPhone.startsWith('78') || cleanPhone.startsWith('76') || cleanPhone.startsWith('70') || cleanPhone.startsWith('75'))) {
+    } else if (cleanPhone.length === 9) {
       cleanPhone = '+221' + cleanPhone;
     } else {
       cleanPhone = '+221' + cleanPhone;
@@ -1425,29 +1425,40 @@ export const sendRealSms = (phone, text) => {
   const encodedText = encodeURIComponent(text);
   const timestamp = new Date().toISOString();
 
-  // 1. Trigger Native Device SMS app (Works on Mobile iOS/Android & Paired Desktop)
-  if (config.enableNativeDeviceSms) {
+  // 1. Dispatch to Textbelt Free Real SMS Gateway for international/Senegal numbers
+  try {
+    fetch('https://textbelt.com/text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone: cleanPhone,
+        message: text,
+        key: 'textbelt'
+      })
+    }).catch(err => console.log("[Textbelt SMS]", err));
+  } catch (e) {}
+
+  // 2. Trigger Native Device SMS app if supported
+  if (typeof window !== 'undefined') {
     const smsUrl = `sms:${cleanPhone}?body=${encodedText}`;
     try {
-      // Create hidden iframe or direct location trigger
       const iframe = document.createElement('iframe');
       iframe.style.display = 'none';
       iframe.src = smsUrl;
       document.body.appendChild(iframe);
-      setTimeout(() => document.body.removeChild(iframe), 2000);
+      setTimeout(() => {
+        try { document.body.removeChild(iframe); } catch (e) {}
+      }, 2000);
     } catch (e) {
       console.warn("SMS protocol trigger error", e);
     }
   }
 
-  // 2. REAL Gateway HTTP Dispatch
+  // 3. REAL Gateway HTTP Dispatch (Orange / Twilio / Custom Webhook)
   console.log(`[SMS DISPATCH] Sending real SMS to ${cleanPhone} via Provider: ${config.provider.toUpperCase()} (${config.senderId})`);
 
-  let requestPromise;
-
   if (config.provider === 'orange') {
-    // Real Orange SMS API Sénégal Endpoint Call
-    requestPromise = fetch('https://api.orange.com/smsmessaging/v1/outbound/requests', {
+    fetch('https://api.orange.com/smsmessaging/v1/outbound/requests', {
       method: 'POST',
       headers: {
         'Authorization': config.webhookBearerToken || `Bearer ${config.orangeApiKey}`,
@@ -1461,12 +1472,9 @@ export const sendRealSms = (phone, text) => {
           outboundSMSTextMessage: { message: text }
         }
       })
-    }).catch(err => {
-      console.log("[SMS API Fallback Webhook]", err);
-    });
+    }).catch(err => console.log("[Orange SMS]", err));
   } else if (config.provider === 'twilio') {
-    // Real Twilio API Call
-    requestPromise = fetch(`https://api.twilio.com/2010-04-01/Accounts/${config.twilioAccountSid}/Messages.json`, {
+    fetch(`https://api.twilio.com/2010-04-01/Accounts/${config.twilioAccountSid}/Messages.json`, {
       method: 'POST',
       headers: {
         'Authorization': 'Basic ' + btoa(`${config.twilioAccountSid}:${config.twilioAuthToken}`),
@@ -1477,12 +1485,9 @@ export const sendRealSms = (phone, text) => {
         From: config.twilioFromPhone,
         Body: text
       })
-    }).catch(err => {
-      console.log("[Twilio SMS Fallback]", err);
-    });
+    }).catch(err => console.log("[Twilio SMS]", err));
   } else {
-    // Custom Webhook Dispatch
-    requestPromise = fetch(config.webhookUrl || 'https://formsubmit.co/ajax/sms@sunuhajj.sn', {
+    fetch(config.webhookUrl || 'https://formsubmit.co/ajax/sms@sunuhajj.sn', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -1498,7 +1503,7 @@ export const sendRealSms = (phone, text) => {
     }).catch(() => {});
   }
 
-  // Also log transaction into local history
+  // Log transaction into local history
   try {
     const existingLogs = JSON.parse(localStorage.getItem('sunu_hajj_sms_logs') || '[]');
     const newLog = {
@@ -1510,7 +1515,7 @@ export const sendRealSms = (phone, text) => {
       senderId: config.senderId,
       status: 'Livré (ACK GSM)'
     };
-    localStorage.setItem('sunu_hajj_sms_logs', JSON.stringify([newLog, ...existingLogs.slice(0, 49)]));
+    localStorage.setItem('sunu_hajj_sms_logs', JSON.stringify([newLog, ...(Array.isArray(existingLogs) ? existingLogs : []).slice(0, 49)]));
   } catch (e) {}
 
   return { success: true, phone: cleanPhone, provider: config.provider, timestamp };
