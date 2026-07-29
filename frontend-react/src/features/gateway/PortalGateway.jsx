@@ -459,33 +459,43 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
       } else if (chosenRole === 'doctor') {
         // Role is Medical Doctor / Structure
         let doctorCode = (agentMatricule || '').trim().toUpperCase();
-        if (!doctorCode || doctorCode === "MED-DKR-01") {
-          doctorCode = `MED-DKR-${Math.floor(100 + Math.random() * 900)}`;
+        if (!doctorCode) {
+          doctorCode = `MED-SENG-${Math.floor(100 + Math.random() * 900)}`;
         }
         if (!doctorCode.startsWith('MED')) {
           doctorCode = 'MED-' + doctorCode.replace(/[^A-Z0-9]/g, '');
         }
 
+        const cleanDoctorName = (agentName || '').trim() || "Dr. Médecin Chef";
+        const cleanHospitalName = (agencyName || '').trim() || "Structure Médicale Agréée";
+
         const doctorData = {
           id: doctorCode,
           code: doctorCode,
-          doctorName: (agentName || '').trim() || "Dr. Babacar Ndiaye",
-          name: (agencyName || '').trim() || "Structure Médicale Agréée",
+          doctorName: cleanDoctorName,
+          fullName: cleanDoctorName,
+          name: cleanHospitalName,
+          hospital: cleanHospitalName,
           phone: (agentPhone || '').trim() || "+221 33 824 00 00",
           email: (agentEmail || '').trim() || "medecin@sante.gouv.sn",
           password: agencyPassword || "123456",
-          region: "Dakar",
+          region: "Sénégal",
           role: 'doctor'
         };
 
         try {
           const localMedicals = JSON.parse(localStorage.getItem('mock_medical_structures') || '[]');
-          localMedicals.unshift(doctorData);
+          const existingIdx = localMedicals.findIndex(m => m && (m.code === doctorCode || m.id === doctorCode));
+          if (existingIdx !== -1) {
+            localMedicals[existingIdx] = doctorData;
+          } else {
+            localMedicals.unshift(doctorData);
+          }
           localStorage.setItem('mock_medical_structures', JSON.stringify(localMedicals));
         } catch (e) {}
 
         setSuccessUser(doctorData);
-        generateRandomOtp();
+        generateRandomOtp(agentPhone, cleanDoctorName);
         setWizardStep('otp');
       } else {
         // Role is Agency
@@ -545,15 +555,36 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
           roleTitle: userData.roleTitle || 'Agent DGP'
         });
       } else if (chosenRole === 'doctor') {
-        onDirectLogin('doctor', {
-          id: userData.code || userData.id || agentMatricule || 'MED-DKR-01',
-          code: userData.code || userData.id || agentMatricule || 'MED-DKR-01',
-          name: userData.name || agencyName || 'Structure Médicale Agréée',
-          doctorName: userData.doctorName || userData.fullName || agentName || 'Dr. Médecin Chef',
-          email: userData.email || agentEmail || 'medecin@sante.gouv.sn',
-          phone: userData.phone || agentPhone || '+221 33 824 00 00',
+        const activeDoctorCode = userData?.code || userData?.id || agentMatricule || `MED-SENG-${Math.floor(100 + Math.random() * 900)}`;
+        const activeHospitalName = userData?.name || userData?.hospital || agencyName || 'Structure Médicale Agréée';
+        const activeDoctorName = userData?.doctorName || userData?.fullName || agentName || 'Dr. Médecin Chef';
+        const activeEmail = userData?.email || agentEmail || 'medecin@sante.gouv.sn';
+        const activePhone = userData?.phone || agentPhone || '+221 33 824 00 00';
+
+        const doctorPayload = {
+          id: activeDoctorCode,
+          code: activeDoctorCode,
+          name: activeHospitalName,
+          hospital: activeHospitalName,
+          doctorName: activeDoctorName,
+          fullName: activeDoctorName,
+          email: activeEmail,
+          phone: activePhone,
           role: 'doctor'
-        });
+        };
+
+        try {
+          const localMedicals = JSON.parse(localStorage.getItem('mock_medical_structures') || '[]');
+          const idx = localMedicals.findIndex(m => m && (m.code === activeDoctorCode || m.id === activeDoctorCode));
+          if (idx !== -1) {
+            localMedicals[idx] = doctorPayload;
+          } else {
+            localMedicals.unshift(doctorPayload);
+          }
+          localStorage.setItem('mock_medical_structures', JSON.stringify(localMedicals));
+        } catch (e) {}
+
+        onDirectLogin('doctor', doctorPayload);
       } else {
         // Log in agency directly to its created page
         const agencyObj = {
@@ -1322,31 +1353,29 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                                    const selectedName = e.target.value;
                                    setAgencyName(selectedName);
                                    const ACCREDITED_HOSPITALS_LIST = [
-                                     { name: "Hôpital Aristide Le Dantec (Dakar)", code: "MED-DKR-02", doctor: "Dr. Aïssatou Sow", phone: "+221 33 889 38 00", email: "hajj@ledantec.sn" },
-                                     { name: "Hôpital Principal de Dakar", code: "MED-DKR-01", doctor: "Dr. Babacar Ndiaye", phone: "+221 33 839 50 50", email: "visitemedicale@principaldakar.sn" },
-                                     { name: "Hôpital Régional de Thiès", code: "MED-THIES-01", doctor: "Dr. Cheikh Tall", phone: "+221 33 951 10 20", email: "sante.thies@sante.gouv.sn" },
-                                     { name: "Hôpital Régional de Saint-Louis", code: "MED-SL-01", doctor: "Dr. Mouhamadou Kane", phone: "+221 33 961 11 00", email: "hajj@hopitalsaintlouis.sn" },
-                                     { name: "Hôpital Régional de Ziguinchor", code: "MED-ZIG-01", doctor: "Dr. Aminata Touré", phone: "+221 33 991 12 34", email: "visite.zig@sante.gouv.sn" },
-                                     { name: "Hôpital Régional d'El Hadji Ibrahima Niass (Kaolack)", code: "MED-KL-01", doctor: "Dr. Mamadou Ndiaye", phone: "+221 33 941 12 00", email: "hajj@kaolack.sante.sn" },
-                                     { name: "Autre Hôpital / Centre Médical Agréé", code: "MED-DKR-03", doctor: "Dr. Médecin Référent", phone: "+221 33 824 00 00", email: "medecin@sante.gouv.sn" }
+                                     { name: "Hôpital Aristide Le Dantec (Dakar)", codePrefix: "MED-DKR" },
+                                     { name: "Hôpital Principal de Dakar", codePrefix: "MED-DKR" },
+                                     { name: "Hôpital Régional de Thiès", codePrefix: "MED-THIES" },
+                                     { name: "Hôpital Régional de Saint-Louis", codePrefix: "MED-SL" },
+                                     { name: "Hôpital Régional de Ziguinchor", codePrefix: "MED-ZIG" },
+                                     { name: "Hôpital Régional d'El Hadji Ibrahima Niass (Kaolack)", codePrefix: "MED-KL" },
+                                     { name: "Autre Hôpital / Centre Médical Agréé", codePrefix: "MED-SENG" }
                                    ];
                                    const found = ACCREDITED_HOSPITALS_LIST.find(h => h.name === selectedName);
                                    if (found) {
-                                     setAgentMatricule(found.code);
-                                     if (!agentName) setAgentName(found.doctor);
-                                     if (!agentPhone) setAgentPhone(found.phone);
-                                     if (!agentEmail) setAgentEmail(found.email);
+                                     const randomId = Math.floor(100 + Math.random() * 900);
+                                     setAgentMatricule(`${found.codePrefix}-${randomId}`);
                                    }
                                  }}
                                  style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px', fontWeight: 700 }}
                                >
                                  <option value="">-- Sélectionnez votre Hôpital Agréé --</option>
-                                 <option value="Hôpital Aristide Le Dantec (Dakar)">Hôpital Aristide Le Dantec (Dakar) — Code: MED-DKR-02</option>
-                                 <option value="Hôpital Principal de Dakar">Hôpital Principal de Dakar — Code: MED-DKR-01</option>
-                                 <option value="Hôpital Régional de Thiès">Hôpital Régional de Thiès — Code: MED-THIES-01</option>
-                                 <option value="Hôpital Régional de Saint-Louis">Hôpital Régional de Saint-Louis — Code: MED-SL-01</option>
-                                 <option value="Hôpital Régional de Ziguinchor">Hôpital Régional de Ziguinchor — Code: MED-ZIG-01</option>
-                                 <option value="Hôpital Régional d'El Hadji Ibrahima Niass (Kaolack)">Hôpital Régional d'El Hadji Ibrahima Niass (Kaolack) — Code: MED-KL-01</option>
+                                 <option value="Hôpital Aristide Le Dantec (Dakar)">Hôpital Aristide Le Dantec (Dakar)</option>
+                                 <option value="Hôpital Principal de Dakar">Hôpital Principal de Dakar</option>
+                                 <option value="Hôpital Régional de Thiès">Hôpital Régional de Thiès</option>
+                                 <option value="Hôpital Régional de Saint-Louis">Hôpital Régional de Saint-Louis</option>
+                                 <option value="Hôpital Régional de Ziguinchor">Hôpital Régional de Ziguinchor</option>
+                                 <option value="Hôpital Régional d'El Hadji Ibrahima Niass (Kaolack)">Hôpital Régional d'El Hadji Ibrahima Niass (Kaolack)</option>
                                  <option value="Autre Hôpital / Centre Médical Agréé">Autre Hôpital / Centre Médical Agréé</option>
                                </select>
                             </div>
