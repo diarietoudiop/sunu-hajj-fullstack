@@ -670,15 +670,18 @@ export const ApiService = {
       const cleanUser = (username || '').trim().toLowerCase();
       const searchCode = (username || '').trim().toUpperCase();
       
-      if (role === 'doctor' || role === 'medical') {
+      const isDoctorLogin = role === 'doctor' || role === 'medical' || searchCode.startsWith('MED') || searchCode.includes('MED-');
+      
+      if (isDoctorLogin) {
         const localMedicals = JSON.parse(localStorage.getItem('mock_medical_structures') || '[]');
         const allMedicals = [...localMedicals, ...MOCK_MEDICAL_STRUCTURES];
         
-        let match = allMedicals.find(m => 
-          (m.code && m.code.toUpperCase() === searchCode) || 
+        let match = allMedicals.find(m => m && (
+          (m.code && String(m.code).toUpperCase() === searchCode) || 
           (m.id && String(m.id).toUpperCase() === searchCode) ||
-          (m.name && m.name.toLowerCase().includes(cleanUser))
-        );
+          (m.doctorName && String(m.doctorName).toLowerCase().includes(cleanUser)) ||
+          (m.name && String(m.name).toLowerCase().includes(cleanUser))
+        ));
 
         if (!match) {
           // Dynamic hospital auto-detection for any Code Unique Médecin
@@ -694,29 +697,40 @@ export const ApiService = {
             : searchCode.includes('ZIG') ? "Hôpital Régional de Ziguinchor"
             : searchCode.includes('KL') ? "Hôpital Régional d'El Hadji Ibrahima Niass (Kaolack)"
             : searchCode.includes('DKR-02') ? "Hôpital Aristide Le Dantec (Dakar)"
-            : `Centre Hospitalier Agréé Hajj (${searchCode || 'DKR'})`;
+            : `Centre Hospitalier Agréé Hajj (${searchCode})`;
 
           match = {
-            id: searchCode || 'MED-DKR-01',
-            code: searchCode || 'MED-DKR-01',
+            id: searchCode,
+            code: searchCode,
             name: hospitalDetected,
-            doctorName: `Dr. Médecin Référent (${searchCode || 'DKR'})`,
-            email: `medecin.${(searchCode || 'dkr').toLowerCase()}@sante.gouv.sn`,
+            doctorName: `Dr. Médecin Chef (${searchCode})`,
+            email: `medecin.${searchCode.toLowerCase()}@sante.gouv.sn`,
             phone: "+221 33 824 00 00",
+            password: "123456",
             region: regionDetected,
             accredited: true
           };
         }
 
+        // STRICT PASSWORD CHECKING for Doctor accounts
+        const targetCode = String(match.code || match.id || searchCode).toUpperCase();
+        const mockPasswords = JSON.parse(localStorage.getItem('mock_passwords') || '{}');
+        const expectedPassword = mockPasswords[targetCode] || match.password || '123456';
+
+        if (password && String(password).trim() !== String(expectedPassword).trim()) {
+          throw new Error("Mot de passe incorrect. Si vous avez modifié votre mot de passe, veuillez utiliser le nouveau.");
+        }
+
         return {
           id: match.code || match.id,
           code: match.code || match.id,
-          name: match.name,
-          doctorName: match.doctorName || "Dr. Médecin Chef",
+          name: match.name || match.hospital,
+          doctorName: match.doctorName || match.fullName || "Dr. Médecin Chef",
           email: match.email || "medecin@sante.gouv.sn",
           phone: match.phone || "+221 33 824 00 00",
           region: match.region || "Dakar",
-          hospital: match.name,
+          hospital: match.name || match.hospital,
+          password: expectedPassword,
           role: 'doctor'
         };
       }

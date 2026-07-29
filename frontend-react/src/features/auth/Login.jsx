@@ -70,7 +70,10 @@ function Login({ onLoginSuccess, initialRole = 'agency', onBackToHome }) {
       if (authMode === 'login') {
         // Admin Login
         try {
-          const targetRole = (username.toLowerCase().trim() === 'dgpadmin' || username.toLowerCase().trim() === 'moussa.fall') ? 'admin' : loginRole;
+          const cleanInput = (username || '').trim().toUpperCase();
+          const targetRole = (cleanInput.startsWith('MED') || cleanInput.includes('MED-')) ? 'doctor' 
+            : (username.toLowerCase().trim() === 'dgpadmin' || username.toLowerCase().trim() === 'moussa.fall') ? 'admin' 
+            : loginRole;
           const user = await ApiService.loginAdmin(username, password, targetRole);
           onLoginSuccess(targetRole, user);
         } catch (err) {

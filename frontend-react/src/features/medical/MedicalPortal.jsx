@@ -591,16 +591,40 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
 
             <form onSubmit={(e) => {
               e.preventDefault();
-              if (newPassword.length < 6) {
-                setPasswordMsg({ text: "Le mot de passe doit contenir au moins 6 caractères.", type: 'error' });
+              if (newPassword.length < 4) {
+                setPasswordMsg({ text: "Le mot de passe doit contenir au moins 4 caractères.", type: 'error' });
                 return;
               }
               if (newPassword !== confirmPassword) {
                 setPasswordMsg({ text: "Les mots de passe ne correspondent pas.", type: 'error' });
                 return;
               }
-              setPasswordMsg({ text: "Mot de passe mis à jour et validé avec succès !", type: 'success' });
-              setTimeout(() => { setShowPasswordModal(false); setPasswordMsg(null); setNewPassword(''); setConfirmPassword(''); }, 1500);
+
+              try {
+                // Save to mock_passwords map in localStorage
+                const mockPasswords = JSON.parse(localStorage.getItem('mock_passwords') || '{}');
+                const targetCode = String(structureInfo.code || doctorUser?.code || doctorUser?.id || 'MED-DKR-01').toUpperCase();
+                mockPasswords[targetCode] = newPassword;
+                localStorage.setItem('mock_passwords', JSON.stringify(mockPasswords));
+
+                // Also update mock_medical_structures list in localStorage
+                const localMedicals = JSON.parse(localStorage.getItem('mock_medical_structures') || '[]');
+                const idx = localMedicals.findIndex(m => m && (String(m.code || '').toUpperCase() === targetCode || String(m.id || '').toUpperCase() === targetCode));
+                if (idx !== -1) {
+                  localMedicals[idx].password = newPassword;
+                  localStorage.setItem('mock_medical_structures', JSON.stringify(localMedicals));
+                }
+
+                // Update active user profile in sessionStorage
+                const currentUser = JSON.parse(sessionStorage.getItem('dgp_admin_user') || '{}');
+                currentUser.password = newPassword;
+                sessionStorage.setItem('dgp_admin_user', JSON.stringify(currentUser));
+              } catch (err) {
+                console.error("Failed to save password change:", err);
+              }
+
+              setPasswordMsg({ text: "✅ Mot de passe modifié et enregistré avec succès ! Utilisez ce nouveau mot de passe pour vos prochaines connexions.", type: 'success' });
+              setTimeout(() => { setShowPasswordModal(false); setPasswordMsg(null); setNewPassword(''); setConfirmPassword(''); }, 1800);
             }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1E293B', display: 'block', marginBottom: '6px' }}>
