@@ -307,13 +307,62 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
     if (pilgrim) {
       setFullName(pilgrim.fullName || pilgrim.name || 'Pèlerin Sunu Hajj');
       setSelectedAgencyId(pilgrim.selectedAgencyId || 1);
-      setBloodType(pilgrim.bloodType || pilgrim.bloodGroup || 'À déterminer (Visite médicale)');
+      
+      const latestBlood = pilgrim.bloodType || pilgrim.bloodGroup;
+      if (latestBlood && !latestBlood.includes('déterminer')) {
+        setBloodType(latestBlood);
+      } else {
+        setBloodType('À déterminer (Visite médicale)');
+      }
+
       setPhone(pilgrim.phone || '');
       setEmail(pilgrim.email || '');
       setEmergencyContactName(pilgrim.emergencyContact?.name || pilgrim.emergencyContactName || '');
       setEmergencyContactPhone(pilgrim.emergencyContact?.phone || pilgrim.emergencyContactPhone || '');
+
+      if (pilgrim.doctorName || pilgrim.structureName || pilgrim.assignedDoctor) {
+        setChosenDoctor({
+          code: pilgrim.doctorCode || pilgrim.assignedDoctor?.code || "MED-DKR-01",
+          doctorName: pilgrim.doctorName || pilgrim.assignedDoctor?.doctorName || "Dr. Médecin Chef",
+          hospital: pilgrim.structureName || pilgrim.assignedDoctor?.hospital || "Structure Médicale Agréée",
+          region: pilgrim.region || pilgrim.assignedDoctor?.region || "Sénégal"
+        });
+      }
     }
   }, [pilgrim]);
+
+  // Auto-refresh pilgrim profile from storage in real time
+  useEffect(() => {
+    const refreshFromStorage = () => {
+      try {
+        const stored = sessionStorage.getItem('dgp_pilgrim');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && (parsed.id === safePilgrim.id || String(parsed.id) === String(safePilgrim.id) || parsed.passportNumber === safePilgrim.passportNumber)) {
+            const bType = parsed.bloodType || parsed.bloodGroup;
+            if (bType && !bType.includes('déterminer')) {
+              setBloodType(bType);
+            }
+            if (parsed.doctorName || parsed.structureName || parsed.assignedDoctor) {
+              setChosenDoctor({
+                code: parsed.doctorCode || parsed.assignedDoctor?.code || "MED-DKR-01",
+                doctorName: parsed.doctorName || parsed.assignedDoctor?.doctorName || "Dr. Médecin Chef",
+                hospital: parsed.structureName || parsed.assignedDoctor?.hospital || "Structure Médicale Agréée",
+                region: parsed.region || parsed.assignedDoctor?.region || "Sénégal"
+              });
+            }
+          }
+        }
+      } catch (e) {}
+    };
+
+    window.addEventListener('storage', refreshFromStorage);
+    const interval = setInterval(refreshFromStorage, 2000);
+    return () => {
+      window.removeEventListener('storage', refreshFromStorage);
+      clearInterval(interval);
+    };
+  }, [safePilgrim.id, safePilgrim.passportNumber]);
 
   // Budget State
   const [packagePrice, setPackagePrice] = useState(safePilgrim.selectedAgencyId === 1 ? 3600000 : safePilgrim.selectedAgencyId === 2 ? 4900000 : 8500000);
