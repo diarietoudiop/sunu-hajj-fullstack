@@ -717,6 +717,113 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
         </div>
       )}
 
+      {/* 🧪 DEMO / TEST MODE QUICK CONNECTIONS BANNER */}
+      <div style={{ 
+        backgroundColor: '#0F172A', 
+        color: '#FFFFFF', 
+        padding: '10px 24px', 
+        display: 'flex', 
+        justify: 'space-between', 
+        alignItems: 'center', 
+        flexWrap: 'wrap', 
+        gap: '12px',
+        borderBottom: '2px solid #D4AF37',
+        fontSize: '0.85rem',
+        position: 'relative',
+        zIndex: 20
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800 }}>
+          <span style={{ backgroundColor: '#D4AF37', color: '#0F172A', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 900 }}>MODE TEST</span>
+          <span>🧪 Tester directement la plateforme sans inscription (Accès 1-Clic) :</span>
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => {
+              if (onDirectLogin) {
+                onDirectLogin('pilgrim', {
+                  id: 1,
+                  fullName: "malick",
+                  passportNumber: "SN55555",
+                  phone: "+221 78 591 07 67",
+                  email: "malick@gmail.com",
+                  registrationStatus: "approved",
+                  medicalStatus: "apte",
+                  bloodType: "B+",
+                  bloodGroup: "B+",
+                  selectedAgencyId: 1
+                });
+              }
+            }}
+            style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', backgroundColor: '#10B981', color: '#FFFFFF', fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            🕋 Espace Pèlerin
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (onDirectLogin) {
+                onDirectLogin('doctor', {
+                  id: "MED-THIES-01",
+                  code: "MED-THIES-01",
+                  name: "Hôpital Régional de Thiès",
+                  hospital: "Hôpital Régional de Thiès",
+                  doctorName: "Dr. Cheikh Tall",
+                  email: "sante.thies@sante.gouv.sn",
+                  phone: "+221 33 951 10 20",
+                  region: "Thiès",
+                  role: "doctor"
+                });
+              }
+            }}
+            style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', backgroundColor: '#3B82F6', color: '#FFFFFF', fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            🩺 Espace Médecin
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (onDirectLogin) {
+                onDirectLogin('agency', {
+                  id: 1,
+                  agencyId: 1,
+                  name: "Voyages Teranga Hajj & Omra",
+                  fullName: "Voyages Teranga Hajj & Omra",
+                  email: "agence@terangahajj.sn",
+                  phone: "+221 33 824 12 34",
+                  role: "agency"
+                });
+              }
+            }}
+            style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', backgroundColor: '#F59E0B', color: '#FFFFFF', fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            🏢 Espace Agence
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (onDirectLogin) {
+                onDirectLogin('admin', {
+                  id: 999,
+                  username: 'dgpadmin',
+                  fullName: 'Administrateur Sunu Hajj',
+                  email: 'admin@sunuhajj.sn',
+                  department: 'Direction Générale',
+                  role: 'admin'
+                });
+              }
+            }}
+            style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', backgroundColor: '#8B5CF6', color: '#FFFFFF', fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            🇸🇳 Espace Admin DGP
+          </button>
+        </div>
+      </div>
+
       {/* Header / Navbar */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 40px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', position: 'relative', zIndex: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => { setActivePage('landing'); scrollToSection('hero'); }}>

@@ -81,6 +81,71 @@ function App() {
     }
   }, [darkMode]);
 
+  // Handle URL ?demo= parameter for instant test mode
+  useEffect(() => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const demoParam = urlParams.get('demo');
+      if (demoParam && !sessionStorage.getItem('dgp_session')) {
+        if (demoParam === 'pelerin' || demoParam === 'pilgrim') {
+          const testPilgrim = {
+            id: 1,
+            fullName: "malick",
+            passportNumber: "SN55555",
+            phone: "+221 78 591 07 67",
+            email: "malick@gmail.com",
+            registrationStatus: "approved",
+            medicalStatus: "apte",
+            bloodType: "B+",
+            bloodGroup: "B+",
+            selectedAgencyId: 1,
+            paymentStatus: "paid",
+            visaStatus: "issued",
+            flightNumber: "HC-2026-DKR",
+            hotelMakkah: "Abraj Al Bait Royal Hotel",
+            hotelMadinah: "Pullman Zamzam Madina",
+            roomNumber: "704-B"
+          };
+          handleLoginSuccess('pilgrim', testPilgrim);
+        } else if (demoParam === 'medecin' || demoParam === 'doctor') {
+          const testDoctor = {
+            id: "MED-THIES-01",
+            code: "MED-THIES-01",
+            name: "Hôpital Régional de Thiès",
+            hospital: "Hôpital Régional de Thiès",
+            doctorName: "Dr. Cheikh Tall",
+            email: "sante.thies@sante.gouv.sn",
+            phone: "+221 33 951 10 20",
+            region: "Thiès",
+            role: "doctor"
+          };
+          handleLoginSuccess('doctor', testDoctor);
+        } else if (demoParam === 'agence' || demoParam === 'agency') {
+          const testAgency = {
+            id: 1,
+            agencyId: 1,
+            name: "Voyages Teranga Hajj & Omra",
+            fullName: "Voyages Teranga Hajj & Omra",
+            email: "agence@terangahajj.sn",
+            phone: "+221 33 824 12 34",
+            role: "agency"
+          };
+          handleLoginSuccess('agency', testAgency);
+        } else if (demoParam === 'admin') {
+          const testAdmin = {
+            id: 999,
+            username: 'dgpadmin',
+            fullName: 'Administrateur Sunu Hajj',
+            email: 'admin@sunuhajj.sn',
+            department: 'Direction Générale',
+            role: 'admin'
+          };
+          handleLoginSuccess('admin', testAdmin);
+        }
+      }
+    } catch (e) {}
+  }, []);
+
   // Fetching data when authenticated
   useEffect(() => {
     if (isAuthenticated) {

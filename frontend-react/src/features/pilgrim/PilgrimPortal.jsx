@@ -279,7 +279,20 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState(safePilgrim.fullName || safePilgrim.name || 'Pèlerin Sunu Hajj');
   const [selectedAgencyId, setSelectedAgencyId] = useState(safePilgrim.selectedAgencyId || 1);
-  const [bloodType, setBloodType] = useState(safePilgrim.bloodType || safePilgrim.bloodGroup || 'À déterminer (Visite médicale)');
+  const [bloodType, setBloodType] = useState(() => {
+    try {
+      const mockList = JSON.parse(localStorage.getItem('mock_pilgrims') || '[]');
+      const found = mockList.find(p => p && (
+        p.id === safePilgrim.id || 
+        String(p.id) === String(safePilgrim.id) || 
+        (p.passportNumber && safePilgrim.passportNumber && p.passportNumber.toUpperCase() === safePilgrim.passportNumber.toUpperCase())
+      ));
+      if (found && (found.bloodType || found.bloodGroup) && !(found.bloodType || found.bloodGroup).includes('déterminer')) {
+        return found.bloodType || found.bloodGroup;
+      }
+    } catch (e) {}
+    return safePilgrim.bloodType || safePilgrim.bloodGroup || 'À déterminer (Visite médicale)';
+  });
   const [phone, setPhone] = useState(safePilgrim.phone || '');
   const [email, setEmail] = useState(safePilgrim.email || '');
   const [emergencyContactName, setEmergencyContactName] = useState(safePilgrim.emergencyContact?.name || safePilgrim.emergencyContactName || '');
@@ -331,33 +344,45 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
     }
   }, [pilgrim]);
 
-  // Auto-refresh pilgrim profile from storage in real time
+  // Auto-refresh pilgrim profile from localStorage & sessionStorage in real time
   useEffect(() => {
     const refreshFromStorage = () => {
       try {
-        const stored = sessionStorage.getItem('dgp_pilgrim');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (parsed && (parsed.id === safePilgrim.id || String(parsed.id) === String(safePilgrim.id) || parsed.passportNumber === safePilgrim.passportNumber)) {
-            const bType = parsed.bloodType || parsed.bloodGroup;
-            if (bType && !bType.includes('déterminer')) {
-              setBloodType(bType);
-            }
-            if (parsed.doctorName || parsed.structureName || parsed.assignedDoctor) {
-              setChosenDoctor({
-                code: parsed.doctorCode || parsed.assignedDoctor?.code || "MED-DKR-01",
-                doctorName: parsed.doctorName || parsed.assignedDoctor?.doctorName || "Dr. Médecin Chef",
-                hospital: parsed.structureName || parsed.assignedDoctor?.hospital || "Structure Médicale Agréée",
-                region: parsed.region || parsed.assignedDoctor?.region || "Sénégal"
-              });
-            }
+        const mockList = JSON.parse(localStorage.getItem('mock_pilgrims') || '[]');
+        const updatedPilgrim = mockList.find(p => p && (
+          p.id === safePilgrim.id || 
+          String(p.id) === String(safePilgrim.id) || 
+          p.passportNumber === safePilgrim.passportNumber ||
+          (p.passportNumber && safePilgrim.passportNumber && p.passportNumber.toUpperCase() === safePilgrim.passportNumber.toUpperCase())
+        ));
+
+        const storedSession = (() => {
+          try { return JSON.parse(sessionStorage.getItem('dgp_pilgrim') || 'null'); } catch(e) { return null; }
+        })();
+
+        const source = updatedPilgrim || storedSession || safePilgrim;
+
+        if (source) {
+          const bType = source.bloodType || source.bloodGroup;
+          if (bType && !bType.includes('déterminer')) {
+            setBloodType(bType);
+          }
+
+          if (source.doctorName || source.structureName || source.assignedDoctor) {
+            setChosenDoctor({
+              code: source.doctorCode || source.assignedDoctor?.code || "MED-DKR-01",
+              doctorName: source.doctorName || source.assignedDoctor?.doctorName || "Dr. Médecin Chef",
+              hospital: source.structureName || source.assignedDoctor?.hospital || "Structure Médicale Agréée",
+              region: source.region || source.assignedDoctor?.region || "Sénégal"
+            });
           }
         }
       } catch (e) {}
     };
 
+    refreshFromStorage();
     window.addEventListener('storage', refreshFromStorage);
-    const interval = setInterval(refreshFromStorage, 2000);
+    const interval = setInterval(refreshFromStorage, 1000);
     return () => {
       window.removeEventListener('storage', refreshFromStorage);
       clearInterval(interval);
@@ -458,6 +483,22 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
   // Load announcements
   const [showDoctorModal, setShowDoctorModal] = useState(false);
   const [chosenDoctor, setChosenDoctor] = useState(() => {
+    try {
+      const mockList = JSON.parse(localStorage.getItem('mock_pilgrims') || '[]');
+      const found = mockList.find(p => p && (
+        p.id === safePilgrim.id || 
+        String(p.id) === String(safePilgrim.id) || 
+        (p.passportNumber && safePilgrim.passportNumber && p.passportNumber.toUpperCase() === safePilgrim.passportNumber.toUpperCase())
+      ));
+      if (found && (found.doctorName || found.structureName)) {
+        return {
+          code: found.doctorCode || found.assignedDoctor?.code || "MED-DKR-01",
+          doctorName: found.doctorName || found.assignedDoctor?.doctorName || "Dr. Médecin Chef",
+          hospital: found.structureName || found.assignedDoctor?.hospital || "Structure Médicale Agréée",
+          region: found.region || found.assignedDoctor?.region || "Sénégal"
+        };
+      }
+    } catch (e) {}
     return safePilgrim.assignedDoctor || {
       code: "MED-DKR-01",
       doctorName: "Dr. Babacar Ndiaye",
