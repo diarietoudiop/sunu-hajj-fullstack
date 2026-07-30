@@ -490,22 +490,16 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
         String(p.id) === String(safePilgrim.id) || 
         (p.passportNumber && safePilgrim.passportNumber && p.passportNumber.toUpperCase() === safePilgrim.passportNumber.toUpperCase())
       ));
-      if (found && (found.doctorName || found.structureName)) {
+      if (found && (found.doctorName || found.structureName || found.assignedDoctor)) {
         return {
-          code: found.doctorCode || found.assignedDoctor?.code || "MED-DKR-01",
+          code: found.doctorCode || found.assignedDoctor?.code || null,
           doctorName: found.doctorName || found.assignedDoctor?.doctorName || "Dr. Médecin Chef",
           hospital: found.structureName || found.assignedDoctor?.hospital || "Structure Médicale Agréée",
           region: found.region || found.assignedDoctor?.region || "Sénégal"
         };
       }
     } catch (e) {}
-    return safePilgrim.assignedDoctor || {
-      code: "MED-DKR-01",
-      doctorName: "Dr. Babacar Ndiaye",
-      hospital: "Hôpital Principal de Dakar",
-      region: safePilgrim.region || "Dakar",
-      phone: "+221 33 839 50 50"
-    };
+    return safePilgrim.assignedDoctor || null;
   });
   const [appointmentDate, setAppointmentDate] = useState('2026-08-05');
   const [appointmentTime, setAppointmentTime] = useState('09:30');

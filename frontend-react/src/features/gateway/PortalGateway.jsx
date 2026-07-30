@@ -1148,12 +1148,12 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                 </h2>
                 <p style={{ color: '#4A5568', fontSize: '0.96rem', lineHeight: '1.6', marginBottom: '36px', maxWidth: '540px' }}>
                   {chosenRole === 'pilgrim' 
-                    ? "Choisissez une agence agréée par l'État et suivez votre visa jusqu'à votre départ pour La Mecque." 
+                    ? "Choisissez une agence agréée par l'État et suivez votre dossier jusqu'au départ." 
                     : chosenRole === 'doctor'
-                    ? "Enregistrez votre hôpital ou centre de santé habilité pour valider les visites d'aptitude médicale des pèlerins."
+                    ? "Enregistrez votre hôpital ou centre de santé habilité pour valider les dossiers médicaux."
                     : chosenRole === 'agent' 
-                    ? "Accès restreint au personnel de contrôle de la DGP et aux inspecteurs généraux du Hajj." 
-                    : "Inscrivez votre agence officiellement pour créer instantanément sa page dédiée."}
+                    ? "Accès restreint au personnel habilité et aux superviseurs." 
+                    : "Inscrivez votre agence officiellement pour créer sa page dédiée."}
                 </p>
 
                 {/* STEP 1: FORM */}
@@ -1183,7 +1183,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                                 type="text" 
                                 required 
                                 className="form-control"
-                                placeholder="Ex: Babacar Ndiaye" 
+                                placeholder="Votre Prénom et Nom complet" 
                                 value={pilgrimName}
                                 onChange={e => setPilgrimName(e.target.value)}
                                 style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px' }}
@@ -1193,15 +1193,15 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>N° de Passeport Sénégal *</label>
-                                  <span style={{ fontSize: '0.72rem', color: '#A0AEC0' }}>SN1234567</span>
+                                  <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>N° de Passeport *</label>
+                                  <span style={{ fontSize: '0.72rem', color: '#A0AEC0' }}>Ex: AA1234567</span>
                                 </div>
                                 <div style={{ position: 'relative' }}>
                                   <input 
                                     type="text" 
                                     required 
                                     className="form-control"
-                                    placeholder="Ex: SN4821093" 
+                                    placeholder="Ex: AA1234567" 
                                     value={pilgrimPassport}
                                     onChange={e => setPilgrimPassport(e.target.value)}
                                     style={{ textTransform: 'uppercase', height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 40px 0 16px' }}
@@ -1217,13 +1217,13 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                   <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Téléphone Mobile *</label>
-                                  <span style={{ fontSize: '0.72rem', color: '#A0AEC0' }}>+221</span>
+                                  <span style={{ fontSize: '0.72rem', color: '#A0AEC0' }}>Format local</span>
                                 </div>
                                 <input 
                                   type="tel" 
                                   required 
                                   className="form-control"
-                                  placeholder="77 123 45 67" 
+                                  placeholder="00 000 00 00" 
                                   value={pilgrimPhone}
                                   onChange={e => setPilgrimPhone(e.target.value)}
                                   style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px' }}
@@ -1496,7 +1496,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                                   type="text" 
                                   required 
                                   className="form-control"
-                                  placeholder="Ex: Dr. Babacar Ndiaye" 
+                                  placeholder="Votre Prénom et Nom" 
                                   value={agentName}
                                   onChange={e => setAgentName(e.target.value)}
                                   style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px' }}
@@ -3444,7 +3444,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                           type="text" 
                           required 
                           className="form-control"
-                          placeholder="Ex: Babacar Ndiaye" 
+                          placeholder="Votre Prénom et Nom complet" 
                           value={pilgrimName}
                           onChange={e => setPilgrimName(e.target.value)}
                         />
