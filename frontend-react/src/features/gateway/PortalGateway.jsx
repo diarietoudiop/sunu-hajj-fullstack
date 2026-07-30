@@ -717,21 +717,22 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
         </div>
       )}
 
-      {/* 🧪 DEMO / TEST MODE QUICK CONNECTIONS BANNER */}
-      <div style={{ 
-        backgroundColor: '#0F172A', 
-        color: '#FFFFFF', 
-        padding: '10px 24px', 
-        display: 'flex', 
-        justify: 'space-between', 
-        alignItems: 'center', 
-        flexWrap: 'wrap', 
-        gap: '12px',
-        borderBottom: '2px solid #D4AF37',
-        fontSize: '0.85rem',
-        position: 'relative',
-        zIndex: 20
-      }}>
+      {/* 🧪 DEMO / TEST MODE QUICK CONNECTIONS BANNER (Shown only when ?test=true or ?demo=true) */}
+      {(new URLSearchParams(window.location.search).get('test') === 'true' || new URLSearchParams(window.location.search).get('demo') === 'true') && (
+        <div style={{ 
+          backgroundColor: '#0F172A', 
+          color: '#FFFFFF', 
+          padding: '10px 24px', 
+          display: 'flex', 
+          justify: 'space-between', 
+          alignItems: 'center', 
+          flexWrap: 'wrap', 
+          gap: '12px',
+          borderBottom: '2px solid #D4AF37',
+          fontSize: '0.85rem',
+          position: 'relative',
+          zIndex: 20
+        }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800 }}>
           <span style={{ backgroundColor: '#D4AF37', color: '#0F172A', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 900 }}>MODE TEST</span>
           <span>🧪 Tester directement la plateforme sans inscription (Accès 1-Clic) :</span>
@@ -823,6 +824,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
           </button>
         </div>
       </div>
+      )}
 
       {/* Header / Navbar */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 40px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', position: 'relative', zIndex: 10 }}>
