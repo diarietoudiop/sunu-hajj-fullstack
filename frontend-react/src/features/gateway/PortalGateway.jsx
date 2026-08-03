@@ -333,10 +333,13 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
         console.warn("Local agency creation fallback:", apiErr);
       }
 
+      setSuccessUser(newAgency);
+      setAgencyApplyLoading(false);
       setShowAgencyApplyModal(false);
-      if (onDirectLogin) {
-        onDirectLogin('agency', newAgency);
-      }
+      setShowWizard(true);
+      setChosenRole('agency');
+      generateRandomOtp(cleanPhone, cleanName);
+      setWizardStep('otp');
     } catch (err) {
       console.error("Agency registration error:", err);
       const fallbackAgency = {
@@ -1644,6 +1647,41 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                           </div>
                         </div>
 
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Catégorie d'Offre Hajj *</label>
+                            <select
+                              className="form-control"
+                              value={agencyApplyType || 'vip'}
+                              onChange={e => {
+                                const val = e.target.value;
+                                setAgencyApplyType(val);
+                                if (val === 'vip') setAgencyApplyPrice('8500000');
+                                else if (val === 'standard') setAgencyApplyPrice('4900000');
+                                else if (val === 'economique') setAgencyApplyPrice('3600000');
+                              }}
+                              style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px', fontWeight: 700 }}
+                            >
+                              <option value="vip">⭐ Offre VIP Luxe (8.500.000 FCFA)</option>
+                              <option value="standard">✈️ Offre Standard Confort (4.900.000 FCFA)</option>
+                              <option value="economique">📦 Offre Privée / Économique (3.600.000 FCFA)</option>
+                            </select>
+                          </div>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Tarif du Package (FCFA) *</label>
+                            <input 
+                              type="number" 
+                              required 
+                              className="form-control" 
+                              placeholder="Ex: 8500000" 
+                              value={agencyApplyPrice || '8500000'} 
+                              onChange={e => setAgencyApplyPrice(e.target.value)}
+                              style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px', fontWeight: 700 }}
+                            />
+                          </div>
+                        </div>
+
                         <button 
                           type="submit" 
                           disabled={agencyApplyLoading}
@@ -1706,7 +1744,25 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                     </div>
                     <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#042F1A', margin: 0 }}>Inscription Confirmée !</h3>
                     
-                    {chosenRole === 'doctor' ? (
+                    {chosenRole === 'agency' ? (
+                      <div style={{ margin: '20px 0', padding: '20px', backgroundColor: '#FAF9F5', border: '2px solid #D4AF37', borderRadius: '16px', textAlign: 'left' }}>
+                        <h4 style={{ color: '#042F1A', margin: '0 0 10px', fontSize: '1rem', fontWeight: 800 }}>
+                          🏢 Homologation Agence Agréée Confirmée :
+                        </h4>
+                        <p style={{ margin: '4px 0', fontSize: '0.9rem', color: '#4A5568' }}>
+                          Agence : <strong>{successUser?.name || agencyApplyName}</strong>
+                        </p>
+                        <p style={{ margin: '4px 0', fontSize: '0.9rem', color: '#042F1A' }}>
+                          📜 N° d'Agrément Officiel : <strong style={{ color: '#0A5C36', fontFamily: 'monospace', fontSize: '1.05rem' }}>{successUser?.agreementNumber || agencyApplyAgreementNum || 'AGR-2026-DKR-048'}</strong>
+                        </p>
+                        <p style={{ margin: '4px 0', fontSize: '0.9rem', color: '#042F1A' }}>
+                          ⭐ Offre & Catégorie : <strong style={{ color: '#D4AF37', fontWeight: 800 }}>{successUser?.type === 'vip' ? 'Offre VIP Luxe' : successUser?.type === 'economique' ? 'Offre Privée / Économique' : 'Offre Standard Confort'}</strong> ({successUser?.price ? successUser.price.toLocaleString() : '3.600.000'} FCFA)
+                        </p>
+                        <span style={{ fontSize: '0.78rem', color: '#718096', display: 'block', marginTop: '8px' }}>
+                          💡 Votre agence est désormais inscrite dans le Registre National Officiel de la Sunu Hajj.
+                        </span>
+                      </div>
+                    ) : chosenRole === 'doctor' ? (
                       <div style={{ margin: '20px 0', padding: '20px', backgroundColor: '#FAF9F5', border: '2px solid #D4AF37', borderRadius: '16px', textAlign: 'left' }}>
                         <h4 style={{ color: '#042F1A', margin: '0 0 10px', fontSize: '1rem', fontWeight: 800 }}>
                           🩺 Vos Accès Officiels de Connexion :
