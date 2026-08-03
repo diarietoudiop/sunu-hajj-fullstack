@@ -185,13 +185,13 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
           const typeNorm = (c.type || 'vip').toLowerCase();
           const priceNum = parseInt(c.price) || 3600000;
           return {
-            id: c.id,
-            name: c.name,
+            id: c.id || Date.now(),
+            name: c.name || 'Agence Agrée',
             sector: 'prive',
             type: typeNorm,
             badge: typeNorm === 'vip' ? '⭐ PRIVÉ • VIP' : typeNorm === 'economique' ? '📦 PRIVÉ • ÉCONOMIQUE' : '🏢 PRIVÉ • STANDARD',
             priceLabel: `${priceNum.toLocaleString()} FCFA`,
-            quota: `Agrément Nº ${c.id.toString().slice(-4)}-2026`,
+            quota: `Agrément Nº ${(c.id || 100).toString().slice(-4)}-2026`,
             features: c.features || [
               "Hébergement agréé par l'État",
               "Vol charter direct Dakar-Médine",
@@ -226,6 +226,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
   const [pilgrimPassport, setPilgrimPassport] = useState('');
   const [pilgrimPhone, setPilgrimPhone] = useState('');
   const [pilgrimEmail, setPilgrimEmail] = useState('');
+  const [pilgrimRegion, setPilgrimRegion] = useState('Dakar');
   const [regSelectedAgencyId, setRegSelectedAgencyId] = useState(1);
 
   // Pilgrim registration sector & package filters
@@ -233,7 +234,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
   const [regPackageCategory, setRegPackageCategory] = useState('standard'); // 'standard' | 'vip'
 
   const getFilteredAgencies = () => {
-    const list = Array.isArray(allPublicAgencies) ? allPublicAgencies : [];
+    const list = Array.isArray(allPublicAgencies) ? allPublicAgencies : INITIAL_PUBLIC_AGENCIES;
     if (regSectorFilter === 'etat') {
       const filtered = list.filter(ag => ag && (ag.sector === 'etat' || ag.id === 1 || String(ag.id) === '1'));
       return filtered.length > 0 ? filtered : list;
@@ -241,10 +242,11 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
     const filtered = list.filter(ag => {
       if (!ag) return false;
       if (ag.sector === 'etat' || ag.id === 1 || String(ag.id) === '1') return false;
+      const t = (ag.type || '').toLowerCase();
       if (regPackageCategory === 'vip') {
-        return ag.type === 'vip';
+        return t === 'vip';
       }
-      return ag.type === 'standard' || ag.type === 'economique' || !ag.type;
+      return t === 'standard' || t === 'economique' || !t;
     });
     return filtered.length > 0 ? filtered : list;
   };
@@ -1312,8 +1314,9 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                                 type="button"
                                 onClick={() => {
                                   setRegSectorFilter('prive');
-                                  const priveList = getMergedAgencies().filter(ag => ag.sector !== 'etat' && ag.id !== 1);
-                                  if (priveList.length > 0) setRegSelectedAgencyId(priveList[0].id);
+                                  const list = getFilteredAgencies();
+                                  const validId = (list.length > 0 && list[0] && list[0].id) ? list[0].id : 2;
+                                  setRegSelectedAgencyId(validId);
                                 }}
                                 style={{
                                   padding: '12px 16px',
@@ -1338,8 +1341,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                                 type="button"
                                 onClick={() => {
                                   setRegSectorFilter('etat');
-                                  const etatAg = getMergedAgencies().find(ag => ag.sector === 'etat' || ag.id === 1);
-                                  if (etatAg) setRegSelectedAgencyId(etatAg.id);
+                                  setRegSelectedAgencyId(1);
                                 }}
                                 style={{
                                   padding: '12px 16px',
@@ -1371,8 +1373,9 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                                   type="button"
                                   onClick={() => {
                                     setRegPackageCategory('standard');
-                                    const stdList = getMergedAgencies().filter(ag => ag.sector !== 'etat' && ag.id !== 1 && ag.type !== 'vip');
-                                    if (stdList.length > 0) setRegSelectedAgencyId(stdList[0].id);
+                                    const stdList = getFilteredAgencies().filter(ag => (ag.type || '').toLowerCase() !== 'vip');
+                                    const validId = (stdList.length > 0 && stdList[0] && stdList[0].id) ? stdList[0].id : 2;
+                                    setRegSelectedAgencyId(validId);
                                   }}
                                   style={{
                                     padding: '10px 14px',
@@ -1396,8 +1399,9 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                                   type="button"
                                   onClick={() => {
                                     setRegPackageCategory('vip');
-                                    const vipList = getMergedAgencies().filter(ag => ag.sector !== 'etat' && ag.id !== 1 && ag.type === 'vip');
-                                    if (vipList.length > 0) setRegSelectedAgencyId(vipList[0].id);
+                                    const vipList = getFilteredAgencies().filter(ag => (ag.type || '').toLowerCase() === 'vip');
+                                    const validId = (vipList.length > 0 && vipList[0] && vipList[0].id) ? vipList[0].id : 3;
+                                    setRegSelectedAgencyId(validId);
                                   }}
                                   style={{
                                     padding: '10px 14px',
@@ -1427,7 +1431,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                             </label>
                             <select 
                               className="form-control"
-                              value={regSelectedAgencyId}
+                              value={regSelectedAgencyId || 1}
                               onChange={e => setRegSelectedAgencyId(e.target.value)}
                               style={{ height: '50px', borderRadius: '10px', fontSize: '0.92rem', fontWeight: 700, backgroundColor: '#ffffff', border: '1.5px solid #0A5C36', color: '#1A202C', padding: '0 16px' }}
                             >
@@ -3766,8 +3770,9 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                             type="button"
                             onClick={() => {
                               setRegSectorFilter('prive');
-                              const priveList = getMergedAgencies().filter(ag => ag.sector !== 'etat' && ag.id !== 1);
-                              if (priveList.length > 0) setRegSelectedAgencyId(priveList[0].id);
+                              const list = getFilteredAgencies();
+                              const validId = (list.length > 0 && list[0] && list[0].id) ? list[0].id : 2;
+                              setRegSelectedAgencyId(validId);
                             }}
                             style={{
                               padding: '8px 10px',
@@ -3787,8 +3792,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                             type="button"
                             onClick={() => {
                               setRegSectorFilter('etat');
-                              const etatAg = getMergedAgencies().find(ag => ag.sector === 'etat' || ag.id === 1);
-                              if (etatAg) setRegSelectedAgencyId(etatAg.id);
+                              setRegSelectedAgencyId(1);
                             }}
                             style={{
                               padding: '8px 10px',
@@ -3812,8 +3816,9 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                               type="button"
                               onClick={() => {
                                 setRegPackageCategory('standard');
-                                const stdList = getMergedAgencies().filter(ag => ag.sector !== 'etat' && ag.id !== 1 && ag.type !== 'vip');
-                                if (stdList.length > 0) setRegSelectedAgencyId(stdList[0].id);
+                                const stdList = getFilteredAgencies().filter(ag => (ag.type || '').toLowerCase() !== 'vip');
+                                const validId = (stdList.length > 0 && stdList[0] && stdList[0].id) ? stdList[0].id : 2;
+                                setRegSelectedAgencyId(validId);
                               }}
                               style={{
                                 padding: '6px 8px',
@@ -3833,8 +3838,9 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                               type="button"
                               onClick={() => {
                                 setRegPackageCategory('vip');
-                                const vipList = getMergedAgencies().filter(ag => ag.sector !== 'etat' && ag.id !== 1 && ag.type === 'vip');
-                                if (vipList.length > 0) setRegSelectedAgencyId(vipList[0].id);
+                                const vipList = getFilteredAgencies().filter(ag => (ag.type || '').toLowerCase() === 'vip');
+                                const validId = (vipList.length > 0 && vipList[0] && vipList[0].id) ? vipList[0].id : 3;
+                                setRegSelectedAgencyId(validId);
                               }}
                               style={{
                                 padding: '6px 8px',
@@ -3854,7 +3860,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
 
                         <select 
                           className="form-control"
-                          value={regSelectedAgencyId}
+                          value={regSelectedAgencyId || 1}
                           onChange={e => setRegSelectedAgencyId(e.target.value)}
                           style={{ padding: '8px 12px', height: '42px', fontSize: '0.85rem', borderRadius: '6px', backgroundColor: 'var(--surface)', border: '1.5px solid #0A5C36', color: 'var(--text)', fontWeight: 700, marginTop: '4px' }}
                         >
