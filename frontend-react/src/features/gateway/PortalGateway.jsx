@@ -3461,8 +3461,12 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                       2
                     </div>
                     <div>
-                      <strong style={{ display: 'block', fontSize: '0.82rem', color: wizardStep === 'otp' ? 'white' : 'rgba(255,255,255,0.6)' }}>Validation SMS</strong>
-                      <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.45)' }}>Code de sécurité</span>
+                      <strong style={{ display: 'block', fontSize: '0.82rem', color: wizardStep === 'otp' ? 'white' : 'rgba(255,255,255,0.6)' }}>
+                        {chosenRole === 'agency' ? 'Activation Email' : 'Validation SMS'}
+                      </strong>
+                      <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.45)' }}>
+                        {chosenRole === 'agency' ? 'Email Officiel Ligne 33' : 'Code de sécurité'}
+                      </span>
                     </div>
                   </div>
 
@@ -3631,20 +3635,24 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                 </div>
               )}
 
-              {/* STEP 3: OTP VERIFICATION */}
+              {/* STEP 3: OTP / EMAIL VERIFICATION */}
               {wizardStep === 'otp' && (
                 <div className="fade-in">
                   <div style={{ marginBottom: '20px', textAlign: 'center' }}>
                     <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: 'rgba(212,175,55,0.08)', color: 'var(--secondary-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', margin: '0 auto 12px' }}>
-                      🔑
+                      {chosenRole === 'agency' ? '📧' : '🔑'}
                     </div>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-dark)', margin: 0 }}>Code de validation (OTP)</h3>
-                    <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '6px', maxWidth: '340px', margin: '6px auto 0', lineHeight: 1.4 }}>
-                      Un code de validation à 4 chiffres a été envoyé par SMS sur votre mobile.
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-dark)', margin: 0 }}>
+                      {chosenRole === 'agency' ? "Activation par Email Professionnel" : "Code de validation (OTP)"}
+                    </h3>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '6px', maxWidth: '360px', margin: '6px auto 0', lineHeight: 1.4 }}>
+                      {chosenRole === 'agency' 
+                        ? "Les agences ayant une ligne fixe (Ligne 33 non compatible SMS), le code et le lien sécurisé d'activation ont été transmis par Email."
+                        : "Un code de validation à 4 chiffres a été envoyé par SMS sur votre mobile."}
                     </p>
                   </div>
 
-                  {/* PROMINENT SMS RECEIVED SIMULATOR BOX */}
+                  {/* PROMINENT SMS/EMAIL RECEIVED SIMULATOR BOX */}
                   <div style={{
                     backgroundColor: '#ECFDF5',
                     border: '2px dashed #10B981',
@@ -3657,12 +3665,17 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                     boxShadow: '0 4px 12px rgba(16,185,129,0.1)'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '1.2rem' }}>📱</span>
-                      <strong>SMS Sunu Hajj Officiel :</strong>
+                      <span style={{ fontSize: '1.2rem' }}>{chosenRole === 'agency' ? '📧' : '📱'}</span>
+                      <strong>{chosenRole === 'agency' ? 'Email Officiel Sunu Hajj :' : 'SMS Sunu Hajj Officiel :'}</strong>
                     </div>
                     <div>
-                      Votre code de vérification est <strong style={{ fontSize: '1.25rem', color: '#047857', letterSpacing: '2px', backgroundColor: '#D1FAE5', padding: '2px 10px', borderRadius: '6px' }}>{generatedOtp}</strong>
+                      {chosenRole === 'agency' ? 'Votre code d\'activation Email est ' : 'Votre code de vérification est '}<strong style={{ fontSize: '1.25rem', color: '#047857', letterSpacing: '2px', backgroundColor: '#D1FAE5', padding: '2px 10px', borderRadius: '6px' }}>{generatedOtp}</strong>
                     </div>
+                    {chosenRole === 'agency' && (
+                      <div style={{ fontSize: '0.78rem', color: '#047857', marginTop: '6px', fontStyle: 'italic' }}>
+                        Transmis à : <strong>{agencyApplyEmail || agencyEmail || successUser?.email || 'contact@agence.sn'}</strong> (Ligne 33)
+                      </div>
+                    )}
                     <button
                       type="button"
                       onClick={() => setOtpInput(generatedOtp)}
@@ -3678,7 +3691,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                         cursor: 'pointer'
                       }}
                     >
-                      ⚡ Remplir automatiquement le code ({generatedOtp})
+                      ⚡ {chosenRole === 'agency' ? `Activer via l'Email (${generatedOtp})` : `Remplir automatiquement le code (${generatedOtp})`}
                     </button>
                   </div>
 
@@ -3721,15 +3734,15 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                         className="btn btn-primary" 
                         style={{ height: '46px', fontWeight: 700, fontSize: '0.95rem' }}
                       >
-                        Valider et Activer le compte
+                        {chosenRole === 'agency' ? "📧 Valider l'Activation Email et Finaliser →" : "Valider et Activer le compte"}
                       </button>
                       <button 
                         type="button" 
-                        onClick={generateRandomOtp} 
+                        onClick={() => generateRandomOtp(pilgrimPhone || agentPhone || agencyPhone, pilgrimName || agentName || agencyName)} 
                         className="btn btn-secondary" 
                         style={{ height: '40px', fontSize: '0.8rem' }}
                       >
-                        Renvoyer le code OTP par SMS
+                        {chosenRole === 'agency' ? "📩 Renvoyer le lien d'activation par Email" : "Renvoyer le code OTP par SMS"}
                       </button>
                     </div>
 
