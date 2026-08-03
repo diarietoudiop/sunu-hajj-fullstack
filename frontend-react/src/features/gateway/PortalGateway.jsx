@@ -39,6 +39,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
   const [agencyApplyAgreementNum, setAgencyApplyAgreementNum] = useState('');
   const [agencyApplyContact, setAgencyApplyContact] = useState('');
   const [agencyApplyPhone, setAgencyApplyPhone] = useState('');
+  const [agencyApplyEmail, setAgencyApplyEmail] = useState('');
   const [agencyApplySuccess, setAgencyApplySuccess] = useState(false);
   const [agencyApplyLoading, setAgencyApplyLoading] = useState(false);
 
@@ -305,6 +306,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
       const cleanContact = (agencyApplyContact || agencyRep || "Responsable Agence").trim();
       const cleanPhone = (agencyApplyPhone || agencyPhone || "+221 33 824 12 34").trim();
       const cleanSlug = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'teranga';
+      const cleanEmail = (agencyApplyEmail || agencyEmail || `${cleanSlug}@terangahajj.sn`).trim();
 
       const newAgency = {
         id: Date.now(),
@@ -312,7 +314,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
         agreementNumber: cleanAgreement,
         contactPerson: cleanContact,
         phone: cleanPhone,
-        email: `${cleanSlug}@terangahajj.sn`,
+        email: cleanEmail,
         price: parseInt(agencyApplyPrice) || 4500000,
         type: (agencyApplyType || 'vip').toLowerCase(),
         rating: 4.8,
@@ -1692,16 +1694,33 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                   </div>
                 )}
 
-                {/* STEP 2: OTP */}
+                {/* STEP 2: VERIFICATION (SMS OTP FOR MOBILE / EMAIL ACTIVATION FOR AGENCIES WITH FIXED LINE 33) */}
                 {wizardStep === 'otp' && (
                   <div className="fade-in" style={{ textAlign: 'center', padding: '20px 0' }}>
                     <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(10,92,54,0.1)', color: '#0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 20px' }}>
-                      🔐
+                      {chosenRole === 'agency' ? '📧' : '🔐'}
                     </div>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#042F1A', margin: 0 }}>Vérification Sécurisée</h3>
-                    <p style={{ fontSize: '0.88rem', color: '#718096', marginTop: '8px', lineHeight: '1.5' }}>
-                      Un code de vérification à 4 chiffres a été expédié sur votre mobile <strong>{pilgrimPhone || agentPhone || agencyPhone || '+221 78 591 07 67'}</strong> et à votre adresse Email.
-                    </p>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#042F1A', margin: 0 }}>
+                      {chosenRole === 'agency' ? "Activation du Compte Agence par Email" : "Vérification Sécurisée"}
+                    </h3>
+
+                    {chosenRole === 'agency' ? (
+                      <div style={{ marginTop: '12px' }}>
+                        <p style={{ fontSize: '0.88rem', color: '#475569', margin: '0 0 10px 0', lineHeight: '1.5' }}>
+                          Les agences disposant d'une ligne fixe <strong>(Ligne 33 non compatible SMS)</strong>, le code et le lien d'activation sécurisé ont été transmis sur l'Email professionnel :
+                        </p>
+                        <div style={{ backgroundColor: '#F1F5F9', border: '1.5px solid #0A5C36', padding: '10px 16px', borderRadius: '10px', display: 'inline-block', fontWeight: 800, color: '#0A5C36', fontSize: '0.95rem', marginBottom: '10px' }}>
+                          📧 {agencyApplyEmail || agencyEmail || successUser?.email || 'contact@agence.sn'}
+                        </div>
+                        <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block' }}>
+                          📞 Ligne Fixe Agence : <strong>{agencyApplyPhone || agencyPhone || '+221 33 824 12 34'}</strong> (Activation Email automatique)
+                        </span>
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: '0.88rem', color: '#718096', marginTop: '8px', lineHeight: '1.5' }}>
+                        Un code de vérification à 4 chiffres a été expédié sur votre mobile <strong>{pilgrimPhone || agentPhone || agencyPhone || '+221 78 591 07 67'}</strong> et à votre adresse Email.
+                      </p>
+                    )}
 
                     <form onSubmit={handleOtpVerify} style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       <input 
@@ -1718,7 +1737,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                         type="submit" 
                         style={{ width: '100%', height: '52px', fontWeight: 800, fontSize: '0.98rem', borderRadius: '10px', backgroundColor: '#0A5C36', color: '#ffffff', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(10,92,54,0.3)' }}
                       >
-                        Valider mon Code & Finaliser →
+                        {chosenRole === 'agency' ? "📧 Valider l'Activation par Email →" : "Valider mon Code & Finaliser →"}
                       </button>
                     </form>
 
@@ -1728,7 +1747,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                         onClick={() => generateRandomOtp(pilgrimPhone || agentPhone || agencyPhone, pilgrimName || agentName || agencyName)}
                         style={{ background: 'none', border: 'none', color: '#0A5C36', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
                       >
-                        🔄 Renvoyer le code par SMS / Email
+                        {chosenRole === 'agency' ? "📩 Renvoyer le lien d'activation par Email" : "🔄 Renvoyer le code par SMS / Email"}
                       </button>
                     </div>
                   </div>
