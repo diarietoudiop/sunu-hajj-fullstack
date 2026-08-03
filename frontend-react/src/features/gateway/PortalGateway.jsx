@@ -373,7 +373,9 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     setGeneratedOtp(code);
     setOtpInput('');
-    setShowSmsPopup(true);
+    if (chosenRole !== 'agency') {
+      setShowSmsPopup(true);
+    }
 
     const destPhone = targetPhone || pilgrimPhone || agentPhone || agencyPhone || '+221785910767';
     const destEmail = pilgrimEmail || agentEmail || agencyEmail || '';
@@ -538,6 +540,11 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
 
   const handleVerifyOtp = (e) => {
     if (e && e.preventDefault) e.preventDefault();
+    if (chosenRole === 'agency') {
+      setWizardStep('success');
+      setShowSmsPopup(false);
+      return;
+    }
     const cleanOtp = (otpInput || '').trim();
     if (cleanOtp === generatedOtp || cleanOtp === '8492' || !cleanOtp) {
       setWizardStep('success');
@@ -1736,21 +1743,23 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                     )}
 
                     <form onSubmit={handleOtpVerify} style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <input 
-                        type="text" 
-                        maxLength={4}
-                        required
-                        placeholder="• • • •" 
-                        value={otpInput}
-                        onChange={e => setOtpInput(e.target.value)}
-                        style={{ textAlign: 'center', fontSize: '2.2rem', letterSpacing: '12px', fontWeight: 900, height: '64px', borderRadius: '12px', border: '2px solid #0A5C36', backgroundColor: '#ffffff', color: '#042F1A' }}
-                      />
+                      {chosenRole !== 'agency' && (
+                        <input 
+                          type="text" 
+                          maxLength={4}
+                          required
+                          placeholder="• • • •" 
+                          value={otpInput}
+                          onChange={e => setOtpInput(e.target.value)}
+                          style={{ textAlign: 'center', fontSize: '2.2rem', letterSpacing: '12px', fontWeight: 900, height: '64px', borderRadius: '12px', border: '2px solid #0A5C36', backgroundColor: '#ffffff', color: '#042F1A' }}
+                        />
+                      )}
 
                       <button 
                         type="submit" 
                         style={{ width: '100%', height: '52px', fontWeight: 800, fontSize: '0.98rem', borderRadius: '10px', backgroundColor: '#0A5C36', color: '#ffffff', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(10,92,54,0.3)' }}
                       >
-                        {chosenRole === 'agency' ? "📧 Valider l'Activation par Email →" : "Valider mon Code & Finaliser →"}
+                        {chosenRole === 'agency' ? "📧 Valider & Activer le Compte Agence →" : "Valider mon Code & Finaliser →"}
                       </button>
                     </form>
 
@@ -3665,48 +3674,65 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                     </p>
                   </div>
 
-                  {/* PROMINENT SMS/EMAIL RECEIVED SIMULATOR BOX */}
-                  <div style={{
-                    backgroundColor: '#ECFDF5',
-                    border: '2px dashed #10B981',
-                    borderRadius: '12px',
-                    padding: '14px 18px',
-                    marginBottom: '20px',
-                    textAlign: 'center',
-                    color: '#065F46',
-                    fontSize: '0.9rem',
-                    boxShadow: '0 4px 12px rgba(16,185,129,0.1)'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '1.2rem' }}>{chosenRole === 'agency' ? '📧' : '📱'}</span>
-                      <strong>{chosenRole === 'agency' ? 'Email Officiel Sunu Hajj :' : 'SMS Sunu Hajj Officiel :'}</strong>
-                    </div>
-                    <div>
-                      {chosenRole === 'agency' ? 'Votre code d\'activation Email est ' : 'Votre code de vérification est '}<strong style={{ fontSize: '1.25rem', color: '#047857', letterSpacing: '2px', backgroundColor: '#D1FAE5', padding: '2px 10px', borderRadius: '6px' }}>{generatedOtp}</strong>
-                    </div>
-                    {chosenRole === 'agency' && (
-                      <div style={{ fontSize: '0.78rem', color: '#047857', marginTop: '6px', fontStyle: 'italic' }}>
-                        Transmis à : <strong>{agencyApplyEmail || agencyEmail || successUser?.email || 'contact@agence.sn'}</strong> (Ligne 33)
+                  {/* SMS FOR MOBILE / EMAIL ACTIVATION CARD FOR AGENCIES */}
+                  {chosenRole === 'agency' ? (
+                    <div style={{
+                      backgroundColor: '#F8FAFC',
+                      border: '2px solid #0A5C36',
+                      borderRadius: '12px',
+                      padding: '16px 20px',
+                      marginBottom: '20px',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ fontSize: '0.88rem', color: '#475569', marginBottom: '8px' }}>
+                        Lien d'activation transmis à l'adresse Email de l'agence :
                       </div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => setOtpInput(generatedOtp)}
-                      style={{
-                        marginTop: '10px',
-                        background: '#10B981',
-                        color: '#FFFFFF',
-                        border: 'none',
-                        padding: '6px 14px',
-                        borderRadius: '6px',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      ⚡ {chosenRole === 'agency' ? `Activer via l'Email (${generatedOtp})` : `Remplir automatiquement le code (${generatedOtp})`}
-                    </button>
-                  </div>
+                      <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0A5C36' }}>
+                        📧 {agencyApplyEmail || agencyEmail || successUser?.email || 'contact@toubavoyages.sn'}
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '6px' }}>
+                        📞 Ligne Fixe Directe : <strong>{agencyApplyPhone || agencyPhone || '+221 33 824 12 34'}</strong> (Aucun code OTP SMS requis)
+                      </div>
+                    </div>
+                  ) : (
+                    /* PROMINENT SMS RECEIVED SIMULATOR BOX FOR PILGRIMS */
+                    <div style={{
+                      backgroundColor: '#ECFDF5',
+                      border: '2px dashed #10B981',
+                      borderRadius: '12px',
+                      padding: '14px 18px',
+                      marginBottom: '20px',
+                      textAlign: 'center',
+                      color: '#065F46',
+                      fontSize: '0.9rem',
+                      boxShadow: '0 4px 12px rgba(16,185,129,0.1)'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '1.2rem' }}>📱</span>
+                        <strong>SMS Sunu Hajj Officiel :</strong>
+                      </div>
+                      <div>
+                        Votre code de vérification est <strong style={{ fontSize: '1.25rem', color: '#047857', letterSpacing: '2px', backgroundColor: '#D1FAE5', padding: '2px 10px', borderRadius: '6px' }}>{generatedOtp}</strong>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setOtpInput(generatedOtp)}
+                        style={{
+                          marginTop: '10px',
+                          background: '#10B981',
+                          color: '#FFFFFF',
+                          border: 'none',
+                          padding: '6px 14px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ⚡ Remplir automatiquement le code ({generatedOtp})
+                      </button>
+                    </div>
+                  )}
 
                   {otpError && (
                     <div style={{ padding: '10px 14px', marginBottom: '16px', borderRadius: '8px', backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444', fontSize: '0.78rem', border: '1px solid rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -3717,29 +3743,31 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
 
                   <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
-                      <input 
-                        type="text" 
-                        maxLength="4" 
-                        required 
-                        className="form-control"
-                        placeholder="Ex: 8492"
-                        value={otpInput}
-                        onChange={e => setOtpInput(e.target.value)}
-                        style={{ 
-                          fontSize: '1.4rem', 
-                          textAlign: 'center', 
-                          letterSpacing: '8px', 
-                          width: '250px', 
-                          height: '52px',
-                          fontWeight: 800,
-                          border: '2px solid var(--primary)',
-                          borderRadius: '8px',
-                          backgroundColor: 'var(--surface)',
-                          color: 'var(--text)'
-                        }}
-                      />
-                    </div>
+                    {chosenRole !== 'agency' && (
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+                        <input 
+                          type="text" 
+                          maxLength="4" 
+                          required 
+                          className="form-control"
+                          placeholder="Ex: 8492"
+                          value={otpInput}
+                          onChange={e => setOtpInput(e.target.value)}
+                          style={{ 
+                            fontSize: '1.4rem', 
+                            textAlign: 'center', 
+                            letterSpacing: '8px', 
+                            width: '250px', 
+                            height: '52px',
+                            fontWeight: 800,
+                            border: '2px solid var(--primary)',
+                            borderRadius: '8px',
+                            backgroundColor: 'var(--surface)',
+                            color: 'var(--text)'
+                          }}
+                        />
+                      </div>
+                    )}
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <button 
@@ -3747,7 +3775,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                         className="btn btn-primary" 
                         style={{ height: '46px', fontWeight: 700, fontSize: '0.95rem' }}
                       >
-                        {chosenRole === 'agency' ? "📧 Valider l'Activation Email et Finaliser →" : "Valider et Activer le compte"}
+                        {chosenRole === 'agency' ? "📧 Valider & Activer le Compte Agence →" : "Valider et Activer le compte"}
                       </button>
                       <button 
                         type="button" 
