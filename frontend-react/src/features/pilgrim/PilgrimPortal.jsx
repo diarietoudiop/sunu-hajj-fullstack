@@ -3362,7 +3362,7 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
                 <div><strong>Nom & Prénom :</strong> {safePilgrim.fullName || safePilgrim.name || 'Samba DIOP'}</div>
                 <div><strong>N° Passeport :</strong> {safePilgrim.passportNumber || 'SN8492049'}</div>
                 <div><strong>Région :</strong> {safePilgrim.region || chosenDoctor?.region || 'Dakar'}</div>
-                <div><strong>Groupe Sanguin :</strong> {safePilgrim.bloodType || 'O+ (Positif)'}</div>
+                <div><strong>Groupe Sanguin :</strong> {bloodType || safePilgrim.bloodType || safePilgrim.bloodGroup || 'O+'}</div>
                 <div><strong>Structure Sanitaire :</strong> {chosenDoctor?.hospital || chosenDoctor?.name || 'Hôpital Régional de Saint-Louis'}</div>
                 <div><strong>Téléphone :</strong> {safePilgrim.phone || '+221 78 591 07 67'}</div>
               </div>
@@ -3471,7 +3471,7 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
                   {safePilgrim.fullName || safePilgrim.name || 'Samba DIOP'}
                 </h2>
                 <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0A5C36', display: 'block', marginBottom: '14px' }}>
-                  Passeport : {safePilgrim.passportNumber || 'SN9283741'} | Groupe : {safePilgrim.bloodType || 'O+'}
+                  Passeport : {safePilgrim.passportNumber || 'SN9283741'} | Groupe : {bloodType || safePilgrim.bloodType || safePilgrim.bloodGroup || 'O+'}
                 </span>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', textAlign: 'left', backgroundColor: '#f8fafc', padding: '10px 12px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.74rem', margin: '12px 0' }}>

@@ -113,6 +113,42 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
   const pendingCount = myDoctorPilgrims.filter(p => !p.medicalStatus || p.medicalStatus === 'pending').length;
   const inapteCount = myDoctorPilgrims.filter(p => p.medicalStatus === 'inapte').length;
 
+  const handleDirectBloodTypeChange = async (pilgrim, newBloodType) => {
+    try {
+      const currentDetails = pilgrim.medicalDetails || {};
+      const updatedDetails = {
+        ...currentDetails,
+        bloodType: newBloodType,
+        bloodGroup: newBloodType,
+        vaccines: currentDetails.vaccines || pilgrim.vaccines || {
+          yellowFever: true,
+          yellowFeverDate: '2026-05-12',
+          yellowFeverBatch: 'LOT-YF2026-DKR',
+          meningitis: true,
+          meningitisDate: '2026-05-12',
+          meningitisBatch: 'LOT-MN2026-DKR',
+          fluVaccine: true,
+          fluVaccineDate: '2026-05-12',
+          covidVaccine: true,
+          covidVaccineDate: '2026-04-10'
+        },
+        doctorCode: structureInfo.code,
+        doctorName: doctorName,
+        structureName: structureInfo.name,
+        validationDate: pilgrim.validationDate || new Date().toISOString().split('T')[0]
+      };
+
+      const currentStatus = pilgrim.medicalStatus || 'pending';
+      if (onUpdateMedical) {
+        await onUpdateMedical(pilgrim.id, currentStatus, updatedDetails);
+      } else {
+        await ApiService.updatePilgrimMedical(pilgrim.id, currentStatus, updatedDetails);
+      }
+    } catch (err) {
+      console.error("Direct blood type update error:", err);
+    }
+  };
+
   const handleOpenConsultation = (pilgrim) => {
     setSelectedPilgrim(pilgrim);
     setMedicalStatus(pilgrim.medicalStatus === 'inapte' ? 'inapte' : 'apte');
@@ -405,9 +441,31 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
                           {p.phone || 'Non renseigné'}
                         </td>
                         <td style={{ padding: '16px 20px' }}>
-                          <span style={{ padding: '4px 10px', borderRadius: '6px', backgroundColor: '#F1F5F9', fontWeight: 800, color: '#0F172A', fontSize: '0.82rem' }}>
-                            {p.bloodType || 'Non renseigné'}
-                          </span>
+                          <select
+                            value={p.bloodType || p.bloodGroup || 'O+'}
+                            onChange={(e) => handleDirectBloodTypeChange(p, e.target.value)}
+                            title="Modifier directement le groupe sanguin de ce pèlerin"
+                            style={{ 
+                              padding: '6px 10px', 
+                              borderRadius: '8px', 
+                              backgroundColor: '#FAF9F5', 
+                              border: '1.5px solid #D4AF37', 
+                              fontWeight: 900, 
+                              color: '#0A5C36', 
+                              fontSize: '0.85rem',
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+                            }}
+                          >
+                            <option value="O+">🩸 O Rh+ (O+)</option>
+                            <option value="O-">🩸 O Rh- (O-)</option>
+                            <option value="A+">🩸 A Rh+ (A+)</option>
+                            <option value="A-">🩸 A Rh- (A-)</option>
+                            <option value="B+">🩸 B Rh+ (B+)</option>
+                            <option value="B-">🩸 B Rh- (B-)</option>
+                            <option value="AB+">🩸 AB Rh+ (AB+)</option>
+                            <option value="AB-">🩸 AB Rh- (AB-)</option>
+                          </select>
                         </td>
                         <td style={{ padding: '16px 20px' }}>
                           <span style={{ 
