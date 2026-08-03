@@ -226,8 +226,28 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
   const [pilgrimPassport, setPilgrimPassport] = useState('');
   const [pilgrimPhone, setPilgrimPhone] = useState('');
   const [pilgrimEmail, setPilgrimEmail] = useState('');
-  const [pilgrimRegion, setPilgrimRegion] = useState('Dakar');
   const [regSelectedAgencyId, setRegSelectedAgencyId] = useState(1);
+
+  // Pilgrim registration sector & package filters
+  const [regSectorFilter, setRegSectorFilter] = useState('prive'); // 'prive' | 'etat'
+  const [regPackageCategory, setRegPackageCategory] = useState('standard'); // 'standard' | 'vip'
+
+  const getFilteredAgencies = () => {
+    const list = Array.isArray(allPublicAgencies) ? allPublicAgencies : [];
+    if (regSectorFilter === 'etat') {
+      const filtered = list.filter(ag => ag && (ag.sector === 'etat' || ag.id === 1 || String(ag.id) === '1'));
+      return filtered.length > 0 ? filtered : list;
+    }
+    const filtered = list.filter(ag => {
+      if (!ag) return false;
+      if (ag.sector === 'etat' || ag.id === 1 || String(ag.id) === '1') return false;
+      if (regPackageCategory === 'vip') {
+        return ag.type === 'vip';
+      }
+      return ag.type === 'standard' || ag.type === 'economique' || !ag.type;
+    });
+    return filtered.length > 0 ? filtered : list;
+  };
 
   // Agency form states
   const [agencyName, setAgencyName] = useState('');
@@ -1281,20 +1301,139 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                         {/* AGENCE DE VOYAGE SECTION */}
                         <div style={{ marginTop: '8px' }}>
                           <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#718096', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '14px' }}>
-                            AGENCE DE VOYAGE
+                            ENCADREMENT & AGENCE DE VOYAGE
                           </span>
 
+                          {/* 1. SECTOR SELECTOR BUTTONS (PRIVÉ vs ÉTAT) */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Choix du Secteur *</label>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setRegSectorFilter('prive');
+                                  const priveList = getMergedAgencies().filter(ag => ag.sector !== 'etat' && ag.id !== 1);
+                                  if (priveList.length > 0) setRegSelectedAgencyId(priveList[0].id);
+                                }}
+                                style={{
+                                  padding: '12px 16px',
+                                  borderRadius: '10px',
+                                  border: regSectorFilter === 'prive' ? '2.5px solid #0A5C36' : '1px solid #CBD5E1',
+                                  backgroundColor: regSectorFilter === 'prive' ? '#F0FDF4' : '#ffffff',
+                                  color: regSectorFilter === 'prive' ? '#042F1A' : '#64748B',
+                                  fontWeight: 800,
+                                  fontSize: '0.9rem',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '8px',
+                                  boxShadow: regSectorFilter === 'prive' ? '0 4px 12px rgba(10,92,54,0.12)' : 'none'
+                                }}
+                              >
+                                🏢 Secteur Privé (Agences)
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setRegSectorFilter('etat');
+                                  const etatAg = getMergedAgencies().find(ag => ag.sector === 'etat' || ag.id === 1);
+                                  if (etatAg) setRegSelectedAgencyId(etatAg.id);
+                                }}
+                                style={{
+                                  padding: '12px 16px',
+                                  borderRadius: '10px',
+                                  border: regSectorFilter === 'etat' ? '2.5px solid #0A5C36' : '1px solid #CBD5E1',
+                                  backgroundColor: regSectorFilter === 'etat' ? '#F0FDF4' : '#ffffff',
+                                  color: regSectorFilter === 'etat' ? '#042F1A' : '#64748B',
+                                  fontWeight: 800,
+                                  fontSize: '0.9rem',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '8px',
+                                  boxShadow: regSectorFilter === 'etat' ? '0 4px 12px rgba(10,92,54,0.12)' : 'none'
+                                }}
+                              >
+                                🏛️ Secteur État (DGP)
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* 2. IF PRIVÉ: SHOW PACKAGE CHOICE (STANDARD vs VIP) */}
+                          {regSectorFilter === 'prive' && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                              <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Formule d'Offre Privée *</label>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setRegPackageCategory('standard');
+                                    const stdList = getMergedAgencies().filter(ag => ag.sector !== 'etat' && ag.id !== 1 && ag.type !== 'vip');
+                                    if (stdList.length > 0) setRegSelectedAgencyId(stdList[0].id);
+                                  }}
+                                  style={{
+                                    padding: '10px 14px',
+                                    borderRadius: '8px',
+                                    border: regPackageCategory === 'standard' ? '2px solid #D4AF37' : '1px solid #E2E8F0',
+                                    backgroundColor: regPackageCategory === 'standard' ? '#FAF9F5' : '#ffffff',
+                                    color: regPackageCategory === 'standard' ? '#042F1A' : '#64748B',
+                                    fontWeight: 800,
+                                    fontSize: '0.85rem',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '6px'
+                                  }}
+                                >
+                                  ✈️ Offre Standard Confort
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setRegPackageCategory('vip');
+                                    const vipList = getMergedAgencies().filter(ag => ag.sector !== 'etat' && ag.id !== 1 && ag.type === 'vip');
+                                    if (vipList.length > 0) setRegSelectedAgencyId(vipList[0].id);
+                                  }}
+                                  style={{
+                                    padding: '10px 14px',
+                                    borderRadius: '8px',
+                                    border: regPackageCategory === 'vip' ? '2px solid #D4AF37' : '1px solid #E2E8F0',
+                                    backgroundColor: regPackageCategory === 'vip' ? '#FAF9F5' : '#ffffff',
+                                    color: regPackageCategory === 'vip' ? '#042F1A' : '#64748B',
+                                    fontWeight: 800,
+                                    fontSize: '0.85rem',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '6px'
+                                  }}
+                                >
+                                  ⭐ Offre VIP Luxe
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 3. DROPDOWN OF MATCHING AGENCIES */}
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Choix du Secteur / Agence Agréée *</label>
+                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>
+                              {regSectorFilter === 'etat' ? "Organisme Public Officiel *" : `Sélectionner une Agence Agréée (${regPackageCategory === 'vip' ? 'VIP Luxe' : 'Standard Confort'}) *`}
+                            </label>
                             <select 
                               className="form-control"
                               value={regSelectedAgencyId}
                               onChange={e => setRegSelectedAgencyId(e.target.value)}
-                              style={{ height: '50px', borderRadius: '10px', fontSize: '0.92rem', fontWeight: 600, backgroundColor: '#ffffff', border: '1px solid #E2E8F0', color: '#1A202C', padding: '0 16px' }}
+                              style={{ height: '50px', borderRadius: '10px', fontSize: '0.92rem', fontWeight: 700, backgroundColor: '#ffffff', border: '1.5px solid #0A5C36', color: '#1A202C', padding: '0 16px' }}
                             >
-                              {allPublicAgencies.map(ag => (
+                              {getFilteredAgencies().map(ag => (
                                 <option key={ag.id} value={ag.id}>
-                                  {ag.name} — {ag.priceLabel} ({ag.type === 'vip' ? 'Privé VIP' : ag.type === 'economique' ? 'Privé Économique' : ag.sector === 'etat' ? 'Secteur État' : 'Privé Standard'})
+                                  {ag.name} — {ag.priceLabel || (ag.price ? ag.price.toLocaleString() + ' FCFA' : '4 300 000 FCFA')}
                                 </option>
                               ))}
                             </select>
@@ -3618,17 +3757,110 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                         </select>
                       </div>
 
-                      <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px', gridColumn: 'span 2' }}>
-                        <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)' }}>Choix de l'Agence Hajj Agréée *</label>
+                      <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '10px', gridColumn: 'span 2' }}>
+                        <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)' }}>Choix du Secteur & Agence *</label>
+                        
+                        {/* Sector Buttons */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRegSectorFilter('prive');
+                              const priveList = getMergedAgencies().filter(ag => ag.sector !== 'etat' && ag.id !== 1);
+                              if (priveList.length > 0) setRegSelectedAgencyId(priveList[0].id);
+                            }}
+                            style={{
+                              padding: '8px 10px',
+                              borderRadius: '6px',
+                              border: regSectorFilter === 'prive' ? '2px solid #0A5C36' : '1px solid var(--border)',
+                              backgroundColor: regSectorFilter === 'prive' ? '#F0FDF4' : 'var(--surface)',
+                              color: regSectorFilter === 'prive' ? '#042F1A' : 'var(--text-muted)',
+                              fontWeight: 800,
+                              fontSize: '0.8rem',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            🏢 Secteur Privé
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRegSectorFilter('etat');
+                              const etatAg = getMergedAgencies().find(ag => ag.sector === 'etat' || ag.id === 1);
+                              if (etatAg) setRegSelectedAgencyId(etatAg.id);
+                            }}
+                            style={{
+                              padding: '8px 10px',
+                              borderRadius: '6px',
+                              border: regSectorFilter === 'etat' ? '2px solid #0A5C36' : '1px solid var(--border)',
+                              backgroundColor: regSectorFilter === 'etat' ? '#F0FDF4' : 'var(--surface)',
+                              color: regSectorFilter === 'etat' ? '#042F1A' : 'var(--text-muted)',
+                              fontWeight: 800,
+                              fontSize: '0.8rem',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            🏛️ Secteur État (DGP)
+                          </button>
+                        </div>
+
+                        {/* If Privé: Package Category */}
+                        {regSectorFilter === 'prive' && (
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '4px' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRegPackageCategory('standard');
+                                const stdList = getMergedAgencies().filter(ag => ag.sector !== 'etat' && ag.id !== 1 && ag.type !== 'vip');
+                                if (stdList.length > 0) setRegSelectedAgencyId(stdList[0].id);
+                              }}
+                              style={{
+                                padding: '6px 8px',
+                                borderRadius: '6px',
+                                border: regPackageCategory === 'standard' ? '2px solid #D4AF37' : '1px solid var(--border)',
+                                backgroundColor: regPackageCategory === 'standard' ? '#FAF9F5' : 'var(--surface)',
+                                color: regPackageCategory === 'standard' ? '#042F1A' : 'var(--text-muted)',
+                                fontWeight: 800,
+                                fontSize: '0.78rem',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              ✈️ Standard Confort
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRegPackageCategory('vip');
+                                const vipList = getMergedAgencies().filter(ag => ag.sector !== 'etat' && ag.id !== 1 && ag.type === 'vip');
+                                if (vipList.length > 0) setRegSelectedAgencyId(vipList[0].id);
+                              }}
+                              style={{
+                                padding: '6px 8px',
+                                borderRadius: '6px',
+                                border: regPackageCategory === 'vip' ? '2px solid #D4AF37' : '1px solid var(--border)',
+                                backgroundColor: regPackageCategory === 'vip' ? '#FAF9F5' : 'var(--surface)',
+                                color: regPackageCategory === 'vip' ? '#042F1A' : 'var(--text-muted)',
+                                fontWeight: 800,
+                                fontSize: '0.78rem',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              ⭐ VIP Luxe
+                            </button>
+                          </div>
+                        )}
+
                         <select 
                           className="form-control"
                           value={regSelectedAgencyId}
                           onChange={e => setRegSelectedAgencyId(e.target.value)}
-                          style={{ padding: '8px 12px', height: '40px', fontSize: '0.85rem', borderRadius: '6px', backgroundColor: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                          style={{ padding: '8px 12px', height: '42px', fontSize: '0.85rem', borderRadius: '6px', backgroundColor: 'var(--surface)', border: '1.5px solid #0A5C36', color: 'var(--text)', fontWeight: 700, marginTop: '4px' }}
                         >
-                          {allPublicAgencies.map(ag => (
+                          {getFilteredAgencies().map(ag => (
                             <option key={ag.id} value={ag.id}>
-                              {ag.name} — {ag.priceLabel} ({ag.type === 'vip' ? 'VIP' : ag.type === 'economique' ? 'Économique' : ag.sector === 'etat' ? 'Secteur État' : 'Standard'})
+                              {ag.name} — {ag.priceLabel || (ag.price ? ag.price.toLocaleString() + ' FCFA' : '4 300 000 FCFA')}
                             </option>
                           ))}
                         </select>
