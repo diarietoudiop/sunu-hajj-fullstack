@@ -234,8 +234,8 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
   const [agencyPhone, setAgencyPhone] = useState('');
   const [agencyEmail, setAgencyEmail] = useState('');
   const [agencyPassword, setAgencyPassword] = useState('');
-  const [agencyApplyType, setAgencyApplyType] = useState('vip');
-  const [agencyApplyPrice, setAgencyApplyPrice] = useState('8500000');
+  const [agencyApplyType, setAgencyApplyType] = useState('standard');
+  const [agencyApplyPrice, setAgencyApplyPrice] = useState('4900000');
   const [agencyApplyQuota, setAgencyApplyQuota] = useState('250');
 
   // Agent DGP / Medical form states
@@ -1649,22 +1649,20 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Catégorie d'Offre Hajj *</label>
+                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Formule Agence Privée *</label>
                             <select
                               className="form-control"
-                              value={agencyApplyType || 'vip'}
+                              value={agencyApplyType || 'standard'}
                               onChange={e => {
                                 const val = e.target.value;
                                 setAgencyApplyType(val);
                                 if (val === 'vip') setAgencyApplyPrice('8500000');
-                                else if (val === 'standard') setAgencyApplyPrice('4900000');
-                                else if (val === 'economique') setAgencyApplyPrice('3600000');
+                                else setAgencyApplyPrice('4900000');
                               }}
                               style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px', fontWeight: 700 }}
                             >
-                              <option value="vip">⭐ Offre VIP Luxe (8.500.000 FCFA)</option>
                               <option value="standard">✈️ Offre Standard Confort (4.900.000 FCFA)</option>
-                              <option value="economique">📦 Offre Privée / Économique (3.600.000 FCFA)</option>
+                              <option value="vip">⭐ Offre VIP Luxe (8.500.000 FCFA)</option>
                             </select>
                           </div>
 
@@ -3860,22 +3858,20 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)' }}>Catégorie / Statut Offre *</label>
+                      <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)' }}>Formule Agence Privée *</label>
                       <select
                         className="form-control"
-                        value={agencyApplyType}
+                        value={agencyApplyType || 'standard'}
                         onChange={e => {
                           const val = e.target.value;
                           setAgencyApplyType(val);
                           if (val === 'vip') setAgencyApplyPrice('8500000');
-                          else if (val === 'standard') setAgencyApplyPrice('4900000');
-                          else if (val === 'economique') setAgencyApplyPrice('3600000');
+                          else setAgencyApplyPrice('4900000');
                         }}
                         style={{ height: '42px', fontSize: '0.85rem' }}
                       >
-                        <option value="vip">⭐ Offre VIP Luxe</option>
-                        <option value="standard">✈️ Offre Standard Confort</option>
-                        <option value="economique">📦 Offre Économique</option>
+                        <option value="standard">✈️ Offre Standard Confort (4.900.000 FCFA)</option>
+                        <option value="vip">⭐ Offre VIP Luxe (8.500.000 FCFA)</option>
                       </select>
                     </div>
 
