@@ -607,50 +607,48 @@ export const ApiService = {
       console.warn("Backend offline, updating pilgrim locally (mock).");
       
       const mockList = JSON.parse(localStorage.getItem('mock_pilgrims') || '[]');
-      const index = mockList.findIndex(p => p.id === id);
+      const index = mockList.findIndex(p => p && (
+        p.id === id || 
+        String(p.id) === String(id) || 
+        (p.passportNumber && id && String(p.passportNumber).toUpperCase() === String(id).toUpperCase())
+      ));
       
-      let current;
+      let current = index !== -1 ? mockList[index] : (MOCK_PILGRIMS.find(p => p && (p.id === id || String(p.id) === String(id))) || { id, passportNumber: id });
+      const newBlood = profileData.bloodType || profileData.bloodGroup || current.bloodType || current.bloodGroup || 'O+';
+      
+      const updated = {
+        ...current,
+        fullName: profileData.fullName || current.fullName,
+        phone: profileData.phone || current.phone,
+        email: profileData.email || current.email,
+        bloodType: newBlood,
+        bloodGroup: newBlood,
+        selectedAgencyId: profileData.selectedAgencyId ? parseInt(profileData.selectedAgencyId) : current.selectedAgencyId,
+        emergencyContactName: profileData.emergencyContactName || current.emergencyContactName,
+        emergencyContactPhone: profileData.emergencyContactPhone || current.emergencyContactPhone,
+        emergencyContact: {
+          name: profileData.emergencyContactName || current.emergencyContact?.name || current.emergencyContactName,
+          phone: profileData.emergencyContactPhone || current.emergencyContact?.phone || current.emergencyContactPhone
+        }
+      };
+
       if (index !== -1) {
-        current = mockList[index];
-        const updated = {
-          ...current,
-          fullName: profileData.fullName || current.fullName,
-          phone: profileData.phone,
-          email: profileData.email,
-          bloodType: profileData.bloodType || current.bloodType,
-          selectedAgencyId: profileData.selectedAgencyId ? parseInt(profileData.selectedAgencyId) : current.selectedAgencyId,
-          emergencyContactName: profileData.emergencyContactName,
-          emergencyContactPhone: profileData.emergencyContactPhone,
-          emergencyContact: {
-            name: profileData.emergencyContactName,
-            phone: profileData.emergencyContactPhone
-          }
-        };
         mockList[index] = updated;
-        localStorage.setItem('mock_pilgrims', JSON.stringify(mockList));
-        return updated;
       } else {
-        const staticP = MOCK_PILGRIMS.find(p => p.id === id);
-        if (!staticP) throw new Error("Pèlerin introuvable.");
-        
-        const updated = {
-          ...staticP,
-          fullName: profileData.fullName || staticP.fullName,
-          phone: profileData.phone,
-          email: profileData.email,
-          bloodType: profileData.bloodType || staticP.bloodType,
-          selectedAgencyId: profileData.selectedAgencyId ? parseInt(profileData.selectedAgencyId) : staticP.selectedAgencyId,
-          emergencyContactName: profileData.emergencyContactName,
-          emergencyContactPhone: profileData.emergencyContactPhone,
-          emergencyContact: {
-            name: profileData.emergencyContactName,
-            phone: profileData.emergencyContactPhone
-          }
-        };
         mockList.push(updated);
-        localStorage.setItem('mock_pilgrims', JSON.stringify(mockList));
-        return updated;
       }
+      localStorage.setItem('mock_pilgrims', JSON.stringify(mockList));
+
+      // Also update dgp_pilgrim in sessionStorage if matching!
+      try {
+        const storedSession = JSON.parse(sessionStorage.getItem('dgp_pilgrim') || 'null');
+        if (storedSession) {
+          const newStored = { ...storedSession, ...updated };
+          sessionStorage.setItem('dgp_pilgrim', JSON.stringify(newStored));
+        }
+      } catch (e) {}
+
+      return updated;
     }
   },
 

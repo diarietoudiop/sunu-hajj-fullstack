@@ -282,36 +282,40 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
   const getRealBloodType = (source) => {
     if (!source) return null;
     const b = source.bloodType || source.bloodGroup || source.medicalDetails?.bloodType || source.medicalDetails?.bloodGroup;
-    if (b && !b.includes('déterminer')) return b;
+    if (b && typeof b === 'string' && !b.includes('déterminer')) return b;
     return null;
   };
 
-  const [bloodType, setBloodType] = useState(() => {
+  const findBestBloodType = () => {
+    try {
+      const storedSession = JSON.parse(sessionStorage.getItem('dgp_pilgrim') || 'null');
+      const bSession = getRealBloodType(storedSession);
+      if (bSession) return bSession;
+    } catch(e) {}
+
     try {
       const mockList = JSON.parse(localStorage.getItem('mock_pilgrims') || '[]');
+      const targetId = String(safePilgrim.id || '').toUpperCase();
+      const targetPass = String(safePilgrim.passportNumber || '').toUpperCase();
+      const targetEmail = String(safePilgrim.email || '').toLowerCase();
+      
       const found = mockList.find(p => p && (
-        p.id === safePilgrim.id || 
-        String(p.id) === String(safePilgrim.id) || 
-        (p.passportNumber && safePilgrim.passportNumber && p.passportNumber.toUpperCase() === safePilgrim.passportNumber.toUpperCase())
+        (p.id && String(p.id).toUpperCase() === targetId) ||
+        (p.passportNumber && targetPass && String(p.passportNumber).toUpperCase() === targetPass) ||
+        (p.email && targetEmail && String(p.email).toLowerCase() === targetEmail)
       ));
-      const bFromMock = getRealBloodType(found);
-      if (bFromMock) return bFromMock;
+      const bMock = getRealBloodType(found);
+      if (bMock) return bMock;
+    } catch(e) {}
 
-      const storedSession = (() => {
-        try { return JSON.parse(sessionStorage.getItem('dgp_pilgrim') || 'null'); } catch(e) { return null; }
-      })();
-      const bFromSession = getRealBloodType(storedSession);
-      if (bFromSession) return bFromSession;
+    const bProp = getRealBloodType(safePilgrim);
+    if (bProp) return bProp;
 
-    } catch (e) {}
-    
-    const bFromProp = getRealBloodType(safePilgrim);
-    if (bFromProp) return bFromProp;
-
-    // If validated apte, fallback to O+ if not specified
     if (safePilgrim.medicalStatus === 'apte') return 'O+';
     return 'À déterminer (Visite médicale)';
-  });
+  };
+
+  const [bloodType, setBloodType] = useState(() => findBestBloodType());
   const [phone, setPhone] = useState(safePilgrim.phone || '');
   const [email, setEmail] = useState(safePilgrim.email || '');
   const [emergencyContactName, setEmergencyContactName] = useState(safePilgrim.emergencyContact?.name || safePilgrim.emergencyContactName || '');
@@ -339,12 +343,7 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
     if (pilgrim) {
       setFullName(pilgrim.fullName || pilgrim.name || 'Pèlerin Sunu Hajj');
       setSelectedAgencyId(pilgrim.selectedAgencyId || 1);
-      
-      const bProp = getRealBloodType(pilgrim);
-      if (bProp) {
-        setBloodType(bProp);
-      }
-
+      setBloodType(findBestBloodType());
       setPhone(pilgrim.phone || '');
       setEmail(pilgrim.email || '');
       setEmergencyContactName(pilgrim.emergencyContact?.name || pilgrim.emergencyContactName || '');
@@ -365,36 +364,31 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
   useEffect(() => {
     const refreshFromStorage = () => {
       try {
+        const bestBlood = findBestBloodType();
+        if (bestBlood) {
+          setBloodType(bestBlood);
+        }
+
         const mockList = JSON.parse(localStorage.getItem('mock_pilgrims') || '[]');
-        const updatedPilgrim = mockList.find(p => p && (
-          p.id === safePilgrim.id || 
-          String(p.id) === String(safePilgrim.id) || 
-          p.passportNumber === safePilgrim.passportNumber ||
-          (p.passportNumber && safePilgrim.passportNumber && p.passportNumber.toUpperCase() === safePilgrim.passportNumber.toUpperCase())
-        ));
-
-        const storedSession = (() => {
+        const targetId = String(safePilgrim.id || '').toUpperCase();
+        const targetPass = String(safePilgrim.passportNumber || '').toUpperCase();
+        const targetEmail = String(safePilgrim.email || '').toLowerCase();
+        
+        const source = mockList.find(p => p && (
+          (p.id && String(p.id).toUpperCase() === targetId) ||
+          (p.passportNumber && targetPass && String(p.passportNumber).toUpperCase() === targetPass) ||
+          (p.email && targetEmail && String(p.email).toLowerCase() === targetEmail)
+        )) || (() => {
           try { return JSON.parse(sessionStorage.getItem('dgp_pilgrim') || 'null'); } catch(e) { return null; }
-        })();
+        })() || safePilgrim;
 
-        const source = updatedPilgrim || storedSession || safePilgrim;
-
-        if (source) {
-          const bType = getRealBloodType(source);
-          if (bType) {
-            setBloodType(bType);
-          } else if (source.medicalStatus === 'apte' || safePilgrim.medicalStatus === 'apte') {
-            setBloodType(prev => (prev && !prev.includes('déterminer')) ? prev : 'O+');
-          }
-
-          if (source.doctorName || source.structureName || source.assignedDoctor) {
-            setChosenDoctor({
-              code: source.doctorCode || source.assignedDoctor?.code || "MED-DKR-01",
-              doctorName: source.doctorName || source.assignedDoctor?.doctorName || "Dr. Médecin Chef",
-              hospital: source.structureName || source.assignedDoctor?.hospital || "Structure Médicale Agréée",
-              region: source.region || source.assignedDoctor?.region || "Sénégal"
-            });
-          }
+        if (source && (source.doctorName || source.structureName || source.assignedDoctor)) {
+          setChosenDoctor({
+            code: source.doctorCode || source.assignedDoctor?.code || "MED-DKR-01",
+            doctorName: source.doctorName || source.assignedDoctor?.doctorName || "Dr. Médecin Chef",
+            hospital: source.structureName || source.assignedDoctor?.hospital || "Structure Médicale Agréée",
+            region: source.region || source.assignedDoctor?.region || "Sénégal"
+          });
         }
       } catch (e) {}
     };
