@@ -1990,29 +1990,96 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
 
               </div>
 
-              {/* RIGHT COLUMN: Kaaba Photo & Caption (Exact Parity with PDF Screenshot) */}
-              <div>
+              {/* RIGHT COLUMN: Kaaba Photo & Caption (Luxury Integrated Sticky Banner) */}
+              <div style={{ position: 'sticky', top: '24px' }}>
                 <div style={{ 
-                  borderRadius: '16px', 
+                  borderRadius: '24px', 
                   overflow: 'hidden', 
-                  boxShadow: '0 12px 30px rgba(0, 0, 0, 0.08)',
-                  backgroundColor: '#ffffff'
+                  boxShadow: '0 20px 45px rgba(4, 47, 26, 0.15)',
+                  backgroundColor: '#042F1A',
+                  position: 'relative',
+                  border: '1px solid rgba(212, 175, 55, 0.3)'
                 }}>
+                  {/* Top Glassmorphic Badges */}
+                  <div style={{ 
+                    position: 'absolute', 
+                    top: '16px', 
+                    left: '16px', 
+                    right: '16px', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    zIndex: 2 
+                  }}>
+                    <span style={{ 
+                      backgroundColor: 'rgba(4, 47, 26, 0.82)', 
+                      backdropFilter: 'blur(8px)', 
+                      color: '#FFFFFF', 
+                      padding: '6px 14px', 
+                      borderRadius: '20px', 
+                      fontSize: '0.78rem', 
+                      fontWeight: 800,
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      🇸🇳 Registre Officiel DGP
+                    </span>
+
+                    <span style={{ 
+                      backgroundColor: 'rgba(214, 158, 46, 0.95)', 
+                      color: '#042F1A', 
+                      padding: '6px 14px', 
+                      borderRadius: '20px', 
+                      fontSize: '0.78rem', 
+                      fontWeight: 900,
+                      boxShadow: '0 4px 12px rgba(214, 158, 46, 0.4)'
+                    }}>
+                      ⭐ Hajj 1447H / 2026
+                    </span>
+                  </div>
+
+                  {/* Main Image */}
                   <img 
                     src="/assets/hajj_tawaf.png" 
                     alt="La Mecque Kaaba" 
-                    style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '560px', objectFit: 'cover' }}
+                    style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      minHeight: '520px', 
+                      maxHeight: '640px', 
+                      display: 'block', 
+                      objectFit: 'cover' 
+                    }}
                   />
-                </div>
-                
-                {/* Caption below photo */}
-                <div style={{ marginTop: '16px' }}>
-                  <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1A202C', margin: 0 }}>
-                    La Mecque, Arabie Saoudite
-                  </h4>
-                  <p style={{ fontSize: '0.88rem', color: '#718096', margin: '4px 0 0' }}>
-                    Destination finale de votre pèlerinage
-                  </p>
+
+                  {/* Bottom Dark Gradient Overlay with Gold Text */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    padding: '32px 24px 24px',
+                    background: 'linear-gradient(to top, rgba(4, 47, 26, 0.96) 0%, rgba(4, 47, 26, 0.75) 60%, transparent 100%)',
+                    color: '#ffffff'
+                  }}>
+                    <h4 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#FFFFFF', fontFamily: '"Playfair Display", serif', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      🕋 La Mecque, Arabie Saoudite
+                    </h4>
+                    <p style={{ fontSize: '0.88rem', color: '#D1FAE5', margin: '0 0 14px', lineHeight: '1.4' }}>
+                      Destination finale & sanctuaire sacré de votre voyage spirituel.
+                    </p>
+
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', paddingTop: '10px', borderTop: '1px solid rgba(255, 255, 255, 0.15)' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#FCD34D', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        ✓ Suivi Visa & Vol en Direct
+                      </span>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#FCD34D', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        ✓ Accompagnement Médical & Religieux
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
