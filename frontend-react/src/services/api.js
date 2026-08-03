@@ -1003,19 +1003,20 @@ export const ApiService = {
 
   // Get pilgrims registered for a specific agency
   async getAgencyPilgrims(agencyId) {
+    if (!agencyId) return [];
     try {
-      const res = await fetchWithFallback(`${API_BASE}/agencies/${agencyId || 1}/pilgrims`);
+      const res = await fetchWithFallback(`${API_BASE}/agencies/${agencyId}/pilgrims`);
       if (res.ok) return await res.json();
       throw new Error("Impossible de charger les pèlerins de l'agence.");
     } catch (err) {
       console.warn("Backend offline, loading mock pilgrims filtered by agency.");
       const list = await this.getPilgrims();
       const safeList = Array.isArray(list) ? list : [];
-      const targetId = String(agencyId || 1);
+      const targetId = String(agencyId);
       return safeList.filter(p => 
         p && (
-          String(p.selectedAgencyId || 1) === targetId || 
-          (targetId === '101' && p.fullName && typeof p.fullName === 'string' && p.fullName.toLowerCase().includes('adama'))
+          String(p.selectedAgencyId || p.agencyId || '') === targetId ||
+          (targetId === '1' && (!p.selectedAgencyId || String(p.selectedAgencyId) === '1'))
         )
       );
     }

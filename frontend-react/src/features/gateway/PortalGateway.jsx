@@ -36,6 +36,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
   // Agency application states
   const [showAgencyApplyModal, setShowAgencyApplyModal] = useState(false);
   const [agencyApplyName, setAgencyApplyName] = useState('');
+  const [agencyApplyAgreementNum, setAgencyApplyAgreementNum] = useState('');
   const [agencyApplyContact, setAgencyApplyContact] = useState('');
   const [agencyApplyPhone, setAgencyApplyPhone] = useState('');
   const [agencyApplySuccess, setAgencyApplySuccess] = useState(false);
@@ -300,6 +301,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
     setAgencyApplyLoading(true);
     try {
       const cleanName = (agencyApplyName || agencyName || "Nouvelle Agence").trim();
+      const cleanAgreement = (agencyApplyAgreementNum || "AGR-2026-DKR-048").trim().toUpperCase();
       const cleanContact = (agencyApplyContact || agencyRep || "Responsable Agence").trim();
       const cleanPhone = (agencyApplyPhone || agencyPhone || "+221 33 824 12 34").trim();
       const cleanSlug = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'teranga';
@@ -307,6 +309,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
       const newAgency = {
         id: Date.now(),
         name: cleanName,
+        agreementNumber: cleanAgreement,
         contactPerson: cleanContact,
         phone: cleanPhone,
         email: `${cleanSlug}@terangahajj.sn`,
@@ -1585,17 +1588,32 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                       </form>
                     ) : (
                       <form onSubmit={handleAgencyApplySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Nom de l'Agence de Voyage *</label>
-                          <input 
-                            type="text" 
-                            required 
-                            className="form-control"
-                            placeholder="Ex: Touba Voyages Hajj" 
-                            value={agencyApplyName}
-                            onChange={e => setAgencyApplyName(e.target.value)}
-                            style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px' }}
-                          />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Nom de l'Agence de Voyage *</label>
+                            <input 
+                              type="text" 
+                              required 
+                              className="form-control"
+                              placeholder="Ex: Touba Voyages Hajj" 
+                              value={agencyApplyName}
+                              onChange={e => setAgencyApplyName(e.target.value)}
+                              style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px' }}
+                            />
+                          </div>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>N° d'Agrément Officiel (Sunu Hajj / Ministère) *</label>
+                            <input 
+                              type="text" 
+                              required 
+                              className="form-control"
+                              placeholder="Ex: AGR-2026-DKR-048" 
+                              value={agencyApplyAgreementNum}
+                              onChange={e => setAgencyApplyAgreementNum(e.target.value)}
+                              style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px', fontWeight: 700, textTransform: 'uppercase' }}
+                            />
+                          </div>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -3733,16 +3751,31 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                 </p>
 
                 <form onSubmit={handleAgencyApplySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)' }}>Nom de l'Agence de Voyage *</label>
-                    <input 
-                      type="text" 
-                      required 
-                      className="form-control" 
-                      placeholder="Ex: Touba Voyages Hajj" 
-                      value={agencyApplyName} 
-                      onChange={e => setAgencyApplyName(e.target.value)} 
-                    />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)' }}>Nom de l'Agence de Voyage *</label>
+                      <input 
+                        type="text" 
+                        required 
+                        className="form-control" 
+                        placeholder="Ex: Touba Voyages Hajj" 
+                        value={agencyApplyName} 
+                        onChange={e => setAgencyApplyName(e.target.value)} 
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)' }}>N° d'Agrément Officiel *</label>
+                      <input 
+                        type="text" 
+                        required 
+                        className="form-control" 
+                        placeholder="Ex: AGR-2026-DKR-048" 
+                        value={agencyApplyAgreementNum} 
+                        onChange={e => setAgencyApplyAgreementNum(e.target.value)} 
+                        style={{ textTransform: 'uppercase', fontWeight: 700 }}
+                      />
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

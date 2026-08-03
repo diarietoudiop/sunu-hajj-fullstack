@@ -85,6 +85,8 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
     isApproved: matchedAgency?.isApproved ?? safeAgency.isApproved ?? true
   };
 
+  const activeAgencyId = safeAgency.agencyId || safeAgency.id || fullAgencyDetails.id;
+
   const getFeaturesList = () => {
     if (!fullAgencyDetails.features) return [];
     if (Array.isArray(fullAgencyDetails.features)) return fullAgencyDetails.features;
@@ -98,7 +100,7 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
   const loadAgencyData = async () => {
     setLoading(true);
     try {
-      const data = await ApiService.getAgencyPilgrims(agency.agencyId);
+      const data = await ApiService.getAgencyPilgrims(activeAgencyId);
       setPilgrims(data);
       
       // Calculate Stats
@@ -128,7 +130,7 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
 
   useEffect(() => {
     loadAgencyData();
-  }, [agency.agencyId, agencies]);
+  }, [agency.agencyId, agency.id, agencies]);
 
   const handleRegisterPilgrim = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
@@ -157,7 +159,7 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
         birthDate: birthDate || "1970-01-01",
         bloodType: bloodType || "O+",
         bloodGroup: bloodType || "O+",
-        selectedAgencyId: agency.agencyId,
+        selectedAgencyId: activeAgencyId,
         registrationStatus: 'approved',
         medicalStatus: 'pending',
         emergencyContact: {
@@ -845,8 +847,9 @@ function AgencyPortal({ agency = {}, isApiOnline, darkMode, setDarkMode, onLogou
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '1px' }}>ID Homologation</span>
-                    <strong style={{ fontSize: '0.85rem', fontFamily: 'monospace' }}>Sunu Hajj-2026-AG{agency.agencyId}</strong>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '1px' }}>ID Homologation & Agrément</span>
+                    <strong style={{ fontSize: '0.85rem', fontFamily: 'monospace', color: '#0A5C36', display: 'block' }}>{fullAgencyDetails.agreementNumber || 'AGR-2026-DKR-048'}</strong>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Code : AG-2026-{(fullAgencyDetails.id || '048').toString().slice(-4)}</span>
                   </div>
                 </div>
 
