@@ -828,6 +828,25 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
             type="button"
             onClick={() => {
               if (onDirectLogin) {
+                onDirectLogin('admin', {
+                  id: 999,
+                  username: 'admin',
+                  fullName: 'Administrateur Sunu Hajj',
+                  email: 'admin@sunuhajj.sn',
+                  department: 'Direction Générale',
+                  role: 'admin'
+                });
+              }
+            }}
+            style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', backgroundColor: '#8B5CF6', color: '#FFFFFF', fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            🇸🇳 Espace Admin (État)
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (onDirectLogin) {
                 onDirectLogin('agency', {
                   id: 1,
                   agencyId: 1,
@@ -1362,7 +1381,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                                   boxShadow: regSectorFilter === 'etat' ? '0 4px 12px rgba(10,92,54,0.12)' : 'none'
                                 }}
                               >
-                                🏛️ Secteur État (DGP)
+                                🏛️ Secteur État
                               </button>
                             </div>
                           </div>
@@ -2024,7 +2043,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                       alignItems: 'center',
                       gap: '6px'
                     }}>
-                      🇸🇳 Registre Officiel DGP
+                      🇸🇳 Registre Officiel État
                     </span>
 
                     <span style={{ 
@@ -2047,8 +2066,8 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                     style={{ 
                       width: '100%', 
                       height: '100%', 
-                      minHeight: '520px', 
-                      maxHeight: '640px', 
+                      minHeight: '440px', 
+                      maxHeight: '520px', 
                       display: 'block', 
                       objectFit: 'cover' 
                     }}

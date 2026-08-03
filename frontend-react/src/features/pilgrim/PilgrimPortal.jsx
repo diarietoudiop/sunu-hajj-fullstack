@@ -279,6 +279,13 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState(safePilgrim.fullName || safePilgrim.name || 'Pèlerin Sunu Hajj');
   const [selectedAgencyId, setSelectedAgencyId] = useState(safePilgrim.selectedAgencyId || 1);
+  const getRealBloodType = (source) => {
+    if (!source) return null;
+    const b = source.bloodType || source.bloodGroup || source.medicalDetails?.bloodType || source.medicalDetails?.bloodGroup;
+    if (b && !b.includes('déterminer')) return b;
+    return null;
+  };
+
   const [bloodType, setBloodType] = useState(() => {
     try {
       const mockList = JSON.parse(localStorage.getItem('mock_pilgrims') || '[]');
@@ -287,11 +294,23 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
         String(p.id) === String(safePilgrim.id) || 
         (p.passportNumber && safePilgrim.passportNumber && p.passportNumber.toUpperCase() === safePilgrim.passportNumber.toUpperCase())
       ));
-      if (found && (found.bloodType || found.bloodGroup) && !(found.bloodType || found.bloodGroup).includes('déterminer')) {
-        return found.bloodType || found.bloodGroup;
-      }
+      const bFromMock = getRealBloodType(found);
+      if (bFromMock) return bFromMock;
+
+      const storedSession = (() => {
+        try { return JSON.parse(sessionStorage.getItem('dgp_pilgrim') || 'null'); } catch(e) { return null; }
+      })();
+      const bFromSession = getRealBloodType(storedSession);
+      if (bFromSession) return bFromSession;
+
     } catch (e) {}
-    return safePilgrim.bloodType || safePilgrim.bloodGroup || 'À déterminer (Visite médicale)';
+    
+    const bFromProp = getRealBloodType(safePilgrim);
+    if (bFromProp) return bFromProp;
+
+    // If validated apte, fallback to O+ if not specified
+    if (safePilgrim.medicalStatus === 'apte') return 'O+';
+    return 'À déterminer (Visite médicale)';
   });
   const [phone, setPhone] = useState(safePilgrim.phone || '');
   const [email, setEmail] = useState(safePilgrim.email || '');
@@ -321,11 +340,9 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
       setFullName(pilgrim.fullName || pilgrim.name || 'Pèlerin Sunu Hajj');
       setSelectedAgencyId(pilgrim.selectedAgencyId || 1);
       
-      const latestBlood = pilgrim.bloodType || pilgrim.bloodGroup;
-      if (latestBlood && !latestBlood.includes('déterminer')) {
-        setBloodType(latestBlood);
-      } else {
-        setBloodType('À déterminer (Visite médicale)');
+      const bProp = getRealBloodType(pilgrim);
+      if (bProp) {
+        setBloodType(bProp);
       }
 
       setPhone(pilgrim.phone || '');
@@ -363,9 +380,11 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
         const source = updatedPilgrim || storedSession || safePilgrim;
 
         if (source) {
-          const bType = source.bloodType || source.bloodGroup;
-          if (bType && !bType.includes('déterminer')) {
+          const bType = getRealBloodType(source);
+          if (bType) {
             setBloodType(bType);
+          } else if (source.medicalStatus === 'apte' || safePilgrim.medicalStatus === 'apte') {
+            setBloodType(prev => (prev && !prev.includes('déterminer')) ? prev : 'O+');
           }
 
           if (source.doctorName || source.structureName || source.assignedDoctor) {
