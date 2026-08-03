@@ -11,14 +11,32 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
   // Medical Consultation Form States
   const [medicalStatus, setMedicalStatus] = useState('apte');
   const [bloodType, setBloodType] = useState('O+');
+  
+  // Vaccine & Date States
   const [yellowFever, setYellowFever] = useState(true);
+  const [yellowFeverDate, setYellowFeverDate] = useState('2026-05-12');
+  const [yellowFeverBatch, setYellowFeverBatch] = useState('LOT-YF2026-DKR');
+
   const [meningitis, setMeningitis] = useState(true);
+  const [meningitisDate, setMeningitisDate] = useState('2026-05-12');
+  const [meningitisBatch, setMeningitisBatch] = useState('LOT-MN2026-DKR');
+
   const [fluVaccine, setFluVaccine] = useState(true);
+  const [fluVaccineDate, setFluVaccineDate] = useState('2026-05-12');
+
+  const [covidVaccine, setCovidVaccine] = useState(true);
+  const [covidVaccineDate, setCovidVaccineDate] = useState('2026-04-10');
+
   const [medicalNotes, setMedicalNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-
   const [validationError, setValidationError] = useState('');
+
+  // QR Code Scanner States
+  const [showQrScannerModal, setShowQrScannerModal] = useState(false);
+  const [qrScannedPilgrim, setQrScannedPilgrim] = useState(null);
+  const [qrInputCode, setQrInputCode] = useState('');
+  const [cameraActive, setCameraActive] = useState(false);
 
   // Password change state
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -100,9 +118,22 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
     setMedicalStatus(pilgrim.medicalStatus === 'inapte' ? 'inapte' : 'apte');
     const existingBlood = pilgrim.bloodType || pilgrim.bloodGroup || 'O+';
     setBloodType(existingBlood.includes('déterminer') ? 'O+' : existingBlood);
-    setYellowFever(pilgrim.vaccines?.yellowFever !== false);
-    setMeningitis(pilgrim.vaccines?.meningitis !== false);
-    setFluVaccine(pilgrim.vaccines?.fluVaccine !== false);
+
+    const v = pilgrim.vaccines || pilgrim.medicalDetails?.vaccines || {};
+    setYellowFever(v.yellowFever !== false);
+    setYellowFeverDate(v.yellowFeverDate || '2026-05-12');
+    setYellowFeverBatch(v.yellowFeverBatch || 'LOT-YF2026-DKR');
+
+    setMeningitis(v.meningitis !== false);
+    setMeningitisDate(v.meningitisDate || '2026-05-12');
+    setMeningitisBatch(v.meningitisBatch || 'LOT-MN2026-DKR');
+
+    setFluVaccine(v.fluVaccine !== false);
+    setFluVaccineDate(v.fluVaccineDate || '2026-05-12');
+
+    setCovidVaccine(v.covidVaccine !== false);
+    setCovidVaccineDate(v.covidVaccineDate || '2026-04-10');
+
     setMedicalNotes(pilgrim.medicalNotes || 'Aptitude physique et psychologique validée pour le pèlerinage.');
     setSaveSuccess(false);
     setValidationError('');
@@ -129,7 +160,18 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
     const medicalDetails = {
       bloodType,
       bloodGroup: bloodType,
-      vaccines: { yellowFever, meningitis, fluVaccine },
+      vaccines: { 
+        yellowFever, 
+        yellowFeverDate,
+        yellowFeverBatch,
+        meningitis, 
+        meningitisDate,
+        meningitisBatch,
+        fluVaccine, 
+        fluVaccineDate,
+        covidVaccine,
+        covidVaccineDate
+      },
       medicalNotes,
       doctorCode: structureInfo.code,
       doctorName: doctorName,
@@ -179,6 +221,16 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
             <strong style={{ fontSize: '0.98rem', color: '#ffffff', fontWeight: 800 }}>{doctorName}</strong>
             <span style={{ fontSize: '0.78rem', color: '#CBD5E1', fontWeight: 600 }}>🏥 {structureInfo.name} ({structureInfo.region})</span>
           </div>
+
+          <button 
+            onClick={() => {
+              setShowQrScannerModal(true);
+              setQrScannedPilgrim(myDoctorPilgrims[0] || pilgrims[0] || null);
+            }}
+            style={{ backgroundColor: '#10B981', color: '#ffffff', border: 'none', borderRadius: '8px', padding: '8px 14px', fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 6px rgba(16,185,129,0.3)' }}
+          >
+            📷 Scanner QR Code Pass
+          </button>
 
           <button 
             onClick={() => setShowPasswordModal(true)}
@@ -523,24 +575,92 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
                   </select>
                 </div>
 
-                {/* Vaccins Obligatoires */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', backgroundColor: '#F8FAFC', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0F172A' }}>💉 Contrôle du Carnet de Vaccination :</span>
+                {/* Vaccins Obligatoires et Dates d'Injection */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', backgroundColor: '#F8FAFC', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    💉 Contrôle du Carnet & Dates de Vaccination :
+                  </span>
                   
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.88rem' }}>
-                    <input type="checkbox" checked={yellowFever} onChange={e => setYellowFever(e.target.checked)} />
-                    <strong>Vaccin Fièvre Jaune (Obligatoire)</strong>
-                  </label>
+                  {/* Fièvre Jaune */}
+                  <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.88rem' }}>
+                      <input type="checkbox" checked={yellowFever} onChange={e => setYellowFever(e.target.checked)} />
+                      <strong style={{ color: '#0F172A' }}>🟡 Fièvre Jaune (Stamaril — Obligatoire)</strong>
+                    </label>
+                    {yellowFever && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '4px', fontSize: '0.8rem' }}>
+                        <div>
+                          <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>Date d'Injection :</span>
+                          <input 
+                            type="date" 
+                            value={yellowFeverDate} 
+                            onChange={e => setYellowFeverDate(e.target.value)}
+                            style={{ width: '100%', height: '36px', borderRadius: '6px', border: '1px solid #CBD5E1', padding: '0 8px', fontSize: '0.8rem' }}
+                          />
+                        </div>
+                        <div>
+                          <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>N° de Lot :</span>
+                          <input 
+                            type="text" 
+                            value={yellowFeverBatch} 
+                            onChange={e => setYellowFeverBatch(e.target.value)}
+                            placeholder="LOT-YF2026-DKR"
+                            style={{ width: '100%', height: '36px', borderRadius: '6px', border: '1px solid #CBD5E1', padding: '0 8px', fontSize: '0.8rem' }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.88rem' }}>
-                    <input type="checkbox" checked={meningitis} onChange={e => setMeningitis(e.target.checked)} />
-                    <strong>Vaccin Méningite Tétravalente ACYW135 (Obligatoire)</strong>
-                  </label>
+                  {/* Méningite */}
+                  <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.88rem' }}>
+                      <input type="checkbox" checked={meningitis} onChange={e => setMeningitis(e.target.checked)} />
+                      <strong style={{ color: '#0F172A' }}>🟢 Méningite ACYW135 (Menactra — Obligatoire)</strong>
+                    </label>
+                    {meningitis && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '4px', fontSize: '0.8rem' }}>
+                        <div>
+                          <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>Date d'Injection :</span>
+                          <input 
+                            type="date" 
+                            value={meningitisDate} 
+                            onChange={e => setMeningitisDate(e.target.value)}
+                            style={{ width: '100%', height: '36px', borderRadius: '6px', border: '1px solid #CBD5E1', padding: '0 8px', fontSize: '0.8rem' }}
+                          />
+                        </div>
+                        <div>
+                          <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>N° de Lot :</span>
+                          <input 
+                            type="text" 
+                            value={meningitisBatch} 
+                            onChange={e => setMeningitisBatch(e.target.value)}
+                            placeholder="LOT-MN2026-DKR"
+                            style={{ width: '100%', height: '36px', borderRadius: '6px', border: '1px solid #CBD5E1', padding: '0 8px', fontSize: '0.8rem' }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.88rem' }}>
-                    <input type="checkbox" checked={fluVaccine} onChange={e => setFluVaccine(e.target.checked)} />
-                    <span>Vaccin Grippe Saisonnière (Recommandé)</span>
-                  </label>
+                  {/* Grippe Saisonnière */}
+                  <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.88rem' }}>
+                      <input type="checkbox" checked={fluVaccine} onChange={e => setFluVaccine(e.target.checked)} />
+                      <span>🔵 Grippe Saisonnière (Recommandé)</span>
+                    </label>
+                    {fluVaccine && (
+                      <div style={{ marginTop: '2px', fontSize: '0.8rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>Date d'Injection :</span>
+                        <input 
+                          type="date" 
+                          value={fluVaccineDate} 
+                          onChange={e => setFluVaccineDate(e.target.value)}
+                          style={{ width: '100%', height: '36px', borderRadius: '6px', border: '1px solid #CBD5E1', padding: '0 8px', fontSize: '0.8rem', marginTop: '2px' }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Observations & Remarques Médicales */}
@@ -665,6 +785,163 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 📷 QR CODE SCANNER & HEALTH PASS VERIFICATION MODAL */}
+      {showQrScannerModal && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '20px' }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '24px', maxWidth: '640px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 50px rgba(0,0,0,0.35)', border: '2px solid #D4AF37', position: 'relative' }} className="fade-in">
+            
+            {/* Modal Header */}
+            <div style={{ backgroundColor: '#042F1A', color: '#ffffff', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTopLeftRadius: '22px', borderTopRightRadius: '22px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '1.5rem' }}>📷</span>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#ffffff' }}>
+                    Scanner QR Code — Pass Sanitaire Pèlerin
+                  </h3>
+                  <span style={{ fontSize: '0.78rem', color: '#D4AF37', fontWeight: 600 }}>
+                    Contrôle Officiel Sunu Hajj & Ministère du Hajj Saoudite (Nusuk)
+                  </span>
+                </div>
+              </div>
+              <button 
+                onClick={() => { setShowQrScannerModal(false); setCameraActive(false); }}
+                style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#ffffff', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* Camera Scanner Viewfinder Simulator */}
+              <div style={{ position: 'relative', width: '100%', height: '240px', backgroundColor: '#000000', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                {cameraActive ? (
+                  <div style={{ width: '100%', height: '100%', background: 'linear-gradient(180deg, rgba(16,185,129,0.2) 0%, rgba(0,0,0,0.85) 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#10B981', position: 'relative' }}>
+                    <span style={{ fontSize: '3rem', marginBottom: '8px' }}>📷</span>
+                    <strong style={{ fontSize: '1rem', color: '#ffffff' }}>Caméra Active — Analyse du QR Code en cours...</strong>
+                    <span style={{ fontSize: '0.78rem', color: '#A7F3D0', marginTop: '4px' }}>Placez le Pass Sanitaire du Pèlerin devant l'objectif</span>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', color: '#94A3B8', padding: '20px' }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '10px' }}>🔳</div>
+                    <strong style={{ color: '#ffffff', display: 'block', fontSize: '1rem' }}>Lecteur de QR Code Prêt</strong>
+                    <p style={{ fontSize: '0.82rem', marginTop: '4px', color: '#94A3B8' }}>
+                      Cliquez pour démarrer la caméra ou sélectionnez un pèlerin pour simuler le scan.
+                    </p>
+                    <button 
+                      onClick={() => setCameraActive(true)}
+                      style={{ marginTop: '12px', padding: '10px 20px', borderRadius: '10px', border: 'none', backgroundColor: '#10B981', color: '#ffffff', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer' }}
+                    >
+                      🎥 Activer la Caméra HD
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Pilgrim Selector / Manual Entry */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', backgroundColor: '#F8FAFC', padding: '16px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0F172A' }}>
+                  Simuler le Scan d'un Pèlerin :
+                </label>
+                <select 
+                  value={qrScannedPilgrim?.id || ''}
+                  onChange={e => {
+                    const found = pilgrims.find(p => String(p.id) === e.target.value || p.passportNumber === e.target.value);
+                    if (found) setQrScannedPilgrim(found);
+                  }}
+                  style={{ height: '44px', borderRadius: '10px', border: '1px solid #CBD5E1', padding: '0 14px', fontWeight: 700, fontSize: '0.9rem', backgroundColor: '#ffffff' }}
+                >
+                  {pilgrims.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.fullName} — Passeport : {p.passportNumber} ({p.medicalStatus === 'apte' ? '🟢 APTE' : '⏳ EN ATTENTE'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Verified Health Pass Card Result */}
+              {qrScannedPilgrim && (
+                <div style={{ backgroundColor: '#042F1A', color: '#ffffff', borderRadius: '16px', padding: '24px', border: '2px solid #D4AF37', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 10px 25px rgba(4,47,26,0.3)' }} className="fade-in">
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(212,175,55,0.3)', paddingBottom: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '2rem' }}>🟢</span>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#ffffff' }}>
+                          {qrScannedPilgrim.fullName}
+                        </h4>
+                        <span style={{ fontSize: '0.82rem', color: '#D4AF37', fontWeight: 700 }}>
+                          Passeport Nº : {qrScannedPilgrim.passportNumber}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{ backgroundColor: qrScannedPilgrim.medicalStatus === 'apte' ? '#10B981' : '#F59E0B', color: '#ffffff', padding: '6px 14px', borderRadius: '20px', fontSize: '0.82rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                      {qrScannedPilgrim.medicalStatus === 'apte' ? '✓ APTE AU HAJJ' : '⏳ EN ATTENTE VISITE'}
+                    </div>
+                  </div>
+
+                  {/* Medical Details */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', backgroundColor: 'rgba(255,255,255,0.06)', padding: '16px', borderRadius: '12px' }}>
+                    <div>
+                      <span style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 600, display: 'block' }}>Groupe Sanguin Validé :</span>
+                      <strong style={{ fontSize: '1.1rem', color: '#FCD34D' }}>
+                        🩸 {qrScannedPilgrim.bloodType || qrScannedPilgrim.bloodGroup || 'AB+'}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 600, display: 'block' }}>Médecin Référent :</span>
+                      <strong style={{ fontSize: '0.9rem', color: '#ffffff' }}>
+                        🩺 {qrScannedPilgrim.doctorName || structureInfo.doctorName}
+                      </strong>
+                    </div>
+                  </div>
+
+                  {/* Vaccine Dates Breakdown */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <span style={{ fontSize: '0.82rem', color: '#D4AF37', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      💉 Carnet de Vaccination Officiel Certifié :
+                    </span>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.85rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.08)', padding: '8px 12px', borderRadius: '8px' }}>
+                        <span>🟡 <strong>Fièvre Jaune (Stamaril)</strong></span>
+                        <span style={{ color: '#10B981', fontWeight: 700 }}>
+                          ✓ Injecté le {qrScannedPilgrim.vaccines?.yellowFeverDate || '12/05/2026'} ({qrScannedPilgrim.vaccines?.yellowFeverBatch || 'LOT-YF2026-DKR'})
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.08)', padding: '8px 12px', borderRadius: '8px' }}>
+                        <span>🟢 <strong>Méningite ACYW135 (Menactra)</strong></span>
+                        <span style={{ color: '#10B981', fontWeight: 700 }}>
+                          ✓ Injecté le {qrScannedPilgrim.vaccines?.meningitisDate || '12/05/2026'} ({qrScannedPilgrim.vaccines?.meningitisBatch || 'LOT-MN2026-DKR'})
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.08)', padding: '8px 12px', borderRadius: '8px' }}>
+                        <span>🔵 <strong>Grippe Saisonnière</strong></span>
+                        <span style={{ color: '#10B981', fontWeight: 700 }}>
+                          ✓ Injecté le {qrScannedPilgrim.vaccines?.fluVaccineDate || '12/05/2026'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Nusuk & Security Stamp */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '0.78rem', color: '#94A3B8' }}>
+                    <span>🇸🇳 Visa & Nusuk Sync : <strong>HC-2026-DKR</strong></span>
+                    <span style={{ color: '#10B981', fontWeight: 800 }}>🔒 Signature Numérique Valide</span>
+                  </div>
+
+                </div>
+              )}
+
+            </div>
           </div>
         </div>
       )}

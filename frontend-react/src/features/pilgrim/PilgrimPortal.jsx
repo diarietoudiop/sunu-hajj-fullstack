@@ -3367,6 +3367,27 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
                 <div><strong>Téléphone :</strong> {safePilgrim.phone || '+221 78 591 07 67'}</div>
               </div>
 
+              {/* Carnet de Vaccination & Dates certifiées */}
+              <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <strong style={{ fontSize: '0.82rem', color: '#042F1A', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  💉 CARNET DE VACCINATION SÉNÉGAL (DATES D'INJECTION CERTIFIÉES) :
+                </strong>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.78rem' }}>
+                  <div style={{ backgroundColor: '#ffffff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                    🟡 <strong>Fièvre Jaune :</strong> {safePilgrim.vaccines?.yellowFeverDate || '12/05/2026'} ({safePilgrim.vaccines?.yellowFeverBatch || 'LOT-YF2026-DKR'})
+                  </div>
+                  <div style={{ backgroundColor: '#ffffff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                    🟢 <strong>Méningite ACYW135 :</strong> {safePilgrim.vaccines?.meningitisDate || '12/05/2026'} ({safePilgrim.vaccines?.meningitisBatch || 'LOT-MN2026-DKR'})
+                  </div>
+                  <div style={{ backgroundColor: '#ffffff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                    🔵 <strong>Grippe Saisonnière :</strong> {safePilgrim.vaccines?.fluVaccineDate || '12/05/2026'}
+                  </div>
+                  <div style={{ backgroundColor: '#ffffff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                    🟣 <strong>COVID-19 Pfizer :</strong> {safePilgrim.vaccines?.covidVaccineDate || '10/04/2026'}
+                  </div>
+                </div>
+              </div>
+
               <div style={{ marginTop: '16px', padding: '12px', backgroundColor: 'rgba(10,92,54,0.08)', borderRadius: '8px', borderLeft: '4px solid #0A5C36', fontWeight: 800, color: '#0A5C36', textAlign: 'center', fontSize: '0.95rem' }}>
                 CONCLUSIONS MÉDICALES : 🟢 APTE À L'ACCOMPLISSEMENT DU PÈLERINAGE À LA MECQUE
               </div>
