@@ -1636,12 +1636,12 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                           </div>
 
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Téléphone Direct *</label>
+                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Téléphone Fixe / Direct (Ligne 33) *</label>
                             <input 
                               type="tel" 
                               required 
                               className="form-control"
-                              placeholder="Ex: +221 77 123 45 67" 
+                              placeholder="Ex: +221 33 824 12 34" 
                               value={agencyApplyPhone}
                               onChange={e => setAgencyApplyPhone(e.target.value)}
                               style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px' }}
@@ -1650,6 +1650,19 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Adresse Email Professionnelle (Activation) *</label>
+                            <input 
+                              type="email" 
+                              required 
+                              className="form-control"
+                              placeholder="Ex: contact@toubavoyages.sn" 
+                              value={agencyApplyEmail}
+                              onChange={e => setAgencyApplyEmail(e.target.value)}
+                              style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px', fontWeight: 700 }}
+                            />
+                          </div>
+
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Formule Agence Privée *</label>
                             <select
@@ -1667,19 +1680,19 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                               <option value="vip">⭐ Offre VIP Luxe (8.500.000 FCFA)</option>
                             </select>
                           </div>
+                        </div>
 
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Tarif du Package (FCFA) *</label>
-                            <input 
-                              type="number" 
-                              required 
-                              className="form-control" 
-                              placeholder="Ex: 8500000" 
-                              value={agencyApplyPrice || '8500000'} 
-                              onChange={e => setAgencyApplyPrice(e.target.value)}
-                              style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px', fontWeight: 700 }}
-                            />
-                          </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <label style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1A202C' }}>Tarif du Package (FCFA) *</label>
+                          <input 
+                            type="number" 
+                            required 
+                            className="form-control" 
+                            placeholder="Ex: 4900000" 
+                            value={agencyApplyPrice || '4900000'} 
+                            onChange={e => setAgencyApplyPrice(e.target.value)}
+                            style={{ height: '48px', borderRadius: '10px', fontSize: '0.92rem', border: '1px solid #E2E8F0', backgroundColor: '#ffffff', padding: '0 16px', fontWeight: 700 }}
+                          />
                         </div>
 
                         <button 
@@ -3876,16 +3889,30 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
                     />
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)' }}>Numéro de Téléphone Mobile *</label>
-                    <input 
-                      type="tel" 
-                      required 
-                      className="form-control" 
-                      placeholder="Ex: +221 77 123 45 67" 
-                      value={agencyApplyPhone} 
-                      onChange={e => setAgencyApplyPhone(e.target.value)} 
-                    />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)' }}>Téléphone Fixe / Direct (Ligne 33) *</label>
+                      <input 
+                        type="tel" 
+                        required 
+                        className="form-control" 
+                        placeholder="Ex: +221 33 824 12 34" 
+                        value={agencyApplyPhone} 
+                        onChange={e => setAgencyApplyPhone(e.target.value)} 
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)' }}>Adresse Email Professionnelle (Activation) *</label>
+                      <input 
+                        type="email" 
+                        required 
+                        className="form-control" 
+                        placeholder="Ex: contact@toubavoyages.sn" 
+                        value={agencyApplyEmail} 
+                        onChange={e => setAgencyApplyEmail(e.target.value)} 
+                      />
+                    </div>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
