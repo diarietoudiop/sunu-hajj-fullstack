@@ -8,6 +8,7 @@ import AgenciesTab from './features/agencies/AgenciesTab';
 import AnnouncementsTab from './features/announcements/AnnouncementsTab';
 import PilgrimsTab from './features/pilgrims/PilgrimsTab';
 import FlightsTab from './features/flights/FlightsTab';
+import HotelsTab from './features/hotels/HotelsTab';
 import Login from './features/auth/Login';
 import PilgrimPortal from './features/pilgrim/PilgrimPortal';
 import ProfileTab from './features/profile/ProfileTab';
@@ -593,6 +594,14 @@ function App() {
 
         {activeTab === 'flights' && (
           <FlightsTab
+            pilgrims={pilgrims}
+            agencies={agencies}
+            onUpdateLogistics={handleUpdatePilgrimLogistics}
+          />
+        )}
+
+        {activeTab === 'hotels' && (
+          <HotelsTab
             pilgrims={pilgrims}
             agencies={agencies}
             onUpdateLogistics={handleUpdatePilgrimLogistics}
