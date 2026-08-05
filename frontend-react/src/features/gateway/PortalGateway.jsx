@@ -2445,27 +2445,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
               <span>📦</span> Types de Services
             </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveFeatureTab('payments')}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: '12px 0 16px',
-                fontSize: '0.98rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                color: activeFeatureTab === 'payments' ? '#0A5C36' : '#64748B',
-                borderBottom: activeFeatureTab === 'payments' ? '3px solid #0A5C36' : '3px solid transparent',
-                marginBottom: '-1px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <span>💳</span> Gestion Paiements & Banque
-            </button>
+
 
             <button
               type="button"
@@ -2586,56 +2566,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
             </div>
           )}
 
-          {/* TAB 2: Gestion Paiements & Banque */}
-          {activeFeatureTab === 'payments' && (
-            <div className="fade-in">
-              <h4 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#042F1A', margin: '0 0 14px' }}>
-                Module de Paiement Sécurisé & Suivi Financier
-              </h4>
-              <p style={{ color: '#4A5568', fontSize: '0.96rem', lineHeight: '1.65', maxWidth: '780px', marginBottom: '44px' }}>
-                Transparence financière totale avec possibilité d'effectuer vos versements par Wave, Orange Money, Carte Bancaire ou Virement direct (Banque de l'Habitat / BOA), avec génération instantanée d'un reçu chiffré et horodaté.
-              </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '32px 24px', alignItems: 'center' }}>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '12px' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(10,92,54,0.1)', color: '#0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                    📱
-                  </div>
-                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1A202C' }}>Wave & Mobile Money</span>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '12px' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(10,92,54,0.1)', color: '#0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                    💳
-                  </div>
-                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1A202C' }}>Carte Bancaire</span>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '12px' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(10,92,54,0.1)', color: '#0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                    🏦
-                  </div>
-                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1A202C' }}>Virement Bancaire</span>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '12px' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(10,92,54,0.1)', color: '#0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                    🧾
-                  </div>
-                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1A202C' }}>Reçus QR Code</span>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '12px' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(10,92,54,0.1)', color: '#0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                    📊
-                  </div>
-                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1A202C' }}>Échéancier en 3 Tranches</span>
-                </div>
-
-              </div>
-            </div>
-          )}
 
           {/* TAB 3: Gestion des Vols */}
           {activeFeatureTab === 'flights' && (
