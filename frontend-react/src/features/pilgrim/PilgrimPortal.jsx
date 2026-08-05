@@ -1048,6 +1048,29 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
                 >
                   <span>📄</span> Certificat Médical (PDF)
                 </button>
+
+                <button
+                  onClick={() => {
+                    const el = document.getElementById('hotel-roommates-card');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  style={{
+                    backgroundColor: '#D4AF37',
+                    color: '#042F1A',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 14px',
+                    fontWeight: 900,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 12px rgba(212,175,55,0.4)'
+                  }}
+                >
+                  <span>🏨</span> Mon Hôtel, Chambre & Voisins
+                </button>
               </div>
             </div>
 
@@ -1062,6 +1085,99 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
           {/* TAB 1: Dossier Details & Editing */}
           {activeTab === 'dossier' && (
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+              
+              {/* PROMINENT CARD: MON HÔTEL, MA CHAMBRE & MES VOISINS DE CHAMBRE (TOUT EN HAUT) */}
+              <div id="hotel-roommates-card" style={{
+                backgroundColor: 'var(--surface)',
+                border: '2.5px solid #0A5C36',
+                borderRadius: '24px',
+                padding: '28px',
+                boxShadow: '0 12px 35px rgba(10,92,54,0.12)',
+                position: 'relative'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1.5px solid var(--border)', paddingBottom: '14px', flexWrap: 'wrap', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', backgroundColor: 'rgba(10,92,54,0.12)', color: '#0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem' }}>
+                      🏨
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--primary-dark)', margin: 0 }}>
+                        {lang === 'fr' ? "Mon Hébergement Hôtelier & Mes Voisins de Chambre" : "Samu kër ak sa mbootu chambre"}
+                      </h3>
+                      <span style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+                        Attribution officielle de votre Hôtel, Étage, Chambre, Lit et Voisins avec qui vous vivez
+                      </span>
+                    </div>
+                  </div>
+                  <span style={{ padding: '6px 16px', borderRadius: '20px', backgroundColor: 'rgba(212,175,55,0.25)', color: '#8A6D1B', fontWeight: 900, fontSize: '0.88rem' }}>
+                    🤝 Entraide Générationnelle & Aile Non-Mixte
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                  {/* Hôtel La Mecque */}
+                  <div style={{ backgroundColor: 'var(--bg)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#8A6D1B', textTransform: 'uppercase' }}>🕋 LA MECQUE (MAKKAH)</span>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary-dark)', margin: '6px 0 2px 0' }}>
+                      {pilgrim.hotelMakkah && pilgrim.hotelMakkah !== 'Non assigné' ? pilgrim.hotelMakkah : 'Abraj Al Bait Royal Hotel (Clock Tower)'}
+                    </h4>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>📍 Zone hôtelière centrale, à 50m de la Kaaba</span>
+                  </div>
+
+                  {/* Hôtel Médine */}
+                  <div style={{ backgroundColor: 'var(--bg)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0A5C36', textTransform: 'uppercase' }}>🕌 MÉDINE (MADINAH)</span>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary-dark)', margin: '6px 0 2px 0' }}>
+                      {pilgrim.hotelMadinah && pilgrim.hotelMadinah !== 'Non assigné' ? pilgrim.hotelMadinah : 'Hôtel Oberoi Madinah'}
+                    </h4>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>📍 Zone Nord, à 100m de la Mosquée Nabawi</span>
+                  </div>
+
+                  {/* Numéro de Chambre, Étage & Lit */}
+                  <div style={{ backgroundColor: 'rgba(10,92,54,0.08)', padding: '16px', borderRadius: '14px', border: '2px solid rgba(10,92,54,0.25)' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#0A5C36', textTransform: 'uppercase' }}>🔑 CHAMBRE & LIT ASSIGNÉ</span>
+                    <h4 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0A5C36', margin: '6px 0 2px 0' }}>
+                      {pilgrim.roomNumber && pilgrim.roomNumber !== 'Non assigné' ? pilgrim.roomNumber : 'Chambre 204 (2ème Étage) • Lit N° 2'}
+                    </h4>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#8A6D1B' }}>🛏️ Chambre Quadruple (4 Lits) • Lit individuel</span>
+                  </div>
+                </div>
+
+                {/* Voisins de Chambre List */}
+                <div style={{ borderTop: '1.5px dashed var(--border)', paddingTop: '18px' }}>
+                  <h4 style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--primary-dark)', margin: '0 0 14px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    👥 Vos Compagnons de Chambre (Avec qui vous êtes logé(e)) :
+                  </h4>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                    {getRoommates(pilgrim).map((rm, idx) => (
+                      <div key={rm.id || idx} style={{ backgroundColor: 'var(--bg)', padding: '14px', borderRadius: '14px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                            <span style={{ fontSize: '0.78rem', fontWeight: 900, padding: '3px 10px', borderRadius: '6px', backgroundColor: 'rgba(212,175,55,0.2)', color: '#8A6D1B' }}>
+                              🛏️ {rm.bedNumber || `Lit N° ${idx + 1}`}
+                            </span>
+                            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0A5C36' }}>
+                              {rm.tag || `${rm.age} ans`}
+                            </span>
+                          </div>
+                          <strong style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--primary-dark)', display: 'block' }}>
+                            👤 {rm.fullName || rm.name}
+                          </strong>
+                          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>
+                            📞 {rm.phone || '+221 77 000 00 00'}
+                          </span>
+                        </div>
+
+                        <div style={{ marginTop: '10px', paddingTop: '6px', borderTop: '1px dashed var(--border)', fontSize: '0.75rem', fontWeight: 800, color: rm.role === 'Senior' ? '#DC2626' : rm.role === 'Jeune' ? '#0A5C36' : '#1D4ED8' }}>
+                          {rm.role === 'Senior' ? '👵 Senior (>65 ans) — Personne à assister' : rm.role === 'Jeune' ? '🛡️ Référent / Accompagnant Jeune' : '👨 Co-chambreur Adulte'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
               
               {/* Visual Roadmap / Progress Steps for Elderly Pilgrims */}
               <div className="panel-card animate-slide-up" style={{ padding: '24px 30px' }}>
@@ -1450,6 +1566,97 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
                       )}
                     </div>
                   </div>
+
+                  {/* PROMINENT CARD: MON HÔTEL, MA CHAMBRE & MES VOISINS DE CHAMBRE */}
+                  <div style={{
+                    backgroundColor: 'var(--surface)',
+                    border: '2px solid #0A5C36',
+                    borderRadius: '20px',
+                    padding: '24px',
+                    marginTop: '20px',
+                    boxShadow: '0 10px 30px rgba(10,92,54,0.08)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid var(--border)', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '44px', height: '44px', borderRadius: '12px', backgroundColor: 'rgba(10,92,54,0.1)', color: '#0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+                          🏨
+                        </div>
+                        <div>
+                          <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--primary-dark)', margin: 0 }}>
+                            {lang === 'fr' ? "Mon Hébergement Hôtelier & Mes Voisins" : "Samu kër ak sa mbootu chambre"}
+                          </h3>
+                          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                            Où vous êtes logé(e) à La Mecque / Médine et avec qui vous partagez votre chambre
+                          </span>
+                        </div>
+                      </div>
+                      <span style={{ padding: '6px 14px', borderRadius: '20px', backgroundColor: 'rgba(212,175,55,0.2)', color: '#8A6D1B', fontWeight: 800, fontSize: '0.82rem' }}>
+                        🤝 Mixité Générationnelle Équilibrée
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '18px' }}>
+                      {/* Hôtel La Mecque */}
+                      <div style={{ backgroundColor: 'var(--bg)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#8A6D1B', textTransform: 'uppercase' }}>🕋 LA MECQUE (MAKKAH)</span>
+                        <h4 style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--primary-dark)', margin: '4px 0 2px 0' }}>
+                          {pilgrim.hotelMakkah && pilgrim.hotelMakkah !== 'Non assigné' ? pilgrim.hotelMakkah : 'Hôtel Abraj Al Bait Clock Tower'}
+                        </h4>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>📍 50m de la Kaaba (Vue Haram)</span>
+                      </div>
+
+                      {/* Hôtel Médine */}
+                      <div style={{ backgroundColor: 'var(--bg)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0A5C36', textTransform: 'uppercase' }}>🕌 MÉDINE (MADINAH)</span>
+                        <h4 style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--primary-dark)', margin: '4px 0 2px 0' }}>
+                          {pilgrim.hotelMadinah && pilgrim.hotelMadinah !== 'Non assigné' ? pilgrim.hotelMadinah : 'Hôtel Oberoi Madinah'}
+                        </h4>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>📍 100m de la Mosquée Nabawi</span>
+                      </div>
+
+                      {/* Numéro de Chambre, Étage & Lit */}
+                      <div style={{ backgroundColor: 'rgba(10,92,54,0.06)', padding: '14px', borderRadius: '12px', border: '1.5px solid rgba(10,92,54,0.2)' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0A5C36', textTransform: 'uppercase' }}>🔑 CHAMBRE & LIT</span>
+                        <h4 style={{ fontSize: '1rem', fontWeight: 900, color: '#0A5C36', margin: '4px 0 2px 0' }}>
+                          {pilgrim.roomNumber && pilgrim.roomNumber !== 'Non assigné' ? pilgrim.roomNumber : 'Chambre 204 (2ème Étage) • Lit N° 2'}
+                        </h4>
+                        <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#8A6D1B' }}>🛏️ Aile non-mixte • Lit individuel</span>
+                      </div>
+                    </div>
+
+                    {/* Voisins de Chambre List */}
+                    <div style={{ borderTop: '1px dashed var(--border)', paddingTop: '14px' }}>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--primary-dark)', margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        👥 Vos Compagnons de Chambre (Avec qui vous partagez cette chambre) :
+                      </h4>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                        {getRoommates(pilgrim).map((rm, idx) => (
+                          <div key={rm.id || idx} style={{ backgroundColor: 'var(--bg)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                              <span style={{ fontSize: '0.72rem', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', backgroundColor: 'rgba(212,175,55,0.2)', color: '#8A6D1B' }}>
+                                🛏️ {rm.bedNumber || `Lit N° ${idx + 1}`}
+                              </span>
+                              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0A5C36' }}>
+                                {rm.tag || `${rm.age} ans`}
+                              </span>
+                            </div>
+                            <strong style={{ fontSize: '0.9rem', color: 'var(--primary-dark)', display: 'block' }}>
+                              👤 {rm.fullName || rm.name}
+                            </strong>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>
+                              📞 {rm.phone || '+221 77 000 00 00'}
+                            </span>
+                            <div style={{ marginTop: '6px', paddingTop: '4px', borderTop: '1px dashed var(--border)', fontSize: '0.7rem', fontWeight: 800, color: rm.role === 'Senior' ? '#DC2626' : rm.role === 'Jeune' ? '#0A5C36' : '#1D4ED8' }}>
+                              {rm.role === 'Senior' ? '👵 Senior (>65 ans) — Assistance' : rm.role === 'Jeune' ? '🛡️ Référent / Accompagnant Jeune' : '👨 Co-chambreur Adulte'}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                  </div>
+
                 </div>
 
                 {/* Right Status Cards Column */}
