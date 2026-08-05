@@ -1858,15 +1858,17 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
 
           {/* TAB 2: Logistics, Hotels, Flight */}
           {activeTab === 'logistics' && (
-            <div style={{ width: '100%' }}>
-              {pilgrim.registrationStatus === 'approved' ? (
-                <div className="panel-card animate-slide-up" style={{ border: '1.2px solid var(--secondary)', boxShadow: 'var(--shadow-lg)' }}>
-                  <div className="panel-header" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '16px', flexDirection: lang === 'ar' ? 'row-reverse' : 'row' }}>
-                    <h3 className="panel-title" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexDirection: lang === 'ar' ? 'row-reverse' : 'row' }}>
-                      <span style={{ fontSize: '1.2rem' }}>🇸🇦</span>
-                      {t.logisticsTitle}
-                    </h3>
-                  </div>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div className="panel-card animate-slide-up" style={{ border: '1.5px solid var(--secondary)', boxShadow: 'var(--shadow-lg)', padding: '28px' }}>
+                <div className="panel-header" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 className="panel-title" style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
+                    <span style={{ fontSize: '1.4rem' }}>🇸🇦</span>
+                    {t.logisticsTitle} (Hôtels, Vols & Compagnons de Chambre)
+                  </h3>
+                  <span style={{ padding: '6px 14px', borderRadius: '20px', backgroundColor: 'rgba(212,175,55,0.2)', color: '#8A6D1B', fontWeight: 900, fontSize: '0.85rem' }}>
+                    🤝 Logement & Entraide Hajj 2026
+                  </span>
+                </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
                     
@@ -2194,22 +2196,6 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
 
                   </div>
                 </div>
-              ) : (
-                <div className="panel-card animate-slide-up" style={{ 
-                  backgroundColor: 'rgba(212, 175, 55, 0.04)',
-                  border: '1px dashed var(--secondary)',
-                  textAlign: 'center',
-                  padding: '40px 20px'
-                }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                    <Clock size={48} style={{ color: 'var(--secondary)' }} />
-                    <h4 style={{ fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--primary)' }}>{t.waitingLogistics}</h4>
-                    <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', maxWidth: '450px', lineHeight: '1.5' }}>
-                      {t.waitingLogisticsDesc}
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
