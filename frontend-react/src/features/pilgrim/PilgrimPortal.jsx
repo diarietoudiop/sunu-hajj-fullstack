@@ -1825,6 +1825,16 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
                         <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                           📍 {pilgrim.hotelMakkah && pilgrim.hotelMakkah !== 'Non assigné' ? "Zone hôtelière centrale, à 800m de la Kaaba (navettes 24h/24)" : t.notSpecified}
                         </span>
+                        {pilgrim.roomNumber && pilgrim.roomNumber !== 'Non assigné' && (
+                          <div style={{ marginTop: '6px', padding: '8px 12px', backgroundColor: 'rgba(10,92,54,0.08)', borderRadius: '8px', border: '1px solid rgba(10,92,54,0.2)', fontSize: '0.82rem' }}>
+                            <span style={{ fontWeight: 800, color: '#0A5C36', display: 'block' }}>
+                              🔑 {pilgrim.roomNumber}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: '#8A6D1B', fontWeight: 700, marginTop: '2px', display: 'block' }}>
+                              🤝 Chambre Équilibrée (Mixité Générationnelle Senior + Adulte + Jeune)
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -1864,6 +1874,16 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
                         <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                           📍 {pilgrim.hotelMadinah && pilgrim.hotelMadinah !== 'Non assigné' ? "Zone Nord du Haram de Médine, à 300m de la Mosquée du Prophète" : t.notSpecified}
                         </span>
+                        {pilgrim.roomNumber && pilgrim.roomNumber !== 'Non assigné' && (
+                          <div style={{ marginTop: '6px', padding: '8px 12px', backgroundColor: 'rgba(10,92,54,0.08)', borderRadius: '8px', border: '1px solid rgba(10,92,54,0.2)', fontSize: '0.82rem' }}>
+                            <span style={{ fontWeight: 800, color: '#0A5C36', display: 'block' }}>
+                              🔑 {pilgrim.roomNumber}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: '#8A6D1B', fontWeight: 700, marginTop: '2px', display: 'block' }}>
+                              🤝 Chambre Équilibrée (Mixité Générationnelle Senior + Adulte + Jeune)
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 

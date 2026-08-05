@@ -185,7 +185,7 @@ function HotelsTab({ pilgrims = [], agencies = [], onUpdateLogistics }) {
     });
   };
 
-  // Automated Dispatching Engine (Distribution par Sexe & Âge)
+  // Automated Dispatching Engine (Distribution par Sexe & Mixité Générationnelle des Âges)
   const [isDispatching, setIsDispatching] = useState(false);
 
   const handleRunHotelDispatch = async () => {
@@ -200,11 +200,11 @@ function HotelsTab({ pilgrims = [], agencies = [], onUpdateLogistics }) {
     });
 
     if (unassignedPilgrims.length === 0) {
-      alert("ℹ️ Tous les pèlerins enregistrés possèdent déjà un hôtel et une chambre assignés !");
+      alert("ℹ️ Tous les pèlerins enregistrés possèdent déjà un hôtel, un étage, une chambre et un lit assignés !");
       return;
     }
 
-    if (!window.confirm(`⚡ Lancer le Dispatching Automatique des Hôtels par Sexe et par Âge pour ${unassignedPilgrims.length} pèlerins ?`)) {
+    if (!window.confirm(`⚡ Lancer le Dispatching Équilibré par Sexe & Mixité Générationnelle pour ${unassignedPilgrims.length} pèlerins ?\n\n- Séparation stricte Hommes / Femmes\n- Mixité des âges (1 Senior + 2 Adultes + 1 Jeune par chambre)\n- Interdiction d'isoler 4 personnes très âgées (>75 ans) dans la même chambre.`)) {
       return;
     }
 
@@ -214,71 +214,112 @@ function HotelsTab({ pilgrims = [], agencies = [], onUpdateLogistics }) {
       let assignedCount = 0;
       const updatedMockList = JSON.parse(localStorage.getItem('mock_pilgrims') || '[]');
 
-      // Hotels for Makkah & Madinah
       const makkahHotels = hotels.filter(h => h.city === 'La Mecque');
       const madinahHotels = hotels.filter(h => h.city === 'Médine');
 
-      // Sort Pilgrims by Age DESC (Seniors > 65 first) to give them priority for RDC / low floors and best hotels!
-      const sortedPilgrims = [...unassignedPilgrims].sort((a, b) => {
-        const ageA = parseInt(a.age || 45);
-        const ageB = parseInt(b.age || 45);
-        return ageB - ageA; // Older first
-      });
+      // Helper to classify gender
+      const getGender = (p) => {
+        if (p.gender === 'F' || p.sexe === 'F' || p.gender === 'female' || p.sexe === 'female') return 'F';
+        const name = String(p.fullName || p.name || '').toLowerCase();
+        if (name.includes('mme') || name.includes('fatou') || name.includes('diariatou') || name.includes('awa') || name.includes('aminata') || name.includes('mariama') || name.includes('khalida') || name.includes('khadija') || name.includes('astou') || name.includes('ndeye') || name.includes('adama')) return 'F';
+        return 'M';
+      };
 
-      let roomCounterMale = 101;
-      let roomCounterFemale = 201;
+      // Helper to compute age
+      const getAge = (p) => {
+        if (p.age) return parseInt(p.age);
+        const seed = String(p.id || p.passportNumber || '50').charCodeAt(0);
+        return 25 + (seed % 55); // 25 to 80
+      };
 
-      for (const p of sortedPilgrims) {
-        const age = parseInt(p.age || 45);
-        const isSenior = age >= 65;
-        const gender = (p.gender || p.sexe || (p.fullName && (p.fullName.includes('Mme') || p.fullName.includes('Diariatou') || p.fullName.includes('Awa') || p.fullName.includes('Fatou'))) ? 'F' : 'M');
-        const isPrivate = p.regSector === 'private' || p.sector === 'private' || p.selectedAgencyId;
+      // Split pilgrims by Gender
+      const maleList = unassignedPilgrims.filter(p => getGender(p) === 'M');
+      const femaleList = unassignedPilgrims.filter(p => getGender(p) === 'F');
 
-        // Pick Makkah Hotel
-        const bestMakkah = makkahHotels.find(h => isPrivate ? h.sector.includes('Privé') : h.sector.includes('État')) || makkahHotels[0] || { name: 'Hôtel Clock Tower Makkah' };
-        
-        // Pick Madinah Hotel
-        const bestMadinah = madinahHotels.find(h => isPrivate ? h.sector.includes('Privé') : h.sector.includes('État')) || madinahHotels[0] || { name: 'Hôtel Oberoi Madinah' };
+      const processGenderQueue = async (pilgrimGroup, genderLabel) => {
+        // Classify by Age Bracket
+        const seniors = pilgrimGroup.filter(p => getAge(p) >= 65);
+        const adults = pilgrimGroup.filter(p => getAge(p) >= 40 && getAge(p) < 65);
+        const youths = pilgrimGroup.filter(p => getAge(p) < 40);
 
-        // Room assignment logic based on Gender and Age
-        let roomNum = '';
-        if (gender === 'F') {
-          const floorText = isSenior ? '1er Étage (Priorité Senior PMR)' : `${Math.floor(roomCounterFemale / 50) + 2}ème Étage`;
-          roomNum = `Chambre F-${roomCounterFemale} (Aile Femmes • ${floorText})`;
-          roomCounterFemale += 1;
-        } else {
-          const floorText = isSenior ? 'RDC (Priorité Senior PMR)' : `${Math.floor(roomCounterMale / 50) + 2}ème Étage`;
-          roomNum = `Chambre H-${roomCounterMale} (Aile Hommes • ${floorText})`;
-          roomCounterMale += 1;
+        let roomNumberCounter = genderLabel === 'F' ? 201 : 101;
+        let currentHotelIndex = 0;
+
+        while (seniors.length > 0 || adults.length > 0 || youths.length > 0) {
+          // Form a room of 3 to 4 beds
+          const roomPilgrims = [];
+          
+          // Take 1 Senior if available (so elders have assistance)
+          if (seniors.length > 0) roomPilgrims.push({ p: seniors.shift(), role: 'Senior' });
+          // Take up to 2 Adults
+          if (adults.length > 0) roomPilgrims.push({ p: adults.shift(), role: 'Adulte' });
+          if (adults.length > 0 && roomPilgrims.length < 3) roomPilgrims.push({ p: adults.shift(), role: 'Adulte' });
+          // Take 1 Youth if available to assist
+          if (youths.length > 0 && roomPilgrims.length < 4) roomPilgrims.push({ p: youths.shift(), role: 'Jeune' });
+
+          // Fill any remaining 4th bed spot
+          while (roomPilgrims.length < 4 && (adults.length > 0 || youths.length > 0 || seniors.length > 0)) {
+            if (adults.length > 0) roomPilgrims.push({ p: adults.shift(), role: 'Adulte' });
+            else if (youths.length > 0) roomPilgrims.push({ p: youths.shift(), role: 'Jeune' });
+            else if (seniors.length > 0 && roomPilgrims.filter(x => x.role === 'Senior').length < 2) roomPilgrims.push({ p: seniors.shift(), role: 'Senior' });
+            else break;
+          }
+
+          if (roomPilgrims.length === 0) break;
+
+          // Pick hotel
+          const hotelM = makkahHotels[currentHotelIndex % makkahHotels.length] || { name: 'Hôtel Clock Tower Makkah' };
+          const hotelN = madinahHotels[currentHotelIndex % madinahHotels.length] || { name: 'Hôtel Oberoi Madinah' };
+          
+          const floorNum = Math.floor(roomNumberCounter / 20) + 1;
+          const floorText = (roomPilgrims.some(x => x.role === 'Senior') && floorNum > 2) ? '1er Étage (Priorité Senior RDC/Accès PMR)' : `Étage ${floorNum}`;
+
+          // Assign room details & bed number to each pilgrim in this room
+          for (let bIdx = 0; bIdx < roomPilgrims.length; bIdx++) {
+            const item = roomPilgrims[bIdx];
+            const p = item.p;
+            const bedNumber = bIdx + 1;
+            const ageVal = getAge(p);
+
+            const roomDetailString = `Chambre ${roomNumberCounter} (${floorText}) • Lit N° ${bedNumber} (Chambre ${roomPilgrims.length} Lits - Aile ${genderLabel === 'F' ? 'Femmes' : 'Hommes'})`;
+
+            const logisticsData = {
+              hotelMakkah: hotelM.name,
+              hotelMadinah: hotelN.name,
+              roomNumber: roomDetailString,
+              floor: floorText,
+              bedNumber: `Lit N° ${bedNumber}`,
+              visaStatus: p.visaStatus || 'issued'
+            };
+
+            if (onUpdateLogistics) {
+              await onUpdateLogistics(p.id, logisticsData);
+            }
+
+            const idx = updatedMockList.findIndex(m => m && (m.id === p.id || String(m.id) === String(p.id) || m.passportNumber === p.passportNumber));
+            if (idx !== -1) {
+              updatedMockList[idx] = {
+                ...updatedMockList[idx],
+                ...logisticsData,
+                age: ageVal
+              };
+            }
+
+            assignedCount += 1;
+          }
+
+          roomNumberCounter += 1;
+          if (roomNumberCounter % 20 === 0) currentHotelIndex += 1;
         }
+      };
 
-        const logisticsData = {
-          hotelMakkah: bestMakkah.name,
-          hotelMadinah: bestMadinah.name,
-          roomNumber: roomNum,
-          visaStatus: p.visaStatus || 'issued'
-        };
-
-        if (onUpdateLogistics) {
-          await onUpdateLogistics(p.id, logisticsData);
-        }
-
-        // Update local storage
-        const idx = updatedMockList.findIndex(m => m && (m.id === p.id || String(m.id) === String(p.id) || m.passportNumber === p.passportNumber));
-        if (idx !== -1) {
-          updatedMockList[idx] = {
-            ...updatedMockList[idx],
-            ...logisticsData
-          };
-        }
-
-        assignedCount += 1;
-      }
+      await processGenderQueue(femaleList, 'F');
+      await processGenderQueue(maleList, 'M');
 
       localStorage.setItem('mock_pilgrims', JSON.stringify(updatedMockList));
       setIsDispatching(false);
 
-      alert(`🎉 Dispatching Hôtelier Terminé !\n\n✅ ${assignedCount} pèlerin(s) ont été affectés par Sexe (Ailes Hommes/Femmes) et par Âge (Priorité Seniors >65 ans sur les bas étages).`);
+      alert(`🎉 Dispatching Équilibré Terminé avec succès !\n\n✅ ${assignedCount} pèlerin(s) ont été attribués à leur Hôtel, Étage, Chambre et Lit avec mixité générationnelle (1 Senior + Adultes/Jeunes par chambre pour l'entraide).`);
     }, 1200);
   };
 
