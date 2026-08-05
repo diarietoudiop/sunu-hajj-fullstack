@@ -7,6 +7,7 @@ import DashboardTab from './features/dashboard/DashboardTab';
 import AgenciesTab from './features/agencies/AgenciesTab';
 import AnnouncementsTab from './features/announcements/AnnouncementsTab';
 import PilgrimsTab from './features/pilgrims/PilgrimsTab';
+import FlightsTab from './features/flights/FlightsTab';
 import Login from './features/auth/Login';
 import PilgrimPortal from './features/pilgrim/PilgrimPortal';
 import ProfileTab from './features/profile/ProfileTab';
@@ -587,6 +588,14 @@ function App() {
             onUpdateMedical={handleUpdatePilgrimMedical}
             onUpdateLogistics={handleUpdatePilgrimLogistics}
             onSyncNusuk={handleSyncPilgrimNusuk}
+          />
+        )}
+
+        {activeTab === 'flights' && (
+          <FlightsTab
+            pilgrims={pilgrims}
+            agencies={agencies}
+            onUpdateLogistics={handleUpdatePilgrimLogistics}
           />
         )}
 

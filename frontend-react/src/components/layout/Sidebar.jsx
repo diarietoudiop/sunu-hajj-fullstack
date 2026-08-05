@@ -1,10 +1,11 @@
-import { LayoutDashboard, Plane, Megaphone, Users, User, Shield } from 'lucide-react';
+import { LayoutDashboard, Plane, Megaphone, Users, User, Shield, Building2 } from 'lucide-react';
 
 function Sidebar({ activeTab, setActiveTab }) {
   const menuItems = [
     { id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
     { id: 'pilgrims', label: 'Pèlerins Inscrits', icon: Users },
-    { id: 'agencies', label: 'Agences Agréées', icon: Plane },
+    { id: 'flights', label: 'Gestion des Vols', icon: Plane },
+    { id: 'agencies', label: 'Agences Agréées', icon: Building2 },
     { id: 'agents', label: 'Agents Sunu Hajj', icon: Shield },
     { id: 'announcements', label: 'Communiqués Officiels', icon: Megaphone },
     { id: 'profile', label: 'Mon Profil', icon: User }
