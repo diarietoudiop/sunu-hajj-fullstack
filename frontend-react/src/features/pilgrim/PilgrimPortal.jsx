@@ -279,6 +279,44 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState(safePilgrim.fullName || safePilgrim.name || 'Pèlerin Sunu Hajj');
   const [selectedAgencyId, setSelectedAgencyId] = useState(safePilgrim.selectedAgencyId || 1);
+
+  const getRoommates = (currentPilgrim) => {
+    if (!currentPilgrim || !currentPilgrim.roomNumber || currentPilgrim.roomNumber === 'Non assigné') return [];
+
+    let list = [];
+    try {
+      const all = JSON.parse(localStorage.getItem('mock_pilgrims') || '[]');
+      const currentRoomClean = String(currentPilgrim.roomNumber).split('•')[0].split('(')[0].trim();
+
+      list = all.filter(p => {
+        if (!p || p.id === currentPilgrim.id || (p.passportNumber && p.passportNumber === currentPilgrim.passportNumber)) return false;
+        const pRoom = String(p.roomNumber || '').split('•')[0].split('(')[0].trim();
+        return pRoom && pRoom.toLowerCase() === currentRoomClean.toLowerCase();
+      });
+    } catch (e) {}
+
+    if (list.length === 0) {
+      const name = String(currentPilgrim.fullName || currentPilgrim.name || '').toLowerCase();
+      const isFemale = (currentPilgrim.gender === 'F' || currentPilgrim.sexe === 'F' || name.includes('mme') || name.includes('fatou') || name.includes('diariatou') || name.includes('awa'));
+
+      if (isFemale) {
+        list = [
+          { id: 'rm-1', fullName: 'Adja Fatou Binetou Ndiaye', phone: '+221 77 654 32 10', age: 76, bedNumber: 'Lit N° 1', role: 'Senior', tag: '👵 Senior (>65 ans)' },
+          { id: 'rm-2', fullName: 'Mariama Seydou Ba', phone: '+221 78 123 45 67', age: 52, bedNumber: 'Lit N° 3', role: 'Adulte', tag: '👩 Adulte' },
+          { id: 'rm-3', fullName: 'Aminata Sarr', phone: '+221 70 987 65 43', age: 29, bedNumber: 'Lit N° 4', role: 'Jeune', tag: '🛡️ Référente Jeune' }
+        ];
+      } else {
+        list = [
+          { id: 'rm-1', fullName: 'El Hadji Ousmane Diop', phone: '+221 77 345 67 89', age: 78, bedNumber: 'Lit N° 1', role: 'Senior', tag: '👴 Senior (>65 ans)' },
+          { id: 'rm-2', fullName: 'Moussa Faye', phone: '+221 78 456 78 90', age: 50, bedNumber: 'Lit N° 3', role: 'Adulte', tag: '👨 Adulte' },
+          { id: 'rm-3', fullName: 'Cheikh Tidiane Ndiaye', phone: '+221 70 567 89 01', age: 28, bedNumber: 'Lit N° 4', role: 'Jeune', tag: '🛡️ Référent Jeune' }
+        ];
+      }
+    }
+
+    return list;
+  };
+
   const getRealBloodType = (source) => {
     if (!source) return null;
     const b = source.bloodType || source.bloodGroup || source.medicalDetails?.bloodType || source.medicalDetails?.bloodGroup;
@@ -1886,6 +1924,66 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
                         )}
                       </div>
                     </div>
+
+                    {/* Roommates Card */}
+                    {pilgrim.roomNumber && pilgrim.roomNumber !== 'Non assigné' && (
+                      <div style={{
+                        gridColumn: 'span 2',
+                        backgroundColor: 'var(--surface)',
+                        border: '1.5px solid rgba(10,92,54,0.3)',
+                        borderRadius: '16px',
+                        padding: '24px',
+                        marginTop: '10px',
+                        boxShadow: '0 8px 20px rgba(0,0,0,0.03)'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: 'rgba(10,92,54,0.1)', color: '#0A5C36', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
+                              🤝
+                            </div>
+                            <div>
+                              <h4 style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary-dark)', margin: 0 }}>
+                                {lang === 'fr' ? 'Mes Compagnons de Chambre (Voisins)' : 'My Roommates & Chamber Companions'}
+                              </h4>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                Répartition par Sexe & Entraide Générationnelle (Senior + Adultes + Jeune)
+                              </span>
+                            </div>
+                          </div>
+                          <span style={{ padding: '4px 10px', borderRadius: '8px', backgroundColor: '#DEF7EC', color: '#03543F', fontWeight: 800, fontSize: '0.78rem' }}>
+                            ● {pilgrim.roomNumber.split('•')[0]}
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+                          {getRoommates(pilgrim).map((rm, idx) => (
+                            <div key={rm.id || idx} style={{ backgroundColor: 'var(--bg)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                              <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                  <span style={{ fontSize: '0.78rem', fontWeight: 800, padding: '3px 8px', borderRadius: '6px', backgroundColor: 'rgba(212,175,55,0.15)', color: '#8A6D1B' }}>
+                                    🛏️ {rm.bedNumber || `Lit N° ${idx + 1}`}
+                                  </span>
+                                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0A5C36' }}>
+                                    {rm.tag || `${rm.age} ans`}
+                                  </span>
+                                </div>
+
+                                <h5 style={{ fontSize: '0.98rem', fontWeight: 900, color: 'var(--primary-dark)', margin: '4px 0 2px 0' }}>
+                                  👤 {rm.fullName || rm.name}
+                                </h5>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>
+                                  📞 {rm.phone || '+221 77 000 00 00'}
+                                </span>
+                              </div>
+
+                              <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px dashed var(--border)', fontSize: '0.75rem', fontWeight: 700, color: rm.role === 'Senior' ? '#DC2626' : rm.role === 'Jeune' ? '#0A5C36' : '#1D4ED8' }}>
+                                {rm.role === 'Senior' ? '👵 Senior (>65 ans) — Assistance à apporter' : rm.role === 'Jeune' ? '🛡️ Référent / Accompagnant Jeune' : '👨 Co-chambreur Adulte'}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                   </div>
                 </div>
