@@ -330,13 +330,13 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
     setSuccessUser(null);
 
     if (role === 'pilgrim' && onSelectPortal) {
-      onSelectPortal('pilgrim');
+      onSelectPortal('pilgrim', 'register');
     } else if (role === 'agency' && onSelectPortal) {
-      onSelectPortal('agency');
+      onSelectPortal('agency', 'login');
     } else if (role === 'doctor' && onSelectPortal) {
-      onSelectPortal('doctor');
+      onSelectPortal('doctor', 'login');
     } else if ((role === 'agent' || role === 'admin') && onSelectPortal) {
-      onSelectPortal('admin');
+      onSelectPortal('admin', 'login');
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }

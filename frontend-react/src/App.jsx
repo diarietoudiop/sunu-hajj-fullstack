@@ -443,14 +443,28 @@ function App() {
     }
   };
 
-  const handleSelectPortal = (portal) => {
+  const [portalMode, setPortalMode] = useState(() => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get('mode') || urlParams.get('action');
+      if (mode === 'register' || mode === 'inscription') return 'register';
+      return 'login';
+    } catch {
+      return 'login';
+    }
+  });
+
+  const handleSelectPortal = (portal, mode = 'login') => {
     setSelectedPortal(portal);
+    setPortalMode(mode);
     if (portal === 'pilgrim') {
-      window.history.pushState({}, '', '/account/login?portal=pelerin');
+      window.history.pushState({}, '', `/account/login?portal=pelerin${mode === 'register' ? '&mode=register' : ''}`);
+    } else if (portal === 'doctor') {
+      window.history.pushState({}, '', `/account/login?portal=medecin${mode === 'register' ? '&mode=register' : ''}`);
     } else if (portal === 'agency') {
-      window.history.pushState({}, '', '/account/login?role=agency');
+      window.history.pushState({}, '', `/account/login?role=agency${mode === 'register' ? '&mode=register' : ''}`);
     } else if (portal === 'admin') {
-      window.history.pushState({}, '', '/account/login?role=admin');
+      window.history.pushState({}, '', `/account/login?role=admin${mode === 'register' ? '&mode=register' : ''}`);
     } else {
       window.history.pushState({}, '', '/');
     }
@@ -473,6 +487,7 @@ function App() {
           <Login 
             onLoginSuccess={handleLoginSuccess} 
             initialRole={selectedPortal} 
+            initialMode={portalMode}
             onBackToHome={() => handleSelectPortal(null)}
           />
         )}

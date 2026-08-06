@@ -2,17 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { User, Lock, LogIn, AlertCircle, CreditCard, Mail, Key, ShieldAlert, Calendar, Heart, Phone } from 'lucide-react';
 import { ApiService } from '../../services/api';
 
-function Login({ onLoginSuccess, initialRole = 'agency', onBackToHome }) {
+function Login({ onLoginSuccess, initialRole = 'agency', initialMode = 'login', onBackToHome }) {
   // Detect portal type from initialRole or URL query parameters
   const urlParams = new URLSearchParams(window.location.search);
   const portalParam = urlParams.get('portal');
   const roleParam = urlParams.get('role');
+  const modeParam = urlParams.get('mode') || urlParams.get('action');
 
   const isPilgrimPortal = initialRole === 'pilgrim' || portalParam === 'pelerin' || roleParam === 'pilgrim';
   const isShowingAdminToggle = !isPilgrimPortal;
 
   // Sub-mode for both portals: 'login' | 'register'
-  const [authMode, setAuthMode] = useState('login');
+  const [authMode, setAuthMode] = useState(() => {
+    if (initialMode === 'register' || modeParam === 'register' || modeParam === 'inscription') return 'register';
+    return 'login';
+  });
   const [loginRole, setLoginRole] = useState(() => {
     const doctorParam = urlParams.get('doctor');
     if (isPilgrimPortal) return 'pilgrim';
@@ -658,14 +662,8 @@ function Login({ onLoginSuccess, initialRole = 'agency', onBackToHome }) {
                 <button
                   type="button"
                   onClick={() => {
-                    try {
-                      localStorage.setItem('open_role_modal', 'true');
-                    } catch(e) {}
-                    if (onBackToHome) {
-                      onBackToHome();
-                    } else {
-                      window.location.href = '/?modal=true';
-                    }
+                    setAuthMode('register');
+                    setError(null);
                   }}
                   style={{
                     width: '100%',
@@ -687,7 +685,7 @@ function Login({ onLoginSuccess, initialRole = 'agency', onBackToHome }) {
                   className="table-row-hover"
                 >
                   <span style={{ fontSize: '1.2rem' }}>📝</span>
-                  <span>Inscription / Choisir mon Profil pour continuer</span>
+                  <span>Formulaire d'Inscription Directe (Déposer mon dossier)</span>
                 </button>
               </div>
             ) : (
