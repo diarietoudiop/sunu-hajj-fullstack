@@ -318,28 +318,20 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleStartWizard = () => {
-    setShowRoleModal(true);
+  const handleStartWizard = (role = 'pilgrim') => {
+    setChosenRole(role);
+    setWizardStep('form');
+    setActivePage('register_page');
+    setShowRoleModal(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSelectRoleFromModal = (role) => {
     setChosenRole(role);
+    setWizardStep('form');
+    setActivePage('register_page');
     setShowRoleModal(false);
-    setOtpInput('');
-    setOtpError('');
-    setSuccessUser(null);
-
-    if (role === 'pilgrim' && onSelectPortal) {
-      onSelectPortal('pilgrim', 'register');
-    } else if (role === 'agency' && onSelectPortal) {
-      onSelectPortal('agency', 'login');
-    } else if (role === 'doctor' && onSelectPortal) {
-      onSelectPortal('doctor', 'login');
-    } else if ((role === 'agent' || role === 'admin') && onSelectPortal) {
-      onSelectPortal('admin', 'login');
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSelectAgencyAndRegister = (agencyId) => {
@@ -1148,7 +1140,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
 
           {/* Register Button */}
           <button 
-            onClick={handleStartWizard}
+            onClick={() => handleStartWizard('pilgrim')}
             style={{ 
               fontSize: '0.85rem', 
               fontWeight: 800, 
@@ -1177,27 +1169,41 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
         <div style={{ backgroundColor: '#F8F8F6', minHeight: '92vh', padding: '24px 60px 80px' }}>
           <div style={{ maxWidth: '1240px', margin: '0 auto' }}>
             
-            {/* Top Bar Navigation (Clean Layout without horizontal tabs) */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* Top Bar Navigation (Clean Layout with inline role switcher) */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <button 
                   onClick={() => setActivePage('landing')}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: '#4A5568', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: '#4A5568', fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer' }}
                 >
                   ← Retour à l'accueil
                 </button>
-                <button 
-                  onClick={() => setShowRoleModal(true)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '20px', backgroundColor: '#E2E8F0', border: 'none', color: '#042F1A', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer' }}
-                >
-                  🔄 Changer de profil
-                </button>
+                <div style={{ display: 'flex', gap: '6px', backgroundColor: '#E2E8F0', padding: '4px', borderRadius: '30px' }}>
+                  <button 
+                    onClick={() => { setChosenRole('pilgrim'); setWizardStep('form'); }}
+                    style={{ padding: '6px 14px', borderRadius: '20px', backgroundColor: chosenRole === 'pilgrim' ? '#0A5C36' : 'transparent', color: chosenRole === 'pilgrim' ? '#ffffff' : '#4A5568', border: 'none', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s' }}
+                  >
+                    👤 Pèlerin
+                  </button>
+                  <button 
+                    onClick={() => { setChosenRole('agency'); setWizardStep('form'); }}
+                    style={{ padding: '6px 14px', borderRadius: '20px', backgroundColor: chosenRole === 'agency' ? '#0A5C36' : 'transparent', color: chosenRole === 'agency' ? '#ffffff' : '#4A5568', border: 'none', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s' }}
+                  >
+                    🏢 Agence
+                  </button>
+                  <button 
+                    onClick={() => { setChosenRole('doctor'); setWizardStep('form'); }}
+                    style={{ padding: '6px 14px', borderRadius: '20px', backgroundColor: chosenRole === 'doctor' ? '#0A5C36' : 'transparent', color: chosenRole === 'doctor' ? '#ffffff' : '#4A5568', border: 'none', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s' }}
+                  >
+                    🩺 Médecin
+                  </button>
+                </div>
               </div>
               <span style={{ fontSize: '0.88rem', color: '#2D3748', fontWeight: 800 }}>
-                Édition Hajj 2026
+                🇸🇳 Édition Hajj 2026
               </span>
             </div>
-
+            
             {/* Split Screen Grid (Left Form 55%, Right Photo 45%) */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr minmax(360px, 46%)', gap: '56px', alignItems: 'start' }}>
               
