@@ -447,6 +447,14 @@ export const ApiService = {
       }
       localStorage.setItem('mock_pilgrims', JSON.stringify(mockList));
 
+      // Also update in-memory MOCK_PILGRIMS array
+      try {
+        const staticIdx = MOCK_PILGRIMS.findIndex(p => p.id === id || String(p.id) === String(id) || p.passportNumber === id);
+        if (staticIdx !== -1) {
+          MOCK_PILGRIMS[staticIdx] = { ...MOCK_PILGRIMS[staticIdx], ...updated };
+        }
+      } catch (e) {}
+
       // Also update dgp_pilgrim in sessionStorage if matching!
       try {
         const storedPilgrim = JSON.parse(sessionStorage.getItem('dgp_pilgrim') || 'null');
@@ -1241,14 +1249,7 @@ export const ApiService = {
     }
   },
 
-  // Update pilgrim medical status
-  async updatePilgrimMedical(id, medicalStatus) {
-    try {
-      return await this.updatePilgrimProfile(id, { medicalStatus });
-    } catch {
-      return { id, medicalStatus };
-    }
-  },
+
 
   // Update pilgrim logistics
   async updatePilgrimLogistics(id, logisticsData) {

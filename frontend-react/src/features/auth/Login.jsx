@@ -230,50 +230,6 @@ function Login({ onLoginSuccess, initialRole = 'agency', onBackToHome }) {
 
         <div className="login-divider" />
 
-        {/* Auth Mode Toggle for Pilgrim */}
-        {isPilgrimPortal && (
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', backgroundColor: 'var(--bg)', padding: '6px', borderRadius: 'var(--radius-sm)' }}>
-            <button
-              type="button"
-              style={{
-                flex: 1,
-                padding: '10px',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                fontWeight: '700',
-                cursor: 'pointer',
-                transition: 'var(--transition-fast)',
-                backgroundColor: authMode === 'login' ? 'var(--surface)' : 'transparent',
-                color: authMode === 'login' ? 'var(--primary)' : 'var(--text-muted)',
-                boxShadow: authMode === 'login' ? 'var(--shadow-sm)' : 'none'
-              }}
-              onClick={() => { setAuthMode('login'); setError(null); }}
-            >
-              S'identifier
-            </button>
-            <button
-              type="button"
-              style={{
-                flex: 1,
-                padding: '10px',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                fontWeight: '700',
-                cursor: 'pointer',
-                transition: 'var(--transition-fast)',
-                backgroundColor: authMode === 'register' ? 'var(--surface)' : 'transparent',
-                color: authMode === 'register' ? 'var(--primary)' : 'var(--text-muted)',
-                boxShadow: authMode === 'register' ? 'var(--shadow-sm)' : 'none'
-              }}
-              onClick={() => { setAuthMode('register'); setError(null); }}
-            >
-              Déposer un dossier Hajj
-            </button>
-          </div>
-        )}
-
 
 
         <h2 className="login-welcome-title">
