@@ -691,6 +691,78 @@ function Login({ onLoginSuccess, initialRole = 'agency', onBackToHome }) {
           </button>
         </form>
 
+        {/* Prominent Inscription button for pilgrims without an account */}
+        {isPilgrimPortal && (
+          <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px dashed var(--border)', textAlign: 'center' }}>
+            {authMode === 'login' ? (
+              <div>
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--primary-dark)', display: 'block', marginBottom: '10px' }}>
+                  Pas encore de compte ? Vous n'êtes pas encore inscrit au Hajj 2026 ?
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('register');
+                    setError(null);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '14px 20px',
+                    borderRadius: '14px',
+                    border: '2px solid #0A5C36',
+                    backgroundColor: 'rgba(10,92,54,0.08)',
+                    color: '#0A5C36',
+                    fontWeight: 900,
+                    fontSize: '0.95rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    boxShadow: '0 4px 15px rgba(10,92,54,0.18)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  className="table-row-hover"
+                >
+                  <span style={{ fontSize: '1.2rem' }}>📝</span>
+                  <span>Créer mon compte / Déposer mon Dossier Hajj</span>
+                </button>
+              </div>
+            ) : (
+              <div>
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--primary-dark)', display: 'block', marginBottom: '10px' }}>
+                  Vous possédez déjà un compte ou dossier d'inscription ?
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('login');
+                    setError(null);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 18px',
+                    borderRadius: '12px',
+                    border: '1.5px solid var(--border)',
+                    backgroundColor: 'var(--bg)',
+                    color: 'var(--primary-dark)',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                  className="table-row-hover"
+                >
+                  <span>🔑</span> Me connecter avec mon N° de Passeport
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="login-footer" style={{ marginTop: '20px' }}>
           <p className="security-notice">
             {isPilgrimPortal
