@@ -342,6 +342,268 @@ function HotelsTab({ pilgrims = [], agencies = [], onUpdateLogistics }) {
     return matchesSearch && matchesCity && matchesSector;
   });
 
+  // If a hotel is selected for details, render full page room-by-room view
+  if (selectedHotelForDetails) {
+    const assignedPilgrims = getAssignedPilgrimsForHotel(selectedHotelForDetails.name);
+
+    // Group pilgrims by room
+    const roomsMap = {};
+    assignedPilgrims.forEach(p => {
+      const roomRaw = p.roomNumber || 'Chambre 101 (RDC) • Lit N° 1';
+      let roomKey = roomRaw;
+      if (roomRaw.includes('•')) {
+        roomKey = roomRaw.split('•')[0].trim();
+      }
+      if (!roomsMap[roomKey]) {
+        roomsMap[roomKey] = [];
+      }
+      roomsMap[roomKey].push(p);
+    });
+
+    const roomKeys = Object.keys(roomsMap);
+
+    return (
+      <div className="tab-container animate-fade-in" style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
+        {/* Back navigation & Header */}
+        <div style={{ marginBottom: '24px' }}>
+          <button
+            onClick={() => setSelectedHotelForDetails(null)}
+            style={{
+              padding: '10px 18px',
+              borderRadius: '10px',
+              border: '1.5px solid #0A5C36',
+              backgroundColor: 'rgba(10,92,54,0.08)',
+              color: '#0A5C36',
+              fontWeight: 900,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '16px'
+            }}
+          >
+            ← Retour à la liste des Hôtels
+          </button>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', backgroundColor: 'var(--surface)', padding: '28px', borderRadius: '24px', border: '2px solid #0A5C36', boxShadow: '0 10px 30px rgba(10,92,54,0.1)' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 900, padding: '4px 12px', borderRadius: '12px', backgroundColor: selectedHotelForDetails.city === 'La Mecque' ? 'rgba(212,175,55,0.2)' : 'rgba(16,185,129,0.2)', color: selectedHotelForDetails.city === 'La Mecque' ? '#8A6D1B' : '#047857' }}>
+                  {selectedHotelForDetails.city === 'La Mecque' ? '🕋 LA MECQUE (MAKKAH)' : '🕌 MÉDINE (MADINAH)'}
+                </span>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, padding: '4px 10px', borderRadius: '12px', backgroundColor: 'rgba(10,92,54,0.1)', color: '#0A5C36' }}>
+                  {selectedHotelForDetails.sector}
+                </span>
+              </div>
+
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--primary-dark)', margin: 0 }}>
+                🏨 {selectedHotelForDetails.name}
+              </h2>
+              <span style={{ fontSize: '0.92rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                📍 {selectedHotelForDetails.distanceHaram} • 🏢 Capacité : {selectedHotelForDetails.capacity} Lits ({selectedHotelForDetails.maleCapacity} Hommes / {selectedHotelForDetails.femaleCapacity} Femmes)
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => {
+                  const printWindow = window.open('', '_blank');
+                  printWindow.document.write(`
+                    <html>
+                      <head>
+                        <title>Plan de Logement par Chambre - ${selectedHotelForDetails.name}</title>
+                        <style>
+                          body { font-family: Arial, sans-serif; padding: 20px; }
+                          h2 { color: #0A5C36; }
+                          .room-box { border: 1px solid #0A5C36; margin-bottom: 20px; padding: 15px; border-radius: 8px; }
+                          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                          th { background-color: #f2f2f2; }
+                        </style>
+                      </head>
+                      <body>
+                        <h2>REPUBLIQUE DU SENEGAL - DELEGATION GENERALE AU HAJJ</h2>
+                        <h3>Manifeste d'Hébergement par Chambre : ${selectedHotelForDetails.name} (${selectedHotelForDetails.city})</h3>
+                        <p><strong>Distance du Haram :</strong> ${selectedHotelForDetails.distanceHaram}</p>
+                        <hr/>
+                        ${roomKeys.map(rk => `
+                          <div class="room-box">
+                            <h4>🔑 ${rk}</h4>
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>Lit</th>
+                                  <th>Nom Complet</th>
+                                  <th>Passeport</th>
+                                  <th>Téléphone</th>
+                                  <th>Âge / Rôle</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                ${roomsMap[rk].map((p, idx) => `
+                                  <tr>
+                                    <td>Lit N° ${idx + 1}</td>
+                                    <td>${p.fullName || p.name}</td>
+                                    <td>${p.passportNumber || 'SN3455677'}</td>
+                                    <td>${p.phone || '+221 77 000 00 00'}</td>
+                                    <td>${(parseInt(p.age || 45) >= 65) ? 'Senior (>65 ans)' : 'Adulte/Jeune'}</td>
+                                  </tr>
+                                `).join('')}
+                              </tbody>
+                            </table>
+                          </div>
+                        `).join('')}
+                        <script>window.print();</script>
+                      </body>
+                    </html>
+                  `);
+                  printWindow.document.close();
+                }}
+                style={{
+                  padding: '12px 20px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  backgroundColor: '#0A5C36',
+                  color: '#ffffff',
+                  fontWeight: 900,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 15px rgba(10,92,54,0.3)'
+                }}
+              >
+                <Printer size={18} />
+                🖨️ Imprimer la Liste par Chambre
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats bar for this hotel */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
+          <div style={{ padding: '18px', backgroundColor: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Total Pèlerins Logés</span>
+            <h3 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--primary-dark)', margin: '4px 0 0 0' }}>
+              {assignedPilgrims.length} pèlerins
+            </h3>
+          </div>
+
+          <div style={{ padding: '18px', backgroundColor: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Nombre de Chambres</span>
+            <h3 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0A5C36', margin: '4px 0 0 0' }}>
+              🔑 {roomKeys.length} chambres
+            </h3>
+          </div>
+
+          <div style={{ padding: '18px', backgroundColor: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Mixité Générationnelle</span>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#8A6D1B', margin: '4px 0 0 0' }}>
+              👵 Seniors + 👨 Adultes + 🛡️ Jeunes
+            </h3>
+          </div>
+        </div>
+
+        {/* ROOMS LIST SECTION */}
+        <h3 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--primary-dark)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span>🔑</span> Répartition Officielle par Chambre et par Lit :
+        </h3>
+
+        {roomKeys.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: 'var(--surface)', borderRadius: '20px', border: '1px dashed var(--border)' }}>
+            <Hotel size={48} style={{ color: 'var(--text-muted)', marginBottom: '16px' }} />
+            <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text)' }}>Aucun pèlerin affecté à cet hôtel pour le moment</h3>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+              Veuillez lancer le dispatching automatique pour affecter des pèlerins dans cet hôtel.
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {roomKeys.map((roomKey, rIdx) => {
+              const pilgrimsInRoom = roomsMap[roomKey];
+              const firstPilgrim = pilgrimsInRoom[0] || {};
+              const genderLabel = (firstPilgrim.gender === 'F' || firstPilgrim.sexe === 'F' || String(firstPilgrim.gender).toLowerCase() === 'femme') ? 'Femmes' : 'Hommes';
+              const hasSenior = pilgrimsInRoom.some(p => (parseInt(p.age || 45) >= 65));
+
+              return (
+                <div key={rIdx} style={{ backgroundColor: 'var(--surface)', borderRadius: '20px', border: '1.5px solid var(--border)', boxShadow: '0 8px 25px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
+                  {/* Room Header */}
+                  <div style={{ padding: '18px 24px', backgroundColor: genderLabel === 'Femmes' ? 'rgba(236,72,153,0.06)' : 'rgba(59,130,246,0.06)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: genderLabel === 'Femmes' ? 'rgba(236,72,153,0.15)' : 'rgba(59,130,246,0.15)', color: genderLabel === 'Femmes' ? '#BE185D' : '#1D4ED8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.2rem' }}>
+                        🔑
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--primary-dark)', margin: 0 }}>
+                          {roomKey}
+                        </h4>
+                        <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                          Capacité : {pilgrimsInRoom.length} Lits occupés
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ padding: '6px 14px', borderRadius: '20px', backgroundColor: genderLabel === 'Femmes' ? 'rgba(236,72,153,0.15)' : 'rgba(59,130,246,0.15)', color: genderLabel === 'Femmes' ? '#BE185D' : '#1D4ED8', fontWeight: 900, fontSize: '0.82rem' }}>
+                        {genderLabel === 'Femmes' ? '👩 Aile Femmes Non-Mixte' : '👨 Aile Hommes Non-Mixte'}
+                      </span>
+                      {hasSenior && (
+                        <span style={{ padding: '6px 14px', borderRadius: '20px', backgroundColor: 'rgba(212,175,55,0.25)', color: '#8A6D1B', fontWeight: 900, fontSize: '0.82rem' }}>
+                          👵 Entraide Générationnelle Senior
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Room Beds Grid */}
+                  <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+                    {pilgrimsInRoom.map((p, pIdx) => {
+                      const ageVal = parseInt(p.age || 45);
+                      const isSenior = ageVal >= 65;
+                      const isYouth = ageVal < 40;
+                      const bedNumber = p.bedNumber || `Lit N° ${pIdx + 1}`;
+
+                      return (
+                        <div key={p.id || pIdx} style={{ backgroundColor: 'var(--bg)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 900, padding: '4px 10px', borderRadius: '6px', backgroundColor: 'rgba(212,175,55,0.2)', color: '#8A6D1B' }}>
+                                🛏️ {bedNumber}
+                              </span>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0A5C36' }}>
+                                {ageVal} ans
+                              </span>
+                            </div>
+
+                            <strong style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--primary-dark)', display: 'block', margin: '4px 0 2px 0' }}>
+                              👤 {p.fullName || p.name}
+                            </strong>
+                            <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'block' }}>
+                              🪪 Passeport : {p.passportNumber || 'SN3455677'}
+                            </span>
+                            <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>
+                              📞 {p.phone || '+221 77 000 00 00'}
+                            </span>
+                          </div>
+
+                          <div style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px dashed var(--border)', fontSize: '0.78rem', fontWeight: 800, color: isSenior ? '#DC2626' : isYouth ? '#0A5C36' : '#1D4ED8' }}>
+                            {isSenior ? '👵 Senior (>65 ans) — Personne à assister' : isYouth ? '🛡️ Référent / Accompagnant Jeune' : '👨 Co-chambreur Adulte'}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="tab-container animate-fade-in" style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
       
@@ -833,88 +1095,6 @@ function HotelsTab({ pilgrims = [], agencies = [], onUpdateLogistics }) {
               </div>
 
             </form>
-
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 2: View Assigned Pilgrims for a Hotel */}
-      {selectedHotelForDetails && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
-          <div style={{ backgroundColor: 'var(--surface)', width: '100%', maxWidth: '800px', borderRadius: '24px', padding: '32px', border: '1px solid var(--border)', boxShadow: '0 25px 50px rgba(0,0,0,0.25)', maxHeight: '85vh', overflowY: 'auto' }}>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '16px', marginBottom: '20px' }}>
-              <div>
-                <h3 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--primary-dark)', margin: 0 }}>
-                  Manifeste d'Hébergement — {selectedHotelForDetails.name}
-                </h3>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  {selectedHotelForDetails.city} • {selectedHotelForDetails.distanceHaram}
-                </span>
-              </div>
-              <button onClick={() => setSelectedHotelForDetails(null)} style={{ background: 'none', border: 'none', fontSize: '1.4rem', fontWeight: 900, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
-            </div>
-
-            {(() => {
-              const list = getAssignedPilgrimsForHotel(selectedHotelForDetails.name);
-              if (list.length === 0) {
-                return (
-                  <div style={{ textAlign: 'center', padding: '40px 20px', backgroundColor: 'var(--bg)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
-                    <Hotel size={40} style={{ color: 'var(--text-muted)', marginBottom: '12px' }} />
-                    <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text)' }}>Aucun pèlerin affecté à cet hôtel pour le moment</h4>
-                    <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      Cliquez sur <strong>« ⚡ Dispatching Hôtelier (Sexe & Âge) »</strong> pour répartir automatiquement les pèlerins dans cet hôtel.
-                    </p>
-                  </div>
-                );
-              }
-
-              return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', padding: '0 8px' }}>
-                    <span>PÈLERIN</span>
-                    <span>CHAMBRE & PRIORITÉ ÂGE</span>
-                  </div>
-
-                  {list.map((p, idx) => {
-                    const age = parseInt(p.age || 45);
-                    const isSenior = age >= 65;
-
-                    return (
-                      <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', backgroundColor: 'var(--bg)', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#DEF7EC', color: '#03543F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.85rem' }}>
-                            {idx + 1}
-                          </div>
-                          <div>
-                            <strong style={{ fontSize: '0.98rem', color: 'var(--primary-dark)', display: 'block' }}>{p.fullName || p.name}</strong>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Passeport : {p.passportNumber || 'SN9283741'}</span>
-                          </div>
-                        </div>
-
-                        <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text)', display: 'block' }}>
-                            {p.roomNumber || 'Chambre attribuée'}
-                          </span>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 800, padding: '2px 8px', borderRadius: '6px', backgroundColor: isSenior ? 'rgba(212,175,55,0.2)' : 'rgba(10,92,54,0.1)', color: isSenior ? '#8A6D1B' : '#0A5C36' }}>
-                            {isSenior ? `👵 Senior (${age} ans) • RDC` : ` Standard (${age} ans)`}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })()}
-
-            <div style={{ marginTop: '24px', textAlign: 'right' }}>
-              <button
-                onClick={() => setSelectedHotelForDetails(null)}
-                style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', backgroundColor: '#0A5C36', color: '#FFFFFF', fontWeight: 800, cursor: 'pointer' }}
-              >
-                Fermer
-              </button>
-            </div>
 
           </div>
         </div>
