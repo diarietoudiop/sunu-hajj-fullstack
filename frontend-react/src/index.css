@@ -25,19 +25,19 @@
   --accent-green-light: #ecfdf5;
 
   /* Theme dependent variables (Light Mode Default) */
-  --bg: #f4f7f5;
+  --bg: #e5e9e6;
   --surface: #ffffff;
-  --surface-hover: #fafcfb;
+  --surface-hover: #e2e8f0;
   --surface-card: #ffffff;
-  --border: #e2e9e5;
+  --border: #cbd5e1;
   --text: #0f1a14;
-  --text-muted: #62756b;
+  --text-muted: #475569;
   --text-inverse: #ffffff;
-  --shadow-sm: 0 2px 4px rgba(0, 77, 38, 0.04);
-  --shadow: 0 10px 30px -10px rgba(0, 77, 38, 0.08);
-  --shadow-lg: 0 20px 40px -15px rgba(0, 77, 38, 0.12);
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.5);
+  --shadow-sm: 0 2px 5px rgba(0, 77, 38, 0.08);
+  --shadow: 0 10px 30px -10px rgba(0, 77, 38, 0.12);
+  --shadow-lg: 0 20px 40px -15px rgba(0, 77, 38, 0.18);
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(203, 213, 225, 0.8);
 
   --radius: 16px;
   --radius-sm: 10px;
@@ -575,25 +575,36 @@ button, input, select, textarea {
 
 .admin-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .admin-table th {
   padding: 14px 16px;
-  background-color: var(--bg);
-  font-weight: 700;
-  color: var(--text-muted);
-  border-bottom: 2px solid var(--border);
-  font-size: 0.8rem;
+  background-color: #cbd5e1 !important;
+  font-weight: 900 !important;
+  color: #0f172a !important;
+  border-bottom: 2.5px solid #94a3b8 !important;
+  font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
+.admin-table tbody tr:nth-child(even) {
+  background-color: #f1f5f9;
+}
+
+.admin-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
 .admin-table td {
   padding: 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #cbd5e1;
   vertical-align: middle;
   color: var(--text);
 }
@@ -603,7 +614,7 @@ button, input, select, textarea {
 }
 
 .table-row-hover:hover {
-  background-color: var(--surface-hover);
+  background-color: #e2e8f0 !important;
 }
 
 .pelerin-identity {

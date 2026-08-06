@@ -458,16 +458,16 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUp
           <div className="table-responsive">
             <table className="admin-table">
             <thead>
-              <tr style={{ backgroundColor: '#f8fafc', color: '#475569', borderBottom: '2px solid #e2e8f0' }}>
-                <th style={{ width: '40px', padding: '12px 10px', textAlign: 'center' }}></th>
-                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pèlerin</th>
-                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Passeport</th>
-                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Agence Choisie</th>
-                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Aptitude</th>
-                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Nusuk Sync</th>
-                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Visa Hajj</th>
-                <th style={{ padding: '12px 14px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Dossier</th>
-                <th style={{ textAlign: 'right', padding: '12px 16px', width: '210px', fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Actions</th>
+              <tr style={{ backgroundColor: '#cbd5e1', color: '#0f172a', borderBottom: '2.5px solid #94a3b8' }}>
+                <th style={{ width: '40px', padding: '14px 10px', textAlign: 'center', color: '#0f172a' }}></th>
+                <th style={{ padding: '14px 14px', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#0f172a' }}>Pèlerin</th>
+                <th style={{ padding: '14px 14px', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#0f172a' }}>Passeport</th>
+                <th style={{ padding: '14px 14px', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#0f172a' }}>Agence Choisie</th>
+                <th style={{ padding: '14px 14px', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#0f172a' }}>Aptitude</th>
+                <th style={{ padding: '14px 14px', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#0f172a' }}>Nusuk Sync</th>
+                <th style={{ padding: '14px 14px', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#0f172a' }}>Visa Hajj</th>
+                <th style={{ padding: '14px 14px', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#0f172a' }}>Dossier</th>
+                <th style={{ textAlign: 'right', padding: '14px 16px', width: '210px', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#0f172a' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -481,7 +481,7 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUp
                   </td>
                 </tr>
               ) : (
-                filteredPilgrims.map(p => {
+                filteredPilgrims.map((p, pIdx) => {
                   const isExpanded = expandedPilgrimId === p.id;
                   const speakPilgrimInfo = (e) => {
                     e.stopPropagation();
@@ -495,7 +495,7 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUp
 
                   return (
                     <React.Fragment key={p.id}>
-                      <tr className={`table-row-hover ${isExpanded ? 'row-expanded-parent' : ''}`} onClick={() => toggleExpand(p.id)} style={{ cursor: 'pointer', borderBottom: '1px solid #f1f5f9', backgroundColor: isExpanded ? 'rgba(10,92,54,0.03)' : '#ffffff', transition: 'background 0.15s ease' }}>
+                      <tr className={`table-row-hover ${isExpanded ? 'row-expanded-parent' : ''}`} onClick={() => toggleExpand(p.id)} style={{ cursor: 'pointer', borderBottom: '1px solid #cbd5e1', backgroundColor: isExpanded ? 'rgba(10,92,54,0.08)' : (pIdx % 2 === 0 ? '#f1f5f9' : '#ffffff'), transition: 'background 0.15s ease' }}>
                         <td style={{ padding: '12px 10px', textAlign: 'center', color: '#94a3b8' }}>
                           {isExpanded ? <ChevronUp size={18} style={{ color: '#0A5C36' }} /> : <ChevronDown size={18} />}
                         </td>

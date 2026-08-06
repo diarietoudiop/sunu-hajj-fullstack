@@ -407,7 +407,7 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
               <thead>
-                <tr style={{ backgroundColor: '#F1F5F9', color: '#475569', fontWeight: 700, fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <tr style={{ backgroundColor: '#cbd5e1', color: '#0f172a', fontWeight: 900, fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.6px', borderBottom: '2.5px solid #94a3b8' }}>
                   <th style={{ padding: '14px 20px' }}>Pèlerin</th>
                   <th style={{ padding: '14px 20px' }}>N° Passeport</th>
                   <th style={{ padding: '14px 20px' }}>Téléphone</th>
