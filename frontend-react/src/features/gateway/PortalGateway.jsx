@@ -318,20 +318,30 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleStartWizard = (role = 'pilgrim') => {
-    setChosenRole(role);
-    setWizardStep('form');
-    setActivePage('register_page');
-    setShowRoleModal(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleStartWizard = () => {
+    setShowRoleModal(true);
   };
 
   const handleSelectRoleFromModal = (role) => {
     setChosenRole(role);
-    setWizardStep('form');
-    setActivePage('register_page');
     setShowRoleModal(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setOtpInput('');
+    setOtpError('');
+    setSuccessUser(null);
+
+    if (role === 'pilgrim') {
+      setWizardStep('form');
+      setActivePage('register_page');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (role === 'agency' && onSelectPortal) {
+      onSelectPortal('agency', 'login');
+    } else if (role === 'doctor' && onSelectPortal) {
+      onSelectPortal('doctor', 'login');
+    } else if ((role === 'agent' || role === 'admin') && onSelectPortal) {
+      onSelectPortal('admin', 'login');
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleSelectAgencyAndRegister = (agencyId) => {
