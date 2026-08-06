@@ -697,13 +697,19 @@ function Login({ onLoginSuccess, initialRole = 'agency', onBackToHome }) {
             {authMode === 'login' ? (
               <div>
                 <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--primary-dark)', display: 'block', marginBottom: '10px' }}>
-                  Pas encore de compte ? Vous n'êtes pas encore inscrit au Hajj 2026 ?
+                  Pas encore de compte ? Vous souhaitez procéder à une inscription ?
                 </span>
                 <button
                   type="button"
                   onClick={() => {
-                    setAuthMode('register');
-                    setError(null);
+                    try {
+                      localStorage.setItem('open_role_modal', 'true');
+                    } catch(e) {}
+                    if (onBackToHome) {
+                      onBackToHome();
+                    } else {
+                      window.location.href = '/?modal=true';
+                    }
                   }}
                   style={{
                     width: '100%',
@@ -725,7 +731,7 @@ function Login({ onLoginSuccess, initialRole = 'agency', onBackToHome }) {
                   className="table-row-hover"
                 >
                   <span style={{ fontSize: '1.2rem' }}>📝</span>
-                  <span>Créer mon compte / Déposer mon Dossier Hajj</span>
+                  <span>Inscription / Choisir mon Profil pour continuer</span>
                 </button>
               </div>
             ) : (

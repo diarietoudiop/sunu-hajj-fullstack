@@ -272,7 +272,23 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
   const [agentEmail, setAgentEmail] = useState('');
 
   // Role Modal State
-  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(() => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('modal') === 'true' || localStorage.getItem('open_role_modal') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('open_role_modal') === 'true') {
+        setShowRoleModal(true);
+        localStorage.removeItem('open_role_modal');
+      }
+    } catch (e) {}
+  }, []);
 
   // Features Carousel / Sub-tabs state
   const [activeFeatureTab, setActiveFeatureTab] = useState('services');
@@ -299,7 +315,7 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
     const timer = setInterval(() => {
       setActiveSlide(prev => (prev + 1) % hajjSlidesCount);
     }, 10000); // 10 seconds auto slide to give more time to read
-    return () => clearInterval(timer);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleStartWizard = () => {
@@ -308,13 +324,22 @@ function PortalGateway({ onSelectPortal, onDirectLogin }) {
 
   const handleSelectRoleFromModal = (role) => {
     setChosenRole(role);
-    setWizardStep('form');
     setShowRoleModal(false);
     setOtpInput('');
     setOtpError('');
     setSuccessUser(null);
-    setActivePage('register_page');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (role === 'pilgrim' && onSelectPortal) {
+      onSelectPortal('pilgrim');
+    } else if (role === 'agency' && onSelectPortal) {
+      onSelectPortal('agency');
+    } else if (role === 'doctor' && onSelectPortal) {
+      onSelectPortal('doctor');
+    } else if ((role === 'agent' || role === 'admin') && onSelectPortal) {
+      onSelectPortal('admin');
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleSelectAgencyAndRegister = (agencyId) => {
