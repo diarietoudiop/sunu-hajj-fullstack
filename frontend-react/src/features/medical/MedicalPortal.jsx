@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Activity, Search, ShieldCheck, UserCheck, AlertTriangle, FileText, CheckCircle, XCircle, LogOut, Sun, Moon, MapPin, Stethoscope, Phone, Mail, Building2 } from 'lucide-react';
+import { Activity, Search, ShieldCheck, UserCheck, AlertTriangle, FileText, CheckCircle, XCircle, LogOut, Sun, Moon, MapPin, Stethoscope, Phone, Mail, Building2, Send } from 'lucide-react';
 import { ApiService, MOCK_MEDICAL_STRUCTURES } from '../../services/api';
+import { notificationService } from '../../services/notificationService';
+import NotificationCenter from '../../components/common/NotificationCenter';
 
-export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedical, onLogout }) {
+export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedical, onLogout, onOpenSendNotifModal }) {
   const [darkMode, setDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -221,6 +223,21 @@ export default function MedicalPortal({ doctorUser, pilgrims = [], onUpdateMedic
       } else {
         await ApiService.updatePilgrimMedical(selectedPilgrim.id, medicalStatus, medicalDetails);
       }
+
+      // Automatically dispatch SMS/WhatsApp notification to the pilgrim
+      notificationService.sendNotification({
+        recipientName: selectedPilgrim.fullName,
+        recipientPhone: selectedPilgrim.phone || '+221 78 591 07 67',
+        passportNumber: selectedPilgrim.passportNumber,
+        channel: 'whatsapp',
+        type: 'medical',
+        title: medicalStatus === 'apte' ? ' Visite Médicale Validée' : '⚠️ Statut Médical Mis à Jour',
+        message: medicalStatus === 'apte'
+          ? `🇸🇳 Sunu Hajj : Félicitations ${selectedPilgrim.fullName} ! Votre visite médicale d'aptitude au Hajj 2026 a été validée par ${doctorName} (${structureInfo.name}). Groupe sanguin: ${bloodType}. Statut: APTE.`
+          : `🇸🇳 Sunu Hajj : M. ${selectedPilgrim.fullName}, votre bilan médical nécessite une contre-expertise. Veuillez contacter la commission médicale.`,
+        sender: `${doctorName} (${structureInfo.name})`
+      });
+
       setSaveSuccess(true);
       setTimeout(() => {
         setIsSubmitting(false);

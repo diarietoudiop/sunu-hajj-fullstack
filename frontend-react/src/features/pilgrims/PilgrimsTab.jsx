@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Check, X, ShieldAlert, HeartPulse, UserCheck, UserX, ChevronDown, ChevronUp, MapPin, Phone, Mail, FileText, Calendar, Activity, Download, RefreshCw } from 'lucide-react';
 
-function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUpdateLogistics, onSyncNusuk }) {
+function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUpdateLogistics, onSyncNusuk, onOpenSendNotifModal }) {
   const [expandedPilgrimId, setExpandedPilgrimId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -553,6 +553,27 @@ function PilgrimsTab({ pilgrims, agencies, onUpdateStatus, onUpdateMedical, onUp
                         </td>
                         <td style={{ textAlign: 'right', padding: '12px 16px' }} onClick={e => e.stopPropagation()}>
                           <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                            {onOpenSendNotifModal && (
+                              <button
+                                style={{
+                                  padding: '6px 10px',
+                                  borderRadius: '8px',
+                                  backgroundColor: '#f0fdf4',
+                                  color: '#166534',
+                                  border: '1px solid #bbf7d0',
+                                  fontWeight: 700,
+                                  fontSize: '0.8rem',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                                onClick={() => onOpenSendNotifModal(p)}
+                                title="Envoyer SMS ou WhatsApp"
+                              >
+                                📱 Notifier
+                              </button>
+                            )}
                             {p.registrationStatus !== 'approved' && (
                               <button
                                 style={{

@@ -16,8 +16,17 @@ import AgentsTab from './features/agents/AgentsTab';
 import AgencyPortal from './features/agency/AgencyPortal';
 import PortalGateway from './features/gateway/PortalGateway';
 import MedicalPortal from './features/medical/MedicalPortal';
+import SendNotificationModal from './components/common/SendNotificationModal';
+import PhoneNotificationToast from './components/common/PhoneNotificationToast';
 
 function App() {
+  const [isSendNotifModalOpen, setIsSendNotifModalOpen] = useState(false);
+  const [targetNotifPilgrim, setTargetNotifPilgrim] = useState(null);
+
+  const handleOpenSendNotifModal = (pilgrim = null) => {
+    setTargetNotifPilgrim(pilgrim);
+    setIsSendNotifModalOpen(true);
+  };
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try { return sessionStorage.getItem('dgp_session') === 'true'; } catch { return false; }
   });
@@ -498,6 +507,12 @@ function App() {
   if (userRole === 'pilgrim') {
     return (
       <div className="admin-layout">
+        <SendNotificationModal
+          isOpen={isSendNotifModalOpen}
+          onClose={() => setIsSendNotifModalOpen(false)}
+          targetPilgrim={targetNotifPilgrim}
+        />
+        <PhoneNotificationToast />
         {alert && (
           <Alert
             message={alert.message}
@@ -520,6 +535,12 @@ function App() {
   if (userRole === 'agency') {
     return (
       <div className="admin-layout">
+        <SendNotificationModal
+          isOpen={isSendNotifModalOpen}
+          onClose={() => setIsSendNotifModalOpen(false)}
+          targetPilgrim={targetNotifPilgrim}
+        />
+        <PhoneNotificationToast />
         {alert && (
           <Alert
             message={alert.message}
@@ -534,6 +555,7 @@ function App() {
           setDarkMode={setDarkMode}
           onLogout={handleLogout}
           agencies={agencies}
+          onOpenSendNotifModal={handleOpenSendNotifModal}
         />
       </div>
     );
@@ -543,6 +565,12 @@ function App() {
   if (userRole === 'doctor') {
     return (
       <div className={`app ${darkMode ? 'dark-mode' : ''}`}>
+        <SendNotificationModal
+          isOpen={isSendNotifModalOpen}
+          onClose={() => setIsSendNotifModalOpen(false)}
+          targetPilgrim={targetNotifPilgrim}
+        />
+        <PhoneNotificationToast />
         {alert && (
           <Alert
             message={alert.message}
@@ -555,6 +583,7 @@ function App() {
           pilgrims={pilgrims}
           onUpdateMedical={handleUpdatePilgrimMedical}
           onLogout={handleLogout}
+          onOpenSendNotifModal={handleOpenSendNotifModal}
         />
       </div>
     );
@@ -562,6 +591,14 @@ function App() {
 
   return (
     <div className="admin-layout">
+      {/* Global Notification Components */}
+      <SendNotificationModal
+        isOpen={isSendNotifModalOpen}
+        onClose={() => setIsSendNotifModalOpen(false)}
+        targetPilgrim={targetNotifPilgrim}
+      />
+      <PhoneNotificationToast />
+
       {/* Alert display */}
       {alert && (
         <Alert
@@ -583,6 +620,7 @@ function App() {
           setDarkMode={setDarkMode}
           onLogout={handleLogout}
           adminUser={adminUser}
+          onOpenSendModal={handleOpenSendNotifModal}
         />
 
         {/* Tab switcher */}
@@ -604,6 +642,7 @@ function App() {
             onUpdateMedical={handleUpdatePilgrimMedical}
             onUpdateLogistics={handleUpdatePilgrimLogistics}
             onSyncNusuk={handleSyncPilgrimNusuk}
+            onOpenSendNotifModal={handleOpenSendNotifModal}
           />
         )}
 

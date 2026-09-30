@@ -1,7 +1,9 @@
 import React from 'react';
 import { Sun, Moon, Wifi, WifiOff, LogOut } from 'lucide-react';
 
-function Header({ activeTab, isApiOnline, darkMode, setDarkMode, onLogout, adminUser }) {
+import NotificationCenter from '../common/NotificationCenter';
+
+function Header({ activeTab, isApiOnline, darkMode, setDarkMode, onLogout, adminUser, onOpenSendModal }) {
   const getPageTitle = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -39,6 +41,8 @@ function Header({ activeTab, isApiOnline, darkMode, setDarkMode, onLogout, admin
       </div>
 
       <div className="header-right">
+        <NotificationCenter onOpenSendModal={onOpenSendModal} />
+
         <button
           className="btn btn-outline"
           onClick={() => alert("📱 Sunu Hajj App : Pour installer l'application sur votre écran d'accueil, appuyez sur le menu de votre navigateur et sélectionnez 'Ajouter à l'écran d'accueil'.")}

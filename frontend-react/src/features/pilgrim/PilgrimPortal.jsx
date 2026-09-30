@@ -5,6 +5,7 @@ import {
   Clock, XCircle, ShieldCheck, Heart, Smartphone, Upload, Edit, Save, X, Globe, Menu, Compass, Bell
 } from 'lucide-react';
 import { ApiService, sendRealSms, sendRealEmail } from '../../services/api';
+import NotificationCenter from '../../components/common/NotificationCenter';
 
 const TRANSLATIONS = {
   fr: {
@@ -784,8 +785,9 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
             </select>
           </div>
 
-          {/* Theme & Logout Buttons Row */}
-          <div style={{ display: 'flex', justifySelf: 'stretch', gap: '10px', flexDirection: lang === 'ar' ? 'row-reverse' : 'row' }}>
+          {/* Theme, Notifications & Logout Buttons Row */}
+          <div style={{ display: 'flex', justifySelf: 'stretch', gap: '10px', alignItems: 'center', flexDirection: lang === 'ar' ? 'row-reverse' : 'row' }}>
+            <NotificationCenter userPhone={safePilgrim.phone} userPassport={safePilgrim.passportNumber} isPilgrimView={true} />
             <button 
               className="theme-toggle-btn"
               onClick={() => setDarkMode(!darkMode)}
