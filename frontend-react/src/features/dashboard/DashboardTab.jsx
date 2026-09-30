@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Eye, Users, FileText, CheckSquare, MessageSquare, Phone, Calendar, ArrowUpRight, Cpu, Terminal, RefreshCw, Compass, PlaneTakeoff, ShieldCheck, Home } from 'lucide-react';
 import StatsCard from '../../components/common/StatsCard';
+import SOSAdminWidget from '../../components/map/SOSAdminWidget';
 
 function DashboardTab({ stats, agenciesCount, announcements, pilgrims = [], onSyncAllNusuk }) {
   const terminalEndRef = useRef(null);
@@ -182,6 +183,11 @@ function DashboardTab({ stats, agenciesCount, announcements, pilgrims = [], onSy
           trendLabel={`${roomAssignedCount}/${totalApproved} logés`}
           color="blue"
         />
+      </div>
+
+      {/* Live SOS Emergency Monitoring Widget */}
+      <div style={{ marginTop: '20px' }}>
+        <SOSAdminWidget />
       </div>
 
       {/* Row 3: Realtime Chart & Milestones */}

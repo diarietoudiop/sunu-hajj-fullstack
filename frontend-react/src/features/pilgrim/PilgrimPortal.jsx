@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { 
   User, CreditCard, Shield, Plane, Hotel, CheckSquare, 
   Wallet, FileText, Send, LogOut, Sun, Moon, CheckCircle2, 
-  Clock, XCircle, ShieldCheck, Heart, Smartphone, Upload, Edit, Save, X, Globe, Menu, Compass, Bell
+  Clock, XCircle, ShieldCheck, Heart, Smartphone, Upload, Edit, Save, X, Globe, Menu, Compass, Bell, AlertTriangle
 } from 'lucide-react';
 import { ApiService, sendRealSms, sendRealEmail } from '../../services/api';
 import NotificationCenter from '../../components/common/NotificationCenter';
+import SacredSitesMap from '../../components/map/SacredSitesMap';
+import SOSAlertModal from '../../components/common/SOSAlertModal';
 
 const TRANSLATIONS = {
   fr: {
@@ -702,10 +704,13 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
   const completedCount = checklist.filter(item => item.done).length;
   const progressPercent = Math.round((completedCount / checklist.length) * 100);
 
+  const [showSOSModal, setShowSOSModal] = useState(false);
+
   // Sidebar Menu Config
   const menuItems = [
     { id: 'dossier', label: t.tabDossier, icon: User },
     { id: 'logistics', label: t.tabLogistics, icon: Plane },
+    { id: 'sacred_map', label: '🗺️ Carte Lieux Saints & SOS', icon: Compass },
     { id: 'checklist', label: t.tabChecklist, icon: CheckSquare },
     { id: 'vault', label: t.tabVault, icon: FileText }
   ];
@@ -1050,6 +1055,27 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
                 >
                   <span>📄</span> Certificat Médical (PDF)
                 </button>
+
+                <button
+                  onClick={() => setShowSOSModal(true)}
+                  style={{
+                    backgroundColor: '#dc2626',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 14px',
+                    fontWeight: 900,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 12px rgba(220,38,38,0.4)'
+                  }}
+                  className="bell-shake"
+                >
+                  <AlertTriangle size={16} /> 🚨 SOS PÈLERIN ÉGARÉ
+                </button>
               </div>
             </div>
 
@@ -1060,6 +1086,13 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
               </span>
             </div>
           </div>
+
+          {/* TAB MAP: Sacred Sites Interactive Map & GPS SOS */}
+          {activeTab === 'sacred_map' && (
+            <div style={{ width: '100%', marginBottom: '30px' }}>
+              <SacredSitesMap pilgrim={safePilgrim} onTriggerSOS={() => setShowSOSModal(true)} />
+            </div>
+          )}
 
           {/* TAB 1: Dossier Details & Editing */}
           {activeTab === 'dossier' && (
@@ -3258,6 +3291,13 @@ function PilgrimPortal({ pilgrim = {}, isApiOnline, darkMode, setDarkMode, onLog
           </div>
         </div>
       )}
+
+      {/* SOS Emergency Modal */}
+      <SOSAlertModal 
+        isOpen={showSOSModal} 
+        onClose={() => setShowSOSModal(false)} 
+        pilgrim={safePilgrim} 
+      />
 
     </div>
   );
